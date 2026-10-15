@@ -1,0 +1,35 @@
+# 별운관 MAIN_SITE — GitHub Pages에 올라가지 않아야 할 작업 자료
+# (실제 웹사이트 구동에 필요한 index.html/css/js/fonts/01_SITE_IMAGES는
+# 전부 포함됨 — 아래 항목만 명시적으로 제외)
+
+# 피그마 디자인 레퍼런스 원본(비공개 작업 자료, 사이트 구동에 불필요)
+00_DESIGN_REFERENCE/
+
+# 개발용 에이전트/도구 설정(이 저장소 바깥에도 있을 수 있으나 안전하게 함께 제외)
+.claude/
+.agents/
+.playwright-mcp/
+
+# 프로젝트 내부 작업 메모(인수인계 기록·구조 설계 문서 — 공개 저장소에 불필요)
+IMPLEMENTATION_STATUS.md
+SITE_STRUCTURE.md
+
+# 임시/스크래치 파일
+_*.txt
+_*.png
+*.tmp
+*.bak
+*~
+
+# 압축/백업 파일
+*.zip
+
+# 인증 정보·환경 변수(혹시라도 생길 경우 대비)
+.env
+.env.*
+*.pem
+*.key
+
+# OS/에디터 잡동사니
+.DS_Store
+Thumbs.db
