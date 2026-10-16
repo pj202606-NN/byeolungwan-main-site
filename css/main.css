@@ -23,6 +23,15 @@
   --text-body-on-cream:  #3C5A72; /* 크림 배경 위의 본문 텍스트 */
   --rail-divider: rgba(255, 255, 255, 0.25);
 
+  /* 2026-10-16: F-00/C-00/S-00 신규 표지용 — 00_DESIGN_REFERENCE에서
+     피펫으로 샘플링(근사값). --navy-brand/--cream 등 기존 브랜드
+     색상으로 커버되지 않는 것만 추가(F-00/S-00 큰 제목·본문은 기존
+     --navy-brand/--text-body-on-cream 재사용). */
+  --black-brand: #111111; /* C-00 배경(기존 브랜드 색상에 없는 검정 계열) */
+  --c00-blue: #296890; /* C-00 큰 제목·목차 링크 */
+  --text-muted-on-black: #BFBFBF; /* C-00 eyebrow·목차 라벨·하단 안내문 */
+  --text-muted-on-cream: rgba(60, 90, 114, 0.55); /* F-00/S-00 eyebrow·목차 라벨(--text-body-on-cream 저채도 버전) */
+
   --ph-fill: rgba(255, 255, 255, 0.06);
   --ph-border: rgba(255, 255, 255, 0.35);
   --ph-label-color: rgba(255, 255, 255, 0.75);
@@ -184,6 +193,15 @@ h1, h2, h3, p { margin: 0; }
   --rail-bg: var(--navy-brand);
 }
 
+/* 검은 배경 페이지 공용. 기존 경계 판정/활성 상태/진도 계산은 그대로 사용. */
+.rail[data-theme="black"] {
+  --rail-bg: var(--black-brand);
+  --rail-fg: var(--white);
+  --rail-line: var(--rail-divider);
+  --rail-progress: var(--c00-blue);
+  --rail-dot: var(--c00-blue);
+}
+
 .rail__burger,
 .rail__navitem a,
 .rail__navitem span,
@@ -330,7 +348,7 @@ h1, h2, h3, p { margin: 0; }
   min-width: 6px;
   min-height: 6px;
   border-radius: 50%;
-  background: var(--rail-fg);
+  background: var(--rail-dot, var(--rail-fg));
   display: block;
   transition: background-color 0.35s ease;
 }
@@ -430,9 +448,21 @@ h1, h2, h3, p { margin: 0; }
 .nav-overlay__col.is-disabled {
   cursor: not-allowed;
 }
-.nav-overlay__col--active {
-  background: var(--cream);
+/* 2026-10-16: 네 메뉴(입구/운세 보기/별자리/이야기) 칼럼 — 예전에는
+   "구현된 메뉴만 고정 크림 배경"(.nav-overlay__col--active, 항상 켜짐)
+   이었는데, 메뉴가 늘어나면서 "입구/운세 보기만 계속 흰 배경"으로
+   굳어 보이는 게 의도와 다르다는 재신고를 받았다. 네 칼럼 전부
+   기본은 동일(네이비 배경), 실제로 마우스를 올리거나(:hover) 내부
+   링크에 포커스가 있을 때(:focus-within, 키보드 접근성)만 흰 배경+
+   파란 텍스트로 바뀌는 순수 호버 상태로 교체했다 — "클릭 가능 여부"
+   (is-disabled)와는 별개의 상태라 혼동하지 않는다. */
+.nav-overlay__col--menu {
   cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.nav-overlay__col--menu:hover,
+.nav-overlay__col--menu:focus-within {
+  background: var(--cream);
 }
 .nav-overlay__col--toc {
   cursor: default;
@@ -449,8 +479,10 @@ h1, h2, h3, p { margin: 0; }
   font-size: 0.83vw;
   line-height: 1.3;
   color: var(--text-muted-on-navy);
+  transition: color 0.2s ease;
 }
-.nav-overlay__col--active .nav-overlay__label {
+.nav-overlay__col--menu:hover .nav-overlay__label,
+.nav-overlay__col--menu:focus-within .nav-overlay__label {
   color: var(--text-body-on-cream);
 }
 
@@ -469,17 +501,26 @@ h1, h2, h3, p { margin: 0; }
   font-size: 7vw;
   line-height: 0.95;
   color: var(--white);
+  transition: color 0.2s ease;
 }
-.nav-overlay__col--active .nav-overlay__glyph {
+.nav-overlay__col--menu:hover .nav-overlay__glyph,
+.nav-overlay__col--menu:focus-within .nav-overlay__glyph {
   color: var(--navy-brand);
 }
 
 .nav-overlay__sublist {
   position: absolute;
   left: 2.083vw;
-  top: 75.195vh; /* 770 / 1024 */
+  top: 71.875vh; /* 네 칼럼의 목록 시작선: 736 / 1024 */
   font-size: 0.9vw;
   line-height: 2;
+  /* 기본(네이비) 배경 위에서도 보이도록 옅은 톤으로 — 칼럼에 호버/
+     포커스가 들어와 배경이 크림으로 바뀔 때만 진한 네이비로 전환. */
+  color: var(--text-muted-on-navy);
+  transition: color 0.2s ease;
+}
+.nav-overlay__col--menu:hover .nav-overlay__sublist,
+.nav-overlay__col--menu:focus-within .nav-overlay__sublist {
   color: var(--text-body-on-cream);
 }
 .nav-overlay__sublist a:hover {
@@ -1116,7 +1157,10 @@ h1, h2, h3, p { margin: 0; }
   color: var(--white);
 }
 .e00__toc-list a { border-bottom: 1px solid rgba(255, 255, 255, 0.35); }
-.e00__toc-list .is-disabled { opacity: 0.45; }
+.e00__toc-list .is-disabled,
+.f00__toc-list .is-disabled,
+.c00__toc-list .is-disabled,
+.s00__toc-list .is-disabled { opacity: 0.45; }
 
 .e00__hint {
   position: absolute;
@@ -1367,6 +1411,602 @@ h1, h2, h3, p { margin: 0; }
   line-height: 1.6;
   color: var(--text-muted-on-navy);
 }
+
+/* ============================================================
+   F-00/C-00/S-00 — 운세 보기/별자리/이야기 표지
+   (2026-10-16 신규) E-00과 "제목·소개문·목차·스크롤 안내" 구조가
+   동일한 공통 표지 레이아웃이라, 위치·크기·타이포그래피 규칙은
+   .e00__* 선택자와 묶어서 공유하고(E-00의 기존 규칙/값은 전혀
+   바꾸지 않음 — 선택자만 추가), 배경·텍스트 색상만 화면별로 따로
+   지정한다. E-00은 손대지 않았으므로 아래 그룹 선택자에 .e00__*를
+   추가해도 E-00의 렌더링 결과는 동일하다.
+
+   F-00만 레퍼런스에 우측 이미지 영역이 없어 패널이 전체 폭을
+   차지한다(F-00_운세보기표지.png 실측 — 캔버스 전체가 크림 단색).
+   C-00/S-00은 E-00과 동일하게 우측 34.86vw에 이미지 자리가 있으나
+   아직 실제 이미지가 없어 #D9D9D9 placeholder로 채운다(나중에
+   실제 이미지로 교체할 때는 .c00__image-ph/.s00__image-ph에
+   background-image만 추가하면 된다). 폭 배수(data-width-multiplier)
+   는 E-00의 1.4배가 독립 패럴랙스 배경 전용 여유 공간이라 이번
+   placeholder 구조에는 필요 없어 추가하지 않았다(기본 1배).
+   ============================================================ */
+.screen--f00,
+.screen--c00,
+.screen--s00 {
+  background: transparent;
+}
+
+.e00__panel,
+.f00__panel,
+.c00__panel,
+.s00__panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+}
+.f00__panel { width: 100%; background: var(--cream); }
+.c00__panel { width: 65.14vw; background: var(--black-brand); }
+.s00__panel { width: 65.14vw; background: var(--cream); }
+
+.c00__image-ph,
+.s00__image-ph {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 34.86vw; /* 100 - 65.14, E-00 패널 분할과 동일 비율 */
+  height: 100%;
+  background: #D9D9D9;
+}
+
+.e00__eyebrow,
+.f00__eyebrow,
+.c00__eyebrow,
+.s00__eyebrow {
+  position: absolute;
+  left: 8.883vw;
+  top: 7.813vh;
+  font-size: 0.83vw;
+  letter-spacing: 0.08em;
+}
+.f00__eyebrow, .s00__eyebrow { color: var(--text-muted-on-cream); }
+.c00__eyebrow { color: var(--text-muted-on-black); }
+
+.e00__glyph,
+.f00__glyph,
+.c00__glyph,
+.s00__glyph {
+  position: absolute;
+  left: 10.758vw;
+  top: 6.348vh;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  font-family: var(--font-emphasis);
+  font-weight: 600;
+  font-size: 9vw;
+  line-height: 0.95;
+}
+.f00__glyph, .s00__glyph { color: var(--navy-brand); }
+.c00__glyph { color: var(--c00-blue); }
+
+.e00__intro,
+.f00__intro,
+.c00__intro,
+.s00__intro {
+  position: absolute;
+  left: 33.328vw;
+  top: 54.199vh;
+  width: 25vw;
+  font-family: var(--font-emphasis);
+  font-weight: 500;
+  font-size: 1.53vw;
+  line-height: 1.55;
+}
+.f00__intro, .s00__intro { color: var(--text-body-on-cream); }
+.c00__intro { color: var(--white); }
+
+.e00__toc,
+.f00__toc,
+.c00__toc,
+.s00__toc {
+  position: absolute;
+  left: 33.328vw;
+  top: 74.707vh;
+  width: 25vw;
+}
+.e00__toc-label, .f00__toc-label, .c00__toc-label, .s00__toc-label {
+  font-size: 0.83vw;
+  margin-bottom: 0.9vh;
+}
+.f00__toc-label, .s00__toc-label { color: var(--text-muted-on-cream); }
+.c00__toc-label { color: var(--text-muted-on-black); }
+
+.e00__toc-list li, .f00__toc-list li, .c00__toc-list li, .s00__toc-list li {
+  font-size: 1.04vw;
+  line-height: 2.1;
+}
+.f00__toc-list li, .s00__toc-list li { color: var(--navy-brand); }
+.c00__toc-list li { color: var(--c00-blue); }
+
+.f00__toc-list a, .s00__toc-list a { border-bottom: 1px solid rgba(60, 90, 114, 0.35); }
+.c00__toc-list a { border-bottom: 1px solid rgba(41, 104, 144, 0.45); }
+
+.e00__hint,
+.f00__hint,
+.c00__hint,
+.s00__hint {
+  position: absolute;
+  left: 10.133vw;
+  bottom: 4.337vh;
+  font-size: 0.83vw;
+}
+.f00__hint, .s00__hint { color: var(--text-muted-on-cream); }
+.c00__hint { color: var(--text-muted-on-black); }
+
+/* 긴 소개문과 목차 5개의 균형만 S-00에서 보정. 공통 표지 서체/간격 유지. */
+.s00__intro { top: 45.898438vh; }
+.s00__toc { top: 68.359375vh; }
+
+/* ============================================================
+   F-01 — 생년월일 입력 (2026-10-16 신규)
+   레퍼런스(F-01_운세보기_생년월일입력.png, 1440x1024)의 픽셀 좌표를
+   그대로 /1440, /1024로 환산 — F-00과 같은 설계 기준이라 E-01처럼
+   레일 폭(60px)을 추가로 빼지 않았다(직접 매핑이 더 정확했음).
+   ============================================================ */
+/* S-01 — 00_DESIGN_REFERENCE/S-01_이야기_천상열차분야지도.png.
+   가로/세로는 기존 E 시리즈와 동일하게 1440/1024 기준 vw/vh로 환산.
+   배경은 PNG 실측값이며 기존 페이지의 브랜드 토큰은 변경하지 않는다. */
+.screen--s01 {
+  background: #065182;
+  color: #F4F4F4;
+}
+.s01__image-ph {
+  position: absolute;
+  left: 11.041667vw; /* 159 */
+  top: 19.433594vh; /* 199 */
+  width: 83.333333vw; /* 1200 */
+  height: 30.078125vh; /* 308 */
+  background: #D9D9D9;
+}
+.s01__title {
+  position: absolute;
+  left: 13.75vw; /* 198 — 서체의 좌측 여백 1px 포함 시 199 */
+  top: 59.277344vh; /* 607 */
+  font-family: var(--font-emphasis);
+  font-weight: 600;
+  font-size: 2.6vw; /* E-01/E-02의 페이지 제목 위계 */
+  line-height: 1.3;
+  white-space: nowrap;
+  color: var(--white);
+}
+.s01__body {
+  position: absolute;
+  top: 59.570313vh; /* 610 */
+  font-family: var(--font-sans);
+  font-size: 0.9vw; /* E-01 일반 본문 */
+  font-weight: 400;
+  line-height: 1.75;
+  white-space: nowrap;
+}
+.s01__body--first { left: 40vw; }
+.s01__body--second { left: 68.888889vw; }
+.s01__body p + p {
+  position: absolute;
+  top: max(10.15625vh, 4em); /* 기준 104px, 작은 높이에서도 문단 겹침 방지 */
+  left: 0;
+}
+.s01__label {
+  position: absolute;
+  left: 13.819444vw;
+  top: 83.496094vh; /* 855 */
+  font-family: var(--font-sans);
+  font-size: 0.9vw; /* E-01/E-02 breadcrumb-current */
+  font-weight: 400;
+  line-height: 1.6;
+}
+.s01__label-category {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 0.8vw; /* E-01/E-02 breadcrumb-label */
+}
+
+/* 이야기 확장 페이지 — 각 PNG의 원본 좌표를 1440×1024 단위로 환산.
+   긴 화면도 100% 기준으로 압축하지 않고 같은 vw 좌표계를 사용한다. */
+.screen--story { background: var(--cream); color: #555; }
+.screen--image { background: #D9D9D9; }
+.s05__content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%; /* 실제 원본 캔버스 폭은 기존 data-width-multiplier로 계산 */
+  height: 100%;
+  will-change: transform;
+}
+.story__ph, .story__title, .story__body, .story__label, .story__guardian {
+  position: absolute;
+  left: calc(var(--x) * 100vw / 1440);
+  top: calc(var(--y) * 100vh / 1024);
+}
+.story__ph {
+  width: calc(var(--w) * 100vw / 1440);
+  height: calc(var(--h) * 100vh / 1024);
+  background: #D9D9D9;
+}
+.story__title {
+  font-family: var(--font-emphasis);
+  font-size: 2.6vw; /* E-01/E-02 페이지 제목 */
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+  color: var(--navy-brand);
+}
+.story__body, .story__guardian {
+  width: calc(var(--w) * 100vw / 1440);
+  font-family: var(--font-sans);
+  font-size: 0.9vw; /* E-01 일반 본문 */
+  font-weight: 400;
+  line-height: 1.75;
+  white-space: nowrap;
+}
+.story__body p + p { margin-top: 1.75em; /* 본문 한 행만큼 문단 여백 */ }
+/* S-05의 앞 두 본문만 사진 하단(y:299 + h:372)에 맞춘다.
+   각 본문의 실제 높이에 따라 세로 위치만 개별적으로 결정된다. */
+.screen--s05 .s05__content > .story__body:nth-child(2),
+.screen--s05 .s05__content > .story__body:nth-child(4) {
+  top: auto;
+  bottom: calc(353 * 100vh / 1024);
+}
+.story__label {
+  font-family: var(--font-sans);
+  font-size: 0.9vw;
+  font-weight: 400;
+  line-height: 1.6;
+}
+.story__label p:first-child {
+  font-family: var(--font-sans);
+  font-size: 0.8vw;
+  font-weight: 400;
+}
+.story__label p + p { color: var(--navy-brand); }
+.story__guardian h3 {
+  font-family: var(--font-emphasis);
+  /* E-02의 1.8vw를 기본으로, 고정된 제목 행 안에서 보조 라벨과 겹치지 않게 제한. */
+  font-size: min(1.8vw, 2.53125vh);
+  font-weight: 500;
+  line-height: 2.929688vh;
+}
+.story__direction {
+  font-family: var(--font-sans);
+  font-size: 0.8vw; /* E 시리즈의 보조 라벨 */
+  font-weight: 400;
+  color: #AAA;
+  line-height: 2.148438vh;
+}
+.story__guardian-body { margin-top: 1.660156vh; }
+.story__ph--shadow { box-shadow: 0 1.171875vh 1.666667vw rgba(0, 0, 0, 0.12); }
+
+/* 이야기 페이지의 색상만 테마별로 지정한다. placeholder와 서체 규칙은 공통 유지. */
+.screen--story[data-rail-theme="black"] {
+  background: var(--black-brand);
+  color: var(--c00-blue);
+}
+.screen--story[data-rail-theme="black"] .story__title,
+.screen--story[data-rail-theme="black"] .story__label p + p {
+  color: var(--c00-blue);
+}
+.screen--story[data-rail-theme="black"] .story__label p:first-child {
+  color: var(--text-muted-on-navy);
+}
+.screen--story[data-rail-theme="navy"] {
+  background: var(--navy-brand);
+  color: var(--white);
+}
+.screen--story[data-rail-theme="navy"] .story__title,
+.screen--story[data-rail-theme="navy"] .story__label p + p {
+  color: var(--white);
+}
+.screen--story[data-rail-theme="navy"] .story__label p:first-child {
+  color: var(--text-muted-on-navy);
+}
+
+.screen--f01 { background: var(--navy-brand); }
+
+.f01__headline {
+  position: absolute;
+  left: 14.583vw; /* 210 / 1440 */
+  top: 12.5vh;    /* 128 / 1024 */
+  width: 40vw;
+  font-family: var(--font-emphasis);
+  font-weight: 600;
+  font-size: 2.6vw;
+  line-height: 1.3;
+  color: var(--white);
+}
+
+.f01__body {
+  position: absolute;
+  left: 14.583vw;
+  top: 31.84vh; /* 326 / 1024 */
+  width: 20vw;
+  font-size: 1vw;
+  line-height: 1.7;
+  color: var(--text-muted-on-navy);
+}
+.f01__body p { margin: 0 0 3.2vh 0; }
+.f01__body p:last-child { margin-bottom: 0; }
+
+.f01__image-ph {
+  position: absolute;
+  left: 57.5vw;  /* 828 / 1440 */
+  top: 8.2vh;    /* 84 / 1024 */
+  width: 38.75vw; /* (1386-828) / 1440 */
+  height: 65.33vh; /* (753-84) / 1024 */
+  background: #D9D9D9;
+}
+
+.f01__date-card-wrap {
+  position: absolute;
+  left: 14.167vw; /* 204 / 1440 */
+  top: 60.55vh;   /* 620 / 1024 */
+  width: 47.5vw;  /* 684 / 1440 */
+  height: 27.64vh; /* 283 / 1024 */
+}
+.f01__date-card {
+  width: 100%;
+  height: 100%;
+  background: var(--cream);
+  transform: rotate(-9deg); /* 레퍼런스의 살짝 기울어진 카드(근사값) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2.2vw;
+  margin: 0;
+  border: 0;
+}
+.f01__date-field {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4vw;
+  font-family: var(--font-emphasis);
+  font-size: 1.1vw;
+  color: var(--text-body-on-cream);
+}
+.f01__date-field select {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.f01__submit-wrap {
+  position: absolute;
+  left: 67.917vw; /* 978 / 1440 */
+  top: 80.47vh;   /* 824 / 1024 */
+  text-align: right;
+}
+.f01__submit-label {
+  font-size: 0.83vw;
+  color: var(--text-muted-on-navy);
+  margin: 0 0 0.6vh 0;
+}
+.f01__submit {
+  display: inline-block;
+  font-size: 1.04vw;
+  font-weight: 600;
+  color: var(--white);
+}
+
+.f01__hint {
+  position: absolute;
+  left: 51.94vw; /* 748 / 1440 */
+  top: 90.04vh;  /* 922 / 1024 */
+  font-size: 0.83vw;
+  color: var(--text-muted-on-navy);
+}
+
+/* ============================================================
+   F-02 — 별자리 출력 (2026-10-16 신규)
+   레퍼런스(F-02_운세보기_별자리출력.png, 1440x1024) 좌표를 동일한
+   방식(직접 /1440, /1024)으로 환산.
+   ============================================================ */
+.screen--f02 { background: var(--navy-brand); }
+
+.f02__image-ph {
+  position: absolute;
+  left: 11.11vw; /* 160 / 1440 */
+  top: 0;
+  width: 38.68vw; /* 557 / 1440 */
+  height: 100%;
+  background: #D9D9D9;
+}
+
+.f02__title {
+  position: absolute;
+  left: 55.56vw; /* 800 / 1440 */
+  top: 10.74vh;  /* 110 / 1024 */
+  font-family: var(--font-emphasis);
+  font-weight: 600;
+  font-size: 3.2vw;
+  color: var(--white);
+}
+.f02__subtitle {
+  position: absolute;
+  left: 55.56vw;
+  top: 19.14vh; /* 196 / 1024 */
+  font-size: 1vw;
+  color: var(--text-muted-on-navy);
+}
+.f02__desc {
+  position: absolute;
+  left: 55.56vw;
+  top: 24.4vh; /* 250 / 1024 */
+  width: 26.4vw;
+  font-size: 1vw;
+  line-height: 1.7;
+  color: var(--white);
+}
+
+.f02__fortune-ph {
+  position: absolute;
+  left: 55.56vw;
+  top: 40vh;     /* 410 / 1024 */
+  width: 12.22vw; /* (976-800) / 1440 */
+  height: 35.45vh; /* (773-410) / 1024 */
+  background: #D9D9D9;
+}
+.f02__fortune {
+  position: absolute;
+  left: 71.25vw; /* 1026 / 1440 */
+  top: 42.77vh;  /* 438 / 1024 */
+  width: 21.46vw; /* (1335-1026) / 1440 */
+}
+.f02__fortune-title {
+  font-size: 1.4vw;
+  font-weight: 600;
+  color: var(--white);
+  margin: 0 0 2.4vh 0;
+}
+.f02__fortune-p1 {
+  font-size: 1vw;
+  line-height: 1.6;
+  color: var(--white);
+  margin: 0 0 2vh 0;
+}
+.f02__fortune-p2 {
+  font-size: 1vw;
+  line-height: 1.6;
+  color: var(--text-muted-on-navy);
+  margin: 0;
+}
+
+.f02__links {
+  position: absolute;
+  right: 5.69vw; /* (1440-1358) / 1440 */
+  top: 76.85vh;  /* 787 / 1024 */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1.5vh;
+  font-size: 0.9vw;
+}
+.f02__links a { color: var(--white); }
+.f02__links .is-disabled { color: var(--text-muted-on-navy); cursor: not-allowed; }
+
+.f02__breadcrumb {
+  position: absolute;
+  left: 55.56vw;
+  top: 86.3vh; /* 884 / 1024 */
+}
+.f02__breadcrumb-label {
+  font-size: 0.83vw;
+  color: var(--text-muted-on-navy);
+  margin: 0 0 0.6vh 0;
+}
+.f02__breadcrumb-current {
+  font-size: 0.9vw;
+  color: var(--white);
+  margin: 0;
+}
+
+/* C-01~C-04: PNG 원본 좌표 / 1440×1024. 이미지 영역은 빈 회색 사각형. */
+.screen--c01, .screen--c02 { background: var(--cream); color: #555; }
+.screen--c03, .screen--c04 { background: #065182; color: var(--white); }
+.c-ref__at {
+  position: absolute;
+  left: calc(var(--x) * 100vw / 1440);
+  top: calc(var(--y) * 100vh / 1024);
+  width: calc(var(--w) * 100vw / 1440);
+}
+.c-ref__ph {
+  height: calc(var(--h) * 100vh / 1024);
+  background: #D9D9D9;
+}
+.c-ref__title {
+  font-family: var(--font-emphasis);
+  font-size: 3.263889vw;
+  font-weight: 500;
+  line-height: 1.3;
+  white-space: nowrap;
+  color: var(--navy-brand);
+}
+.c-ref__body {
+  font-family: var(--font-sans);
+  font-size: 0.95vw;
+  font-weight: 400;
+  line-height: 1.8;
+  white-space: nowrap;
+}
+.c-ref__label { font-family: var(--font-sans); font-size: 0.9vw; font-weight: 400; line-height: 1.7; }
+.c-ref__label p:first-child { font-size: 0.8vw; }
+.c-ref__label p + p { color: var(--navy-brand); }
+.screen--c03 .c-ref__label p + p, .screen--c04 .c-ref__label p + p,
+.screen--c03 .c-ref__title { color: var(--white); }
+.c-ref__name {
+  font-family: var(--font-emphasis);
+  font-size: 1.388889vw;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--navy-brand);
+  white-space: nowrap;
+}
+.screen--c03 .c-ref__name, .screen--c04 .c-ref__name { color: var(--white); }
+.c-ref__hanja { font-family: var(--font-sans); font-size: 1vw; font-weight: 400; line-height: 1.7; color: #AAA; white-space: nowrap; }
+.screen--c03 .c-ref__hanja, .screen--c04 .c-ref__hanja,
+.c-ref__muted { color: var(--text-muted-on-navy); }
+.c-ref__directions { display: flex; gap: 5.555556vw; }
+.c-ref__directions span {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  font-family: var(--font-emphasis);
+  font-size: 1.388889vw;
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: 0.14em;
+  color: var(--navy-brand);
+}
+.c01__head-line { width: 24.930556vw; border-top: 1px solid var(--navy-brand); }
+.c01__head-dot { width: 0.555556vw; height: 0.78125vh; background: var(--navy-brand); border-radius: 50%; }
+.c01__divider { height: 55.957031vh; border-left: 1px solid #D9D9D9; }
+.c01__preview-name { font-family: var(--font-emphasis); font-size: 3.263889vw; font-weight: 500; line-height: 1.3; color: var(--navy-brand); text-align: center; }
+.c01__preview-hanja { font-size: 1vw; line-height: 1.7; color: #AAA; text-align: center; }
+.c01__preview-link { font-size: 0.95vw; line-height: 1.8; color: #C7C7C7; text-align: center; }
+.c02__legend { display: flex; gap: 1.388889vw; font-size: 0.9vw; line-height: 1.6; white-space: nowrap; }
+.c02__legend span::before { content: ''; display: inline-block; width: 0.555556vw; height: 0.78125vh; margin-right: 0.555556vw; border-radius: 50%; background: #929292; }
+.c02__directions { gap: 2.777778vw; }
+.c02__relation { font-size: 0.95vw; font-weight: 400; line-height: 1.8; white-space: nowrap; }
+.c02__relation-copy { position: absolute; left: 5.763889vw; top: 3.515625vh; }
+.c03__question { font-family: var(--font-emphasis); font-size: 1.53vw; font-weight: 500; line-height: 1.55; }
+.c03__picker { display: flex; align-items: baseline; justify-content: space-between; background: none; border: 0; padding: 0; text-align: left; cursor: pointer; }
+.c03__picker .c-ref__hanja { position: absolute; left: 8.263889vw; top: 0.292969vh; }
+.c03__picker:focus-visible { outline: 1px solid var(--white); outline-offset: 4px; }
+.c03__accordion { width: 19.861111vw; height: 24.609375vh; }
+.c03__acc-item { position: absolute; left: 0; width: 100%; }
+.c03__acc-item:nth-child(1) { --row-offset: 0vh; top: 0; }
+.c03__acc-item:nth-child(2) { --row-offset: 6.542969vh; top: var(--row-offset); }
+.c03__acc-item:nth-child(3) { --row-offset: 13.085938vh; top: var(--row-offset); }
+.c03__acc-item:nth-child(4) { --row-offset: 19.628906vh; top: var(--row-offset); }
+.c03__acc-head { display: block; width: 100%; height: 4.980469vh; padding: 0; border: 0; background: #808080; cursor: pointer; }
+.c03__acc-head:focus-visible { outline: 1px solid var(--white); outline-offset: 3px; }
+.c03__acc-body {
+  /* 펼침 패널은 설명문과 접힌 행 사이의 빈 공간에 겹친다. 네 행은 움직이지 않는다. */
+  position: absolute; top: calc(-16.015625vh - var(--row-offset)); left: 0;
+  display: none; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.555556vw;
+  width: 100%; padding: 0.555556vw; background: var(--navy-brand);
+  max-height: 15.625vh; overflow-y: auto;
+  border: 1px solid var(--text-muted-on-navy); box-shadow: 0 4px 16px rgba(0,0,0,.2);
+}
+.c03__acc-item.is-open { z-index: 2; }
+.c03__acc-item.is-open .c03__acc-body { display: grid; }
+.c03__acc-star { display: flex; align-items: baseline; justify-content: center; gap: 0.416667vw; padding: 0.390625vh 0.277778vw; font-family: var(--font-sans); font-size: 0.9vw; line-height: 1.6; color: var(--white); background: transparent; border: 1px solid var(--text-label-on-navy); cursor: pointer; }
+.c03__acc-star:hover, .c03__acc-star:focus-visible { background: var(--cream); color: var(--navy-brand); }
+.c03__confirm-btn { width: 19.861111vw; height: 4.980469vh; border: none; padding: 0; font-family: var(--font-sans); font-size: 1.04vw; font-weight: 400; background: #808080; color: #444; cursor: pointer; }
+.c03__confirm-btn:disabled { cursor: default; }
+.c04__headline { font-family: var(--font-emphasis); font-size: 1.53vw; font-weight: 500; line-height: 1.4; text-align: center; overflow-wrap: anywhere; }
+.c04__constellation { width: 23.75vw; height: 30.273438vh; }
+.c04__copy { white-space: normal; overflow-wrap: anywhere; }
+.c04__pair-title { white-space: normal; overflow-wrap: anywhere; }
+.c-ref__sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 
 /* ============================================================
    화면별 요소 등장 효과(reveal) — 초기/JS 적용 전 기본 상태.

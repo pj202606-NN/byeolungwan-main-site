@@ -361,6 +361,14 @@
   inset: 0;
   z-index: 3;
   pointer-events: none;
+  opacity: 1;
+  transition: opacity 600ms ease;
+}
+
+.opening.is-exiting .o01__center {
+  opacity: 0;
+  /* 기존 문 닫힘(1150ms) 직전까지 로고를 유지하고 1100ms에 퇴장 완료. */
+  transition-delay: 500ms;
 }
 
 .o01__logo {
@@ -588,7 +596,7 @@
    ------------------------------------------------------------ */
 .o01__soundui {
   position: absolute;
-  top: 1.7vh;
+  top: 2.7vh;
   right: 8.5vw;
   z-index: 6;
 }
@@ -596,35 +604,38 @@
 .o01__soundui-btn {
   display: flex;
   align-items: flex-start;
-  gap: 0.5vw;
+  gap: 0.375vw;
   padding: 0.4vh 0.3vw;
+  min-width: 44px;
+  min-height: 44px;
   cursor: pointer;
 }
 
 .o01__soundui-bar {
-  width: 0.18vw;
-  min-width: 2px;
+  width: 0.1vw;
+  min-width: 1px;
   background: #B9CEE8;
   border-radius: 2px;
   opacity: 0.8;
+  transform-origin: center top;
 }
 /* 길이가 들쭉날쭉한(뒤집힌 이퀄라이저) 모양 — 고정값, 추후 실제
    오디오 분석 데이터가 생기면 JS에서 height를 갱신하도록 구조만
    맞춰둔다(js/opening.js의 soundBars 참고). */
-.o01__soundui-bar:nth-child(1) { height: 2.0vh; }
-.o01__soundui-bar:nth-child(2) { height: 3.4vh; }
-.o01__soundui-bar:nth-child(3) { height: 1.4vh; }
-.o01__soundui-bar:nth-child(4) { height: 4.1vh; }
-.o01__soundui-bar:nth-child(5) { height: 2.6vh; }
+.o01__soundui-bar:nth-child(1) { height: 1.5vh; }
+.o01__soundui-bar:nth-child(2) { height: 2.55vh; }
+.o01__soundui-bar:nth-child(3) { height: 1.05vh; }
+.o01__soundui-bar:nth-child(4) { height: 3.075vh; }
+.o01__soundui-bar:nth-child(5) { height: 1.95vh; }
 
 .o01__soundui-btn[data-sound-on="true"] .o01__soundui-bar {
-  animation: o01-soundbar-pulse 1.8s ease-in-out infinite;
+  animation: o01-soundbar-pulse 2.4s ease-in-out infinite;
 }
 .o01__soundui-btn[data-sound-on="true"] .o01__soundui-bar:nth-child(2n) { animation-delay: -0.5s; }
 .o01__soundui-btn[data-sound-on="true"] .o01__soundui-bar:nth-child(3n) { animation-delay: -1.1s; }
 @keyframes o01-soundbar-pulse {
   0%, 100% { opacity: 0.55; transform: scaleY(1); }
-  50%      { opacity: 1; transform: scaleY(1.12); }
+  50%      { opacity: 1; transform: scaleY(1.08); }
 }
 
 /* 스크롤 트랜지션 시작 시 바가 위로 접히며 사라지는 애니메이션.
@@ -644,26 +655,35 @@
   top: 100%;
   right: 0;
   margin-top: 0.8vh;
-  background: rgba(8, 14, 22, 0.92);
-  border: 1px solid rgba(185, 206, 232, 0.35);
-  border-radius: 4px;
-  padding: 0.5vh 0;
-  min-width: 5.5vw;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+  min-width: 44px;
   display: none;
   flex-direction: column;
 }
 .o01__soundui-menu.is-open { display: flex; }
 .o01__soundui-menu button {
-  padding: 0.6vh 0.9vw;
-  text-align: left;
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 0.72vw;
+  padding: 8px;
+  min-width: 44px;
+  min-height: 44px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  text-align: center;
+  color: #B9CEE8;
+  opacity: 0.65;
+  font-family: var(--font-sans);
+  font-size: clamp(10px, 0.65vw, 14px);
+  line-height: 1.4;
   cursor: pointer;
 }
 .o01__soundui-menu button:hover,
 .o01__soundui-menu button[aria-checked="true"] {
-  background: rgba(185, 206, 232, 0.18);
-  color: #fff;
+  opacity: 1;
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
 }
 
 /* ------------------------------------------------------------
@@ -755,6 +775,7 @@
     opacity: 1;
   }
   .o01__door,
+  .o01__center,
   .o01__hint,
   .o01__blackout,
   .o01__soundui.is-folding {

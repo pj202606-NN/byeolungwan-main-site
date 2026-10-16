@@ -23,6 +23,7 @@
     doorOpenMs: 1350,     // 문이 열리는 시간 (지시값 1.2~1.5s)
     doorCloseMs: 1100,    // 스크롤 트랜지션에서 문이 닫히는 시간
     hintFadeMs: 450,      // 유도 문구 페이드아웃 — 이게 끝나야 사운드 바 접힘이 시작됨(순차 진행)
+    logoFadeMs: 600,      // 기존 문 닫힘 전 대기 안에서 중앙 로고·부제를 정리
     soundFoldMs: 400,     // 소리 바가 위로 접히며 사라지는 시간
     preCloseGapMs: 300,   // 두 UI가 완전히 정리된 뒤 문이 닫히기 시작하기 전 pause
     blackoutMs: 400,      // 블랙아웃 opacity 전환 시간
@@ -44,6 +45,7 @@
   if (!opening) return; // 이 페이지에 오프닝 마크업이 없으면 아무것도 하지 않음
 
   const scene = document.getElementById('o01-scene');
+  const center = opening.querySelector('.o01__center');
   const hint = document.getElementById('o01-hint');
   const lanternBtn = document.getElementById('o01-lantern-btn');
   const soundUi = document.getElementById('o01-soundui');
@@ -57,6 +59,7 @@
   // 설정값을 CSS 쪽 기본 transition-duration에도 1회 주입 (이후로는
   // 여기 있는 TIMING 값이 유일한 기준).
   hint.style.transitionDuration = `${TIMING.hintFadeMs}ms`;
+  center.style.transitionDuration = `${TIMING.logoFadeMs}ms`;
   blackout.style.transitionDuration = `${TIMING.blackoutMs}ms`;
   opening.style.transitionDuration = `${TIMING.openingFadeMs}ms`;
 
@@ -208,6 +211,7 @@
   // style.height를 매 프레임 갱신하도록 바꾸면 된다.
   // --------------------------------------------------------------
   const soundBars = soundUi.querySelectorAll('.o01__soundui-bar');
+  soundBtn.setAttribute('aria-label', `배경음 설정 열기 (현재 ${soundBtn.dataset.soundOn === 'true' ? 'ON' : 'OFF'})`);
 
   function closeSoundMenu() {
     soundMenu.classList.remove('is-open');
@@ -226,6 +230,7 @@
       e.stopPropagation();
       const on = btn.dataset.soundChoice === 'on';
       soundBtn.dataset.soundOn = String(on);
+      soundBtn.setAttribute('aria-label', `배경음 설정 열기 (현재 ${on ? 'ON' : 'OFF'})`);
       soundMenu.querySelectorAll('button[data-sound-choice]').forEach((b) => {
         b.setAttribute('aria-checked', String(b === btn));
       });
@@ -323,6 +328,8 @@
   function playTransitionOut() {
     if (stage !== 'open') return;
     stage = 'closing';
+    // 기존 1150ms 대기와 겹쳐 재생하므로 문·장면 전환 시점은 그대로다.
+    opening.classList.add('is-exiting');
 
     // 열려 있던 메뉴는 즉시 정리(비주얼 fold와는 별개로, 떠 있는 채로
     // 남아있으면 안 되므로) — 아래 순서 자체에는 영향 없음.
@@ -412,6 +419,7 @@
   // enterFromMainSite(메인 사이트 '오프닝 페이지로 이동') 양쪽에서
   // 재사용한다.
   function resetSceneToClosedInstant() {
+    opening.classList.remove('is-exiting');
     blackout.classList.remove('is-active');
     hint.classList.remove('is-visible');
     soundUi.classList.remove('is-folding');

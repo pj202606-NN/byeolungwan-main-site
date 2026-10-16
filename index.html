@@ -31,8 +31,8 @@
   https://hangeul.naver.com/font/maru
 -->
 
-<link rel="stylesheet" href="css/main.css?v=21">
-<link rel="stylesheet" href="css/opening.css?v=24">
+<link rel="stylesheet" href="css/main.css?v=29">
+<link rel="stylesheet" href="css/opening.css?v=25">
 </head>
 <body class="is-o01-active">
 <!-- is-o01-active: 페이지 로드 시 기본으로 켜져 있다(O-01이 첫
@@ -3545,9 +3545,9 @@
   <nav class="rail__zone rail__zone--nav">
     <ul class="rail__navlist">
       <li class="rail__navitem rail__navitem--nudge-down rail__navitem--nudge-down-more" id="rail-navitem-entrance"><a href="#E-00" data-target="E-00">입구</a></li>
-      <li class="rail__navitem is-disabled rail__navitem--nudge-down"><span title="아직 구현되지 않았습니다">운세 보기</span></li>
-      <li class="rail__navitem is-disabled"><span title="아직 구현되지 않았습니다">별자리</span></li>
-      <li class="rail__navitem is-disabled"><span title="아직 구현되지 않았습니다">이야기</span></li>
+      <li class="rail__navitem rail__navitem--nudge-down" id="rail-navitem-fortune"><a href="#F-00" data-target="F-00">운세 보기</a></li>
+      <li class="rail__navitem" id="rail-navitem-constellation"><a href="#C-00" data-target="C-00">별자리</a></li>
+      <li class="rail__navitem" id="rail-navitem-story"><a href="#S-00" data-target="S-00">이야기</a></li>
     </ul>
   </nav>
 
@@ -3561,18 +3561,21 @@
      전체 메뉴 오버레이 — 햄버거 버튼을 누르면 레일 왼쪽 끝부터
      단색(네이비) 배경이 오른쪽으로 퍼져나가며 펼쳐진다(.nav-overlay__bg
      가 scaleX(0)→scaleX(1)). 디자인 기준:
-     00_DESIGN_REFERENCE/NAV-00_전체메뉴.png — 그 시안은 '입구'가
-     선택된 모습이라, 현재 실제로 구현된 메뉴가 입구(E-xx)뿐인 이 사이트
-     상태와 맞아떨어져 입구 칼럼을 항상 활성(크림 배경) 상태로 둔다.
-     운세 보기/별자리/이야기/오프닝은 아직 구현 전이라 클릭이 안 되는
-     점은 레일의 기존 비활성 처리와 동일하게 맞췄다. '별자리 확인하기'
-     항목은 E-00 쪽에서 이미 삭제했으므로 여기 하위 목록에도 넣지 않음.
+     00_DESIGN_REFERENCE/NAV-00_전체메뉴.png.
+     2026-10-16: F-00/C-00/S-00 표지와 F-01/F-02가 생겨 운세 보기까지
+     클릭 가능하게 열었다. --active(크림 배경+하위 목차)는 "하위
+     페이지가 실제로 있는 메뉴"에만 주는 기존 E-00의 처리를 그대로
+     따라 운세 보기에도 적용(F-01/F-02 하위 목록 추가). 별자리/이야기는
+     아직 표지(-00)만 있고 하위 콘텐츠가 없어 기본(네이비) 칼럼으로
+     클릭만 가능하게 열되 하위 목록은 비워둔다. 오프닝은 여전히 구현
+     전이라 비활성 유지. '별자리 확인하기' 항목은 E-00 쪽에서 이미
+     삭제했으므로 여기 하위 목록에도 넣지 않음.
      ============================================================ -->
 <div class="nav-overlay" id="nav-overlay" aria-hidden="true">
   <div class="nav-overlay__bg"></div>
   <div class="nav-overlay__content">
 
-    <div class="nav-overlay__col nav-overlay__col--active" data-target="E-00">
+    <div class="nav-overlay__col nav-overlay__col--menu" data-target="E-00">
       <p class="nav-overlay__label">입구</p>
       <h2 class="nav-overlay__glyph font-hanja-safe">入口</h2>
       <ul class="nav-overlay__sublist">
@@ -3581,19 +3584,36 @@
       </ul>
     </div>
 
-    <div class="nav-overlay__col is-disabled" title="아직 구현되지 않았습니다">
+    <div class="nav-overlay__col nav-overlay__col--menu" data-target="F-00">
       <p class="nav-overlay__label">운세<br>보기</p>
       <h2 class="nav-overlay__glyph font-hanja-safe">運勢</h2>
+      <ul class="nav-overlay__sublist">
+        <li><a href="#F-01" data-target="F-01">생년월일 입력</a></li>
+        <li><a href="#F-02" data-target="F-02">별자리 찾기</a></li>
+      </ul>
     </div>
 
-    <div class="nav-overlay__col is-disabled" title="아직 구현되지 않았습니다">
+    <div class="nav-overlay__col nav-overlay__col--menu" data-target="C-00">
       <p class="nav-overlay__label">별자리</p>
       <h2 class="nav-overlay__glyph font-hanja-safe">星座</h2>
+      <ul class="nav-overlay__sublist">
+        <li><a href="#C-01" data-target="C-01">별자리 사전</a></li>
+        <li><a href="#C-02" data-target="C-02">별자리 궁합 관계도</a></li>
+        <li><a href="#C-03" data-target="C-03">별자리 궁합 보기</a></li>
+        <li><a href="#C-04" data-target="C-04">별자리 궁합 상세</a></li>
+      </ul>
     </div>
 
-    <div class="nav-overlay__col is-disabled" title="아직 구현되지 않았습니다">
+    <div class="nav-overlay__col nav-overlay__col--menu" data-target="S-00">
       <p class="nav-overlay__label">이야기</p>
       <h2 class="nav-overlay__glyph font-hanja-safe">談</h2>
+      <ul class="nav-overlay__sublist">
+        <li><a href="#S-01" data-target="S-01">천상열차분야지도 이야기</a></li>
+        <li><a href="#S-02" data-target="S-02">3원과 28수 이야기</a></li>
+        <li><a href="#S-03" data-target="S-03">사신수 이야기</a></li>
+        <li><a href="#S-04" data-target="S-04">28수 운세 이야기</a></li>
+        <li><a href="#S-05" data-target="S-05">그래서 우리는</a></li>
+      </ul>
     </div>
 
     <div class="nav-overlay__col nav-overlay__col--toc">
@@ -7446,10 +7466,415 @@
       </div>
     </section>
 
+    <!-- F-00 : 운세 보기 표지 — E-00과 동일한 공통 표지 레이아웃
+         (css/main.css의 .e00__*, .f00__* 그룹 선택자 참고). 레퍼런스
+         (F-00_운세보기표지.png)에는 우측 이미지 영역이 없어 패널이
+         전체 폭. 텍스트는 전부 레퍼런스 그대로(소개문은 E-00과 동일
+         문구가 레퍼런스에도 그대로 실려 있어 그대로 사용). -->
+    <section class="screen screen--f00" id="F-00" data-screen-id="F-00" data-rail-theme="light">
+      <div class="f00__panel">
+        <p class="f00__eyebrow reveal" data-reveal-start="0" data-reveal-end="0.3">운세<br>보기</p>
+        <h2 class="f00__glyph font-hanja-safe reveal" data-reveal-start="0.1" data-reveal-end="0.5">運勢</h2>
+
+        <p class="f00__intro reveal" data-reveal-start="0.35" data-reveal-end="0.75">
+          저 옛날, 밤하늘을 읽기 위해 그린<br>
+          지도 속의 잊혀진 별들 중 하나가<br>
+          오늘 당신의 별자리가 됩니다
+        </p>
+
+        <div class="f00__toc reveal" data-reveal-start="0.5" data-reveal-end="0.9">
+          <p class="f00__toc-label">운세 보기 수록 내용</p>
+          <ul class="f00__toc-list">
+            <li><a href="#F-01" data-target="F-01">별자리 찾기</a></li>
+            <li><a href="#F-02" data-target="F-02">당신의 별자리와 오늘의 운세</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="f00__hint">모든 장은 우측으로 넘어갑니다</p>
+    </section>
+
+    <!-- F-01 : 생년월일 입력. 레퍼런스(F-01_운세보기_생년월일입력.png,
+         1440x1024) 좌표를 그대로 px/캔버스로 환산해 사용(E-01처럼
+         레일 폭을 추가로 빼지 않음 — F-00과 같은 설계 기준이라 직접
+         매핑이 더 정확했다). 우측 큰 사각형은 실제 이미지가 없어
+         #D9D9D9 placeholder(.f01__image-ph). 기울어진 입력 카드는
+         실제 <select> 3개(년/월/일)로 구현 — 월 변경 시 일 옵션
+         개수를 윤년 포함해 다시 계산하는 최소한의 입력값 검증만
+         추가했다. "별자리 찾기" 클릭 시 28수 계산 로직이 아직 없어
+         결과는 만들어내지 않고, 입력값만 sessionStorage에 저장해
+         F-02로 넘어갈 구조만 마련했다(js/main.js 참고, 콘솔 출력/
+         서버 전송 없음). -->
+    <section class="screen screen--f01" id="F-01" data-screen-id="F-01" data-rail-theme="navy">
+      <h2 class="f01__headline reveal" data-reveal-start="0" data-reveal-end="0.4">
+        당신이 이 세상에<br>
+        태어난 때는 언제인가요?
+      </h2>
+
+      <div class="f01__body reveal" data-reveal-start="0.15" data-reveal-end="0.55">
+        <p>
+          28수는 달이 지나는 하늘을 28등분 한 후<br>
+          각 자리에서 가장 밝은 별들을 추려 만들어<br>
+          낸 28개의 별자리입니다.
+        </p>
+        <p>
+          매일 밤하늘에 뜨는 달은 하루에 꼭 하나<br>
+          이상의 별자리를 지나게 됩니다.
+        </p>
+        <p>
+          당신이 태어난 순간 하늘에서는 어떤 별이 빛나고 있었을까요.
+        </p>
+      </div>
+
+      <div class="f01__image-ph reveal reveal--image" data-reveal-start="0.1" data-reveal-end="0.5" aria-hidden="true"></div>
+
+      <!-- reveal의 JS 애니메이션이 style.transform을 매 프레임 직접
+           덮어써서(위 updateReveals 참고), 기울어진 카드 자체에
+           reveal을 걸면 rotate()가 지워진다 — 그래서 위치만 잡는
+           바깥 래퍼에 reveal을, 실제로 기울어진 카드 모양은 안쪽
+           폼에 별도로 둬서 서로 간섭하지 않게 분리했다. -->
+      <div class="f01__date-card-wrap reveal reveal--image" data-reveal-start="0.3" data-reveal-end="0.7">
+        <form class="f01__date-card">
+          <label class="f01__date-field">
+            <select id="f01-year" aria-label="태어난 연도"></select>
+            <span>년</span>
+          </label>
+          <label class="f01__date-field">
+            <select id="f01-month" aria-label="태어난 월"></select>
+            <span>월</span>
+          </label>
+          <label class="f01__date-field">
+            <select id="f01-day" aria-label="태어난 일"></select>
+            <span>일</span>
+          </label>
+        </form>
+      </div>
+
+      <div class="f01__submit-wrap reveal" data-reveal-start="0.4" data-reveal-end="0.8">
+        <p class="f01__submit-label">운세 보기</p>
+        <a href="#F-02" data-target="F-02" id="f01-submit" class="f01__submit">별자리 찾기</a>
+      </div>
+
+      <p class="f01__hint">생년월일을 입력해 주세요.</p>
+    </section>
+
+    <!-- F-02 : 별자리 출력. 레퍼런스(F-02_운세보기_별자리출력.png)의
+         좌측 캐릭터 이미지, 우측 "오늘의 운세" 아이콘은 실제 이미지가
+         없어 #D9D9D9 placeholder. 28수 계산 로직이 프로젝트에 아직
+         없어, 텍스트(별자리명·설명·오늘의 운세)는 레퍼런스에 실린
+         고정 예시(저수/너구리자리)를 그대로 재현했다 — 임의의 결과를
+         새로 만들어내지 않았다(8번 보고 항목에 미구현 상태로 명시). -->
+    <section class="screen screen--f02" id="F-02" data-screen-id="F-02" data-rail-theme="navy">
+      <div class="f02__image-ph reveal reveal--image" data-reveal-start="0" data-reveal-end="0.4" aria-hidden="true"></div>
+
+      <h2 class="f02__title reveal" data-reveal-start="0.15" data-reveal-end="0.5">저수</h2>
+      <p class="f02__subtitle reveal" data-reveal-start="0.2" data-reveal-end="0.55">氐宿 · 너구리자리</p>
+      <p class="f02__desc reveal" data-reveal-start="0.25" data-reveal-end="0.6">
+        너구리를 상징 동물로 하는 저수는 동방 청룡에 속한 별자리로<br>
+        동쪽의 7수 중 용의 몸통을 뜻하며, 단단한 중심과 현실적 판단<br>
+        을 기반으로 한 강한 생존력을 상징합니다.
+      </p>
+
+      <div class="f02__fortune-ph reveal reveal--image" data-reveal-start="0.35" data-reveal-end="0.7" aria-hidden="true"></div>
+      <div class="f02__fortune reveal" data-reveal-start="0.4" data-reveal-end="0.75">
+        <h3 class="f02__fortune-title">오늘의 운세</h3>
+        <p class="f02__fortune-p1">
+          작은 균열이 보일 수 있습니다.<br>
+          미리 살피면 큰일이 되지 않습니다.
+        </p>
+        <p class="f02__fortune-p2">
+          평소보다 에너지 소모가 많을 수 있는 날입니다.<br>
+          적응력과 현실 감각이 오늘의 흐름과 다소 엇갈<br>
+          리니, 잘 되던 일도 한 번 더 확인하고 지금 할 수<br>
+          있는 것에만 집중하십시오.
+        </p>
+      </div>
+
+      <div class="f02__links reveal" data-reveal-start="0.5" data-reveal-end="0.85">
+        <a href="#F-01" data-target="F-01">별자리 다시 확인하기</a>
+        <span class="is-disabled" title="아직 구현되지 않았습니다">별자리 더 알아보기</span>
+      </div>
+
+      <div class="f02__breadcrumb reveal" data-reveal-start="0.1" data-reveal-end="0.4">
+        <p class="f02__breadcrumb-label">운세 보기</p>
+        <p class="f02__breadcrumb-current">당신의 별자리와 오늘의 운세</p>
+      </div>
+    </section>
+
+    <!-- C-00 : 별자리 표지 — 공통 표지 레이아웃 + 블랙/블루 테마.
+         레퍼런스(C-00_별자리표지.png) 우측 이미지 영역은 아직 실제
+         이미지가 없어 #D9D9D9 placeholder(.c00__image-ph)로 유지. -->
+    <section class="screen screen--image" id="IMG-01" data-screen-id="IMG-01" data-rail-theme="light" aria-label="이미지 연결 구간 1"></section>
+
+    <section class="screen screen--c00" id="C-00" data-screen-id="C-00" data-rail-theme="black">
+      <div class="c00__panel">
+        <p class="c00__eyebrow reveal" data-reveal-start="0" data-reveal-end="0.3">별자리</p>
+        <h2 class="c00__glyph font-hanja-safe reveal" data-reveal-start="0.1" data-reveal-end="0.5">星座</h2>
+
+        <p class="c00__intro reveal" data-reveal-start="0.35" data-reveal-end="0.75">
+          저 옛날, 밤하늘을 읽기 위해 그린<br>
+          지도 속의 잊혀진 별들 중 하나가<br>
+          오늘 당신의 별자리가 됩니다
+        </p>
+
+        <div class="c00__toc reveal" data-reveal-start="0.5" data-reveal-end="0.9">
+          <p class="c00__toc-label">별자리 수록 내용</p>
+          <ul class="c00__toc-list">
+            <li><a href="#C-01" data-target="C-01">별자리 사전</a></li>
+            <li><a href="#C-02" data-target="C-02">별자리 궁합 관계도</a></li>
+            <li><a href="#C-03" data-target="C-03">별자리 궁합 보기</a></li>
+            <li><a href="#C-04" data-target="C-04">별자리 궁합 상세</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="c00__image-ph" aria-hidden="true"></div>
+
+      <p class="c00__hint">모든 장은 우측으로 넘어갑니다</p>
+    </section>
+
+    <!-- C-01 : 00_DESIGN_REFERENCE의 원본 이미지 영역과 텍스트 배치를 재현. -->
+    <section class="screen screen--c01" id="C-01" data-screen-id="C-01" data-rail-theme="light" data-width-multiplier="1.2479166667" aria-labelledby="c01-title">
+      <h2 class="c-ref__at c-ref__title reveal" id="c01-title" style="--x:160;--y:103" data-reveal-start="0.1" data-reveal-end="0.5">별자리 지도</h2>
+      <p class="c-ref__at c-ref__body reveal" style="--x:440;--y:129" data-reveal-start="0.1" data-reveal-end="0.5">그리드 보기</p>
+      <div class="c-ref__at c01__head-line" style="--x:896;--y:147" aria-hidden="true"></div>
+      <div class="c-ref__at c01__head-dot" style="--x:1273;--y:133" aria-hidden="true"></div>
+      <div class="c-ref__at c-ref__ph" style="--x:160;--y:200;--w:1133;--h:573" aria-hidden="true"></div>
+      <div class="c-ref__at c01__divider" style="--x:1365;--y:201" aria-hidden="true"></div>
+      <div class="c-ref__at c-ref__directions reveal" style="--x:170;--y:822" data-reveal-start="0.35" data-reveal-end="0.75">
+        <span>청룡·동방</span><span>현무·북방</span><span>백호·서방</span><span>주작·남방</span>
+      </div>
+      <p class="c-ref__at c-ref__body reveal" style="--x:665;--y:820;--w:390" data-reveal-start="0.35" data-reveal-end="0.75">청룡·백호·주작·현무, 네 사신수가 지키는 하늘의 네가지 방위<br>에는 각 방위마다 일곱 개의 별자리가 자리하고 있습니다.</p>
+      <p class="c-ref__at c-ref__body reveal" style="--x:1076;--y:820;--w:220" data-reveal-start="0.35" data-reveal-end="0.75">사신수를 고르고, 각 별자리를 눌러<br>자세히 살펴보세요.</p>
+      <div class="c-ref__at c-ref__label reveal" style="--x:1433;--y:117" data-reveal-start="0.4" data-reveal-end="0.7"><p>별자리</p><p>별자리 사전</p></div>
+      <div class="c-ref__at c-ref__ph" style="--x:1433;--y:201;--w:237;--h:292" aria-hidden="true"></div>
+      <h3 class="c-ref__at c01__preview-name reveal" id="c01-preview-name" style="--x:1433;--y:552;--w:237" data-reveal-start="0.35" data-reveal-end="0.75">저수</h3>
+      <p class="c-ref__at c01__preview-hanja reveal" id="c01-preview-hanja" style="--x:1433;--y:633;--w:237" data-reveal-start="0.35" data-reveal-end="0.75">氐宿 · 너구리자리</p>
+      <p class="c-ref__at c-ref__body c01__preview-desc reveal" id="c01-preview-desc" data-reference-copy="true" style="--x:1433;--y:703;--w:237" data-reveal-start="0.35" data-reveal-end="0.75">옛 사람들은 하늘을 3개의 원과 28개<br>의 별자리로 나누어 그 뜻을 읽고 농경<br>과 정치, 삶에 적용해 살아갔습니다. 프<br>로젝트 별운관은 이러한 전통 천문 체<br>계인 3원 28수를 오늘날 사람들이 흔<br>히 즐기는 별자리 운세로 다시 엮어 새<br>로운 28개의 별자리와 함께 매일의</p>
+      <span class="c-ref__at c01__preview-link reveal" style="--x:1433;--y:919;--w:237" data-reveal-start="0.4" data-reveal-end="0.7" aria-disabled="true">별자리 상세 설명 보기</span>
+      <!-- 선택 데이터/필터 로직은 보관하되 이미지 자리에는 UI를 표시하지 않는다. -->
+      <div hidden>
+        <div id="c01-tabs"><button type="button" class="c01__tab is-active" data-group="all">전체</button><button type="button" class="c01__tab" data-group="청룡">청룡</button><button type="button" class="c01__tab" data-group="현무">현무</button><button type="button" class="c01__tab" data-group="백호">백호</button><button type="button" class="c01__tab" data-group="주작">주작</button></div>
+        <div id="c01-grid"></div>
+      </div>
+    </section>
+
+    <!-- C-02 : 00_DESIGN_REFERENCE의 원본 이미지 영역과 텍스트 배치를 재현. -->
+    <section class="screen screen--image" id="IMG-02" data-screen-id="IMG-02" data-rail-theme="light" aria-label="이미지 연결 구간 2"></section>
+
+    <section class="screen screen--c02" id="C-02" data-screen-id="C-02" data-rail-theme="light" aria-labelledby="c02-title">
+      <div class="c-ref__at c-ref__label reveal" style="--x:187;--y:74" data-reveal-start="0" data-reveal-end="0.3"><p>별자리</p><p>별자리 궁합 관계도</p></div>
+      <div class="c-ref__at c-ref__ph" style="--x:187;--y:144;--w:548;--h:514" aria-hidden="true"></div>
+      <div class="c-ref__at c02__legend reveal" style="--x:552;--y:671" data-reveal-start="0.35" data-reveal-end="0.75"><span>천생연분</span><span>보완</span><span>주의</span></div>
+      <h2 class="c-ref__at c-ref__title reveal" id="c02-title" style="--x:818;--y:139" data-reveal-start="0.1" data-reveal-end="0.5">별자리 궁합 관계도</h2>
+      <p class="c-ref__at c-ref__body reveal" style="--x:818;--y:242;--w:440" data-reveal-start="0.35" data-reveal-end="0.75">별자리 하나를 고르면, 그 별자리와 유의미하게 이어진<br>몇 개의 별이 밝아지며 별자리 사이의 관계를 나타냅니다.</p>
+      <div class="c-ref__at c-ref__ph" style="--x:818;--y:364;--w:209;--h:246" aria-hidden="true"></div>
+      <h3 class="c-ref__at c-ref__name reveal" id="c02-selected-name" style="--x:1063;--y:372" data-reveal-start="0.35" data-reveal-end="0.75">저수</h3>
+      <p class="c-ref__at c-ref__hanja reveal" id="c02-selected-hanja" style="--x:1063;--y:407" data-reveal-start="0.35" data-reveal-end="0.75">氐宿 · 너구리자리</p>
+      <div class="c-ref__at c-ref__directions c02__directions reveal" style="--x:1061;--y:487" data-reveal-start="0.35" data-reveal-end="0.75"><span>청룡·동방</span><span>현무·북방</span><span>백호·서방</span><span>주작·남방</span></div>
+      <div class="c-ref__at c02__relation reveal" style="--x:187;--y:722" data-reveal-start="0.4" data-reveal-end="0.8"><p>천생연분</p><div class="c02__relation-copy"><p>루수 (백호 · 서방7수)</p><p>정반대의 기운이 서로를 완성시켜주는 관계입니다.</p></div></div>
+      <div class="c-ref__at c02__relation reveal" style="--x:818;--y:722" data-reveal-start="0.4" data-reveal-end="0.8"><p>보완</p><div class="c02__relation-copy"><p>각수 (청룡 · 동방7수)</p><p>같은 기운을 나누며 서로를 자연스럽게 채워주는 관계입니다.</p></div></div>
+      <div class="c-ref__at c02__relation reveal" style="--x:187;--y:849" data-reveal-start="0.4" data-reveal-end="0.8"><p>보완</p><div class="c02__relation-copy"><p>저수 (청룡 · 동방7수)</p><p>같은 기운을 나누며 서로를 자연스럽게 채워주는 관계입니다.</p></div></div>
+      <div class="c-ref__at c02__relation reveal" style="--x:818;--y:849" data-reveal-start="0.4" data-reveal-end="0.8"><p>주의</p><div class="c02__relation-copy"><p>우수 (현무 · 북방7수)</p><p>기질의 결이 달라 마찰이 생기기 쉬우니 배려가 필요한 관계입니다.</p></div></div>
+      <div class="c-ref__at c-ref__ph" style="--x:187;--y:760;--w:47;--h:47" aria-hidden="true"></div>
+      <div class="c-ref__at c-ref__ph" style="--x:818;--y:760;--w:47;--h:47" aria-hidden="true"></div>
+      <div class="c-ref__at c-ref__ph" style="--x:187;--y:887;--w:47;--h:47" aria-hidden="true"></div>
+      <div class="c-ref__at c-ref__ph" style="--x:818;--y:887;--w:47;--h:47" aria-hidden="true"></div>
+    </section>
+
+    <!-- C-03 : 00_DESIGN_REFERENCE의 원본 이미지 영역과 텍스트 배치를 재현. -->
+    <section class="screen screen--c03" id="C-03" data-screen-id="C-03" data-rail-theme="navy" aria-labelledby="c03-title">
+      <div class="c-ref__at c-ref__label reveal" style="--x:1205;--y:109" data-reveal-start="0" data-reveal-end="0.3"><p>별자리</p><p>별자리 궁합 보기</p></div>
+      <h2 class="c-ref__at c-ref__title reveal" id="c03-title" style="--x:158;--y:223" data-reveal-start="0.1" data-reveal-end="0.5">별자리 궁합 보기</h2>
+      <p class="c-ref__at c03__question reveal" style="--x:169;--y:328" data-reveal-start="0.2" data-reveal-end="0.6">우리의 별은 어떤 관계일까요?</p>
+      <p class="c-ref__at c-ref__body c-ref__muted reveal" style="--x:169;--y:380" data-reveal-start="0.35" data-reveal-end="0.75">나의 별자리와 상대의 별자리를 골라보세요.<br>별자리 간의 궁합과 관계가 나타납니다.</p>
+      <div class="c-ref__at c-ref__ph" style="--x:632;--y:211;--w:286;--h:356" aria-hidden="true"></div>
+      <div class="c-ref__at c-ref__ph" style="--x:1011;--y:211;--w:286;--h:356" aria-hidden="true"></div>
+      <button type="button" class="c-ref__at c03__picker reveal" id="c03-picker-0" style="--x:656;--y:579;--w:238" aria-label="첫 번째 별자리 선택" data-reveal-start="0.35" data-reveal-end="0.75"><span class="c03__picker-label c-ref__name" id="c03-picked-name-0">저수</span><span class="c-ref__hanja" id="c03-picked-hanja-0">氐宿 · 너구리자리</span></button>
+      <button type="button" class="c-ref__at c03__picker reveal" id="c03-picker-1" style="--x:1035;--y:579;--w:238" aria-label="두 번째 별자리 선택" data-reveal-start="0.35" data-reveal-end="0.75"><span class="c03__picker-label c-ref__name" id="c03-picked-name-1">루수</span><span class="c-ref__hanja" id="c03-picked-hanja-1">婁宿 · 개자리</span></button>
+      <div class="c-ref__at c03__accordion" id="c03-accordion" style="--x:236;--y:610">
+        <div class="c03__acc-item" data-group="청룡"><button type="button" class="c03__acc-head" aria-label="동방 청룡 별자리 펼치기" aria-expanded="false" aria-controls="c03-east" title="동방 청룡"><span class="c-ref__sr-only">동방 청룡</span></button><div class="c03__acc-body" id="c03-east" inert></div></div>
+        <div class="c03__acc-item" data-group="현무"><button type="button" class="c03__acc-head" aria-label="북방 현무 별자리 펼치기" aria-expanded="false" aria-controls="c03-north" title="북방 현무"><span class="c-ref__sr-only">북방 현무</span></button><div class="c03__acc-body" id="c03-north" inert></div></div>
+        <div class="c03__acc-item" data-group="백호"><button type="button" class="c03__acc-head" aria-label="서방 백호 별자리 펼치기" aria-expanded="false" aria-controls="c03-west" title="서방 백호"><span class="c-ref__sr-only">서방 백호</span></button><div class="c03__acc-body" id="c03-west" inert></div></div>
+        <div class="c03__acc-item" data-group="주작"><button type="button" class="c03__acc-head" aria-label="남방 주작 별자리 펼치기" aria-expanded="false" aria-controls="c03-south" title="남방 주작"><span class="c-ref__sr-only">남방 주작</span></button><div class="c03__acc-body" id="c03-south" inert></div></div>
+      </div>
+      <p class="c-ref__at c-ref__name reveal" id="c03-confirm-label" style="--x:791;--y:757;--w:130" aria-live="polite" data-reveal-start="0.4" data-reveal-end="0.8">저수 &amp; 루수</p>
+      <button type="button" class="c-ref__at c03__confirm-btn" id="c03-confirm-btn" style="--x:930;--y:749" disabled>궁합 보기</button>
+    </section>
+
+    <!-- C-04 : 00_DESIGN_REFERENCE의 원본 이미지 영역과 텍스트 배치를 재현. -->
+    <section class="screen screen--c04" id="C-04" data-screen-id="C-04" data-rail-theme="navy" aria-labelledby="c04-headline">
+      <div class="c-ref__at c-ref__label reveal" style="--x:1205;--y:109" data-reveal-start="0" data-reveal-end="0.3"><p>별자리</p><p>별자리 궁합 보기</p></div>
+      <h2 class="c-ref__at c04__headline reveal" id="c04-headline" style="--x:570;--y:106;--w:350" data-reveal-start="0.1" data-reveal-end="0.5">우리의 별은 서로를 완성시켜주는<br>천생연분과도 같은 관계입니다.</h2>
+      <div class="c-ref__at c-ref__ph" style="--x:234;--y:211;--w:286;--h:356" aria-hidden="true"></div>
+      <div class="c-ref__at c-ref__ph" style="--x:965;--y:211;--w:286;--h:356" aria-hidden="true"></div>
+      <svg class="c-ref__at c04__constellation" style="--x:574;--y:257" viewBox="574 257 342 310" preserveAspectRatio="none" aria-hidden="true">
+        <g fill="none" stroke="#D9D9D9" stroke-width="1"><path d="M577 299 617 423 634 513 M617 423 667 331 738 260 M667 331 798 377 752 421 774 499 M798 377 912 465 900 334 M912 465 824 541 845 558"/></g>
+        <g fill="#D9D9D9"><circle cx="577" cy="299" r="3"/><circle cx="617" cy="423" r="3"/><circle cx="634" cy="513" r="3"/><circle cx="667" cy="331" r="3"/><circle cx="738" cy="260" r="3"/><circle cx="798" cy="377" r="3"/><circle cx="752" cy="421" r="3"/><circle cx="774" cy="499" r="3"/><circle cx="912" cy="465" r="3"/><circle cx="900" cy="334" r="3"/><circle cx="824" cy="541" r="3"/><circle cx="845" cy="558" r="3"/></g>
+      </svg>
+      <h3 class="c-ref__at c-ref__name reveal" id="c04-name-0" style="--x:258;--y:579" data-reveal-start="0.35" data-reveal-end="0.75">저수</h3>
+      <p class="c-ref__at c-ref__hanja reveal" id="c04-hanja-0" style="--x:377;--y:582" data-reveal-start="0.35" data-reveal-end="0.75">氐宿 · 너구리자리</p>
+      <h3 class="c-ref__at c-ref__name reveal" id="c04-name-1" style="--x:989;--y:579" data-reveal-start="0.35" data-reveal-end="0.75">루수</h3>
+      <p class="c-ref__at c-ref__hanja reveal" id="c04-hanja-1" style="--x:1138;--y:582" data-reveal-start="0.35" data-reveal-end="0.75">婁宿 · 개자리</p>
+      <h3 class="c-ref__at c-ref__name c04__pair-title reveal" id="c04-result-title" style="--x:234;--y:746;--w:135" data-reveal-start="0.4" data-reveal-end="0.8">저수 &amp; 루수</h3>
+      <p class="c-ref__at c-ref__body c-ref__muted c04__copy reveal" id="c04-result-desc" style="--x:383;--y:747;--w:345" data-reveal-start="0.4" data-reveal-end="0.8">정반대의 기운이 서로를 완성시켜주는 관계입니다.</p>
+      <p class="c-ref__at c-ref__body c-ref__muted c04__copy reveal" id="c04-result-body" style="--x:383;--y:797;--w:345" data-reveal-start="0.4" data-reveal-end="0.8">단단히 받쳐주는 안정감과 한결같은 인내심을 가진 저수<br>의 특징과, 루수가 가진 거침없는 결단력이 만나 같은 목<br>표에 도전한다면 더 큰 성과를 얻을 수 있는 상호 보완적<br>인 이상적인 관계입니다. 팀원이나 사업 동료도 좋습니다.</p>
+      <h3 class="c-ref__at c-ref__name reveal" id="c04-note-title" style="--x:823;--y:746" data-reveal-start="0.4" data-reveal-end="0.8">주의</h3>
+      <p class="c-ref__at c-ref__body c-ref__muted c04__copy reveal" id="c04-result-note" style="--x:906;--y:747;--w:350" data-reveal-start="0.4" data-reveal-end="0.8">다만, 서로 발 맞춰 나가야 하는 관계이기에 어느 한 쪽이<br>속도를 맞추지 않는다면 쉽게 어긋나갈 수 도 있습니다.</p>
+      <p class="c-ref__at c-ref__body c-ref__muted c04__copy reveal" id="c04-note-body" style="--x:906;--y:822;--w:350" data-reveal-start="0.4" data-reveal-end="0.8">상대를 배려하며 같은 곳을 바라보고 살아가는 것이<br>이 이상적인 관계를 유지할 수 있는 지름길입니다.</p>
+    </section>
+
+    <!-- S-00 : 이야기 표지 — 공통 표지 레이아웃, F-00과 동일한
+         크림/네이비 테마. 레퍼런스(S-00_이야기표지.png) 우측 이미지
+         영역은 #D9D9D9 placeholder(.s00__image-ph) 유지. 소개문은
+         E-00/F-00/C-00과 달리 레퍼런스에 고유 문구가 실려 있어 그
+         텍스트를 그대로 옮겼다(줄바꿈은 레퍼런스가 좁은 폭에서 임의
+         개행한 것으로 보여, 동일한 25vw 폭 컨테이너에서 자연스럽게
+         흐르도록 <br> 없이 그대로 둠). -->
+    <section class="screen screen--image" id="IMG-03" data-screen-id="IMG-03" data-rail-theme="light" aria-label="이미지 연결 구간 3"></section>
+
+    <section class="screen screen--s00" id="S-00" data-screen-id="S-00" data-rail-theme="light">
+      <div class="s00__panel">
+        <p class="s00__eyebrow reveal" data-reveal-start="0" data-reveal-end="0.3">이야기</p>
+        <h2 class="s00__glyph font-hanja-safe reveal" data-reveal-start="0.1" data-reveal-end="0.5">談</h2>
+
+        <p class="s00__intro reveal" data-reveal-start="0.35" data-reveal-end="0.75">
+          천 년 전 올려다본 하늘을 읽기 위해 만들어진 기록이 어떻게 오늘의 별자리 운세가 되었는지, 그 이야기를 들려드립니다.
+        </p>
+
+        <div class="s00__toc reveal" data-reveal-start="0.5" data-reveal-end="0.9">
+          <p class="s00__toc-label">이야기 수록 내용</p>
+          <ul class="s00__toc-list">
+            <li><a href="#S-01" data-target="S-01">천상열차분야지도 이야기</a></li>
+            <li><a href="#S-02" data-target="S-02">3원과 28수 이야기</a></li>
+            <li><a href="#S-03" data-target="S-03">사신수 이야기</a></li>
+            <li><a href="#S-04" data-target="S-04">28수 운세 이야기</a></li>
+            <li><a href="#S-05" data-target="S-05">그래서 우리는</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="s00__image-ph" aria-hidden="true"></div>
+
+      <p class="s00__hint">모든 장은 우측으로 넘어갑니다</p>
+    </section>
+
+    <!-- S-01 : 1440×1024 레퍼런스의 좌표/줄바꿈을 유지한다.
+         회색 영역은 실제 이미지가 들어오기 전까지 비워 두는 placeholder. -->
+    <section class="screen screen--s01" id="S-01" data-screen-id="S-01" data-rail-theme="navy" aria-labelledby="s01-title">
+      <div class="s01__image-ph" aria-hidden="true"></div>
+
+      <h2 class="s01__title reveal" id="s01-title" data-reveal-start="0.1" data-reveal-end="0.5">돌에 새긴 하늘</h2>
+
+      <div class="s01__body s01__body--first reveal" data-reveal-start="0.35" data-reveal-end="0.75">
+        <p>1395년(조선 태조 4년), 권근을 비롯한 열두 명의 천문학<br>자가 3원 28수를 기반으로 하늘을 관측하고, 하늘의 태양<br>과 달, 별자리를 돌에 새겼습니다.</p>
+        <p>그리고 수백년의 시간이 지나, 실존 여부조차 불확실했던<br>이 돌은 시민들의 평상으로 쓰이다 뒤늦게 발견되어 그 존<br>재와 가치가 세상에 널리 알려지게 되었습니다.</p>
+      </div>
+
+      <div class="s01__body s01__body--second reveal" data-reveal-start="0.35" data-reveal-end="0.75">
+        <p>이 돌의 정식 명칭은<br>천상열차분야지도(天象列次分野之圖).</p>
+        <p>지금까지 남아 있는 석각 천문도 중 세계에서 두 번째로<br>오래된 것이자, 1,467개의 별이 새겨진 우리나라만의<br>방대한 천문 기록입니다.</p>
+      </div>
+
+      <div class="s01__label reveal" data-reveal-start="0.4" data-reveal-end="0.7">
+        <p class="s01__label-category">이야기</p>
+        <p>천상열차분야지도 이야기</p>
+      </div>
+    </section>
+    <section class="screen screen--image" id="IMG-04" data-screen-id="IMG-04" data-rail-theme="light" aria-label="이미지 연결 구간 4"></section>
+
+    <!-- S-02 — 원본 1440×1024. 두 회색 사각형이 맞닿는 구성. -->
+    <section class="screen screen--story" id="S-02" data-screen-id="S-02" data-rail-theme="black" aria-labelledby="s02-title">
+      <div class="story__ph" style="--x:902;--y:0;--w:538;--h:1024" aria-hidden="true"></div>
+      <h2 class="story__title reveal" id="s02-title" style="--x:208;--y:145" data-reveal-start="0.1" data-reveal-end="0.5">달도 해도 지나지 않는 세 담장과<br>스물여덟 개의 자리</h2>
+      <div class="story__ph" style="--x:208;--y:342;--w:694;--h:343" aria-hidden="true"></div>
+      <div class="story__body reveal" style="--x:209;--y:736;--w:310" data-reveal-start="0.35" data-reveal-end="0.75">
+        <p>3원은 자미원·태미원·천시원으로, 북극성 부근에<br>자리한 하늘의 중심입니다. 옥황상제가 머무는 곳<br>이자, 나라의 정치와 질서를 상징하는 자리로<br>여겨졌습니다.</p>
+      </div>
+      <div class="story__body reveal" style="--x:555;--y:736;--w:320" data-reveal-start="0.35" data-reveal-end="0.75">
+        <p>28수는 달이 하늘을 한 바퀴 도는 동안 하루씩<br>머무르는 스물여덟 개의 자리입니다.</p>
+        <p>동쪽의 청룡 7수, 북쪽의 현무 7수,<br>서쪽의 백호 7수, 남쪽의 주작 7수.</p>
+        <p>네 방위, 네 계절, 네 사신수가 하늘을 나누어<br>지켰습니다.</p>
+      </div>
+      <div class="story__label reveal" style="--x:209;--y:907" data-reveal-start="0.4" data-reveal-end="0.7"><p>이야기</p><p>3원과 28수 이야기</p></div>
+    </section>
+
+    <!-- S-03 — 원본 2084×1024. 카드 UI가 아닌 독립 이미지/본문 배치. -->
+    <section class="screen screen--story" id="S-03" data-screen-id="S-03" data-reveal-by-position="true" data-rail-theme="light" data-width-multiplier="1.4472222222" aria-labelledby="s03-title">
+      <h2 class="story__title reveal" id="s03-title" style="--x:144;--y:144" data-reveal-start="0.1" data-reveal-end="0.5">네 방위를 지키는 신수</h2>
+      <div class="story__ph" style="--x:506;--y:342;--w:291;--h:424" aria-hidden="true"></div>
+      <div class="story__ph" style="--x:887;--y:248;--w:291;--h:424" aria-hidden="true"></div>
+      <div class="story__ph" style="--x:1268;--y:342;--w:291;--h:424" aria-hidden="true"></div>
+      <div class="story__ph" style="--x:1649;--y:248;--w:291;--h:424" aria-hidden="true"></div>
+      <div class="story__guardian reveal" style="--x:513;--y:800;--w:310" data-reveal-start="0.35" data-reveal-end="0.75">
+        <h3>청룡</h3><p class="story__direction">동방 · 봄</p>
+        <p class="story__guardian-body">푸른 용은 동쪽 하늘과 봄을 다스립니다.<br>만물이 움트는 계절, 생명이 시작되는 방위를<br>지키는 신수입니다.</p>
+      </div>
+      <div class="story__guardian reveal" style="--x:894;--y:701;--w:310" data-reveal-start="0.35" data-reveal-end="0.75">
+        <h3>백호</h3><p class="story__direction">서방 · 가을</p>
+        <p class="story__guardian-body">흰 호랑이는 서쪽 하늘과 가을을 다스립니다.<br>결실을 거두고 다음을 준비하는 계절, 엄정함과<br>결단을 상징합니다.</p>
+      </div>
+      <div class="story__guardian reveal" style="--x:1275;--y:800;--w:310" data-reveal-start="0.35" data-reveal-end="0.75">
+        <h3>주작</h3><p class="story__direction">남방 · 여름</p>
+        <p class="story__guardian-body">붉은 봉황은 남쪽 하늘과 여름을 다스립니다.<br>만물이 무성해지는 계절, 화려함과 뜨거운<br>생명력을 상징합니다.</p>
+      </div>
+      <div class="story__guardian reveal" style="--x:1656;--y:706;--w:310" data-reveal-start="0.35" data-reveal-end="0.75">
+        <h3>현무</h3><p class="story__direction">북방 · 겨울</p>
+        <p class="story__guardian-body">검은 거북은 북쪽 하늘과 겨울을 다스립니다.<br>만물이 갈무리되는 계절, 인내와 지혜를<br>상징합니다.</p>
+      </div>
+      <div class="story__label reveal" style="--x:145;--y:908" data-reveal-start="0.4" data-reveal-end="0.7"><p>이야기</p><p>사신수 이야기</p></div>
+    </section>
+
+    <section class="screen screen--image" id="IMG-05" data-screen-id="IMG-05" data-rail-theme="light" aria-label="이미지 연결 구간 5"></section>
+
+    <!-- S-04 — 원본 1899×1024. 반복 문단 역시 원본 그대로 유지. -->
+    <section class="screen screen--story" id="S-04" data-screen-id="S-04" data-rail-theme="navy" data-width-multiplier="1.31875" aria-labelledby="s04-title">
+      <div class="story__ph" style="--x:160;--y:1;--w:441;--h:835" aria-hidden="true"></div>
+      <h2 class="story__title reveal" id="s04-title" style="--x:636;--y:150" data-reveal-start="0.1" data-reveal-end="0.5">운세에 적합한 옛 체계<br>28수 운세 이야기</h2>
+      <div class="story__body reveal" style="--x:645;--y:363;--w:400" data-reveal-start="0.35" data-reveal-end="0.75">
+        <p>옛 사람들은 하늘을 3개의 원과 28개의 별자리로 나누어<br>그 뜻을 읽고 농경과 정치, 삶에 적용해 살아갔습니다.<br>프로젝트 별운관은 이러한 전통 천문 체계인 3원 28수를<br>오늘날 사람들이 흔히 즐기는 별자리 운세로 다시 엮어<br>새로운 28개의 별자리와 함께 매일의 운세를 만나는 한국형<br>별자리 운세 서비스로 재해석합니다.</p>
+      </div>
+      <div class="story__body reveal" style="--x:648;--y:558;--w:400" data-reveal-start="0.35" data-reveal-end="0.75">
+        <p>이 웹사이트는 프로젝트 별운관을 소개하고,<br>잊혀졌던 3원 28수와 그에 얽힌 옛이야기를 알아가며<br>여러분의 새로운 별자리를 미리 만나볼 수 있는 공간입니다.</p>
+      </div>
+      <div class="story__body reveal" style="--x:648;--y:687;--w:400" data-reveal-start="0.35" data-reveal-end="0.75">
+        <p>옛 사람들은 하늘을 3개의 원과 28개의 별자리로 나누어<br>그 뜻을 읽고 농경과 정치, 삶에 적용해 살아갔습니다.<br>프로젝트 별운관은 이러한 전통 천문 체계인 3원 28수를<br>오늘날 사람들이 흔히 즐기는 별자리 운세로 다시 엮어<br>새로운 28개의 별자리와 함께 매일의 운세를 만나는 한국형<br>별자리 운세 서비스로 재해석합니다.</p>
+      </div>
+      <div class="story__ph" style="--x:1087;--y:362;--w:729;--h:661" aria-hidden="true"></div>
+      <div class="story__label reveal" style="--x:209;--y:902" data-reveal-start="0.4" data-reveal-end="0.7"><p>이야기</p><p>28수 운세 이야기</p></div>
+    </section>
+
+    <!-- S-05 — 원본 4545×1024. 네 콘텐츠 그룹의 좌표를 개별 유지. -->
+    <section class="screen screen--story screen--s05" id="S-05" data-screen-id="S-05" data-reveal-by-position="true" data-rail-theme="light" data-width-multiplier="3.15625" aria-labelledby="s05-title">
+      <div class="story__label reveal" style="--x:209;--y:140" data-reveal-start="0.4" data-reveal-end="0.7"><p>이야기</p><p>그래서 우리는</p></div>
+      <div class="s05__content">
+      <div class="story__ph story__ph--shadow" style="--x:209;--y:299;--w:472;--h:372" aria-hidden="true"></div>
+      <div class="story__body reveal" style="--x:745;--y:472;--w:390" data-reveal-start="0.35" data-reveal-end="0.75">
+        <p>오늘날 많은 사람들은 짧은 운세와 함께 하루를 시작합니다.<br>아침마다 오늘의 운세 순위에 희비가 교차하거나, 괜히 행운<br>의 색을 신경 쓰거나, 매번 운세와 같이 나오는 내 별자리에<br>애착을 가지거나.</p>
+        <p>이러한 모습은 이제는 누구의 일상에서나 쉽게 볼 수 있게<br>되었고, 그건 프로젝트를 제작하는 당사자인 저희도 다르지<br>않았습니다.</p>
+      </div>
+      <div class="story__ph story__ph--shadow" style="--x:1292;--y:299;--w:472;--h:372" aria-hidden="true"></div>
+      <div class="story__body reveal" style="--x:1828;--y:453;--w:390" data-reveal-start="0.35" data-reveal-end="0.75">
+        <p>그래서일까요. 프로젝트의 주제를 정하고, 조사를 거듭할 수록<br>저희는 이 오래된 천문 체계가 단지 과거의 기록으로만 남는<br>것이 아쉬웠습니다. 현대 운세 서비스에 적용할 수 있을 정도<br>의 체계성과, 우리만의 별자리, 역사를 가진 ‘우리의 옛 것’이<br>니 아쉬움은 더욱 배가 되었습니다.</p>
+        <p>이제는 더 이상 3원 28수 체계를 기반으로 하늘을 관측하며<br>날씨를 읽고, 언제 천벌이 내리지 않을지 전전긍긍하지 않아도<br>되는 시대이지만요.</p>
+      </div>
+      <div class="story__ph story__ph--shadow" style="--x:2387;--y:299;--w:472;--h:372" aria-hidden="true"></div>
+      <div class="story__body reveal" style="--x:2923;--y:453;--w:390" data-reveal-start="0.35" data-reveal-end="0.75">
+        <p>오늘날 많은 사람들이 별자리 운세를 통해 하루를 준비하고<br>소소한 위안을 얻듯, 3원 28수 역시 잊혀져 사라지는 대신 과거<br>의 역할에서 벗어나 새로운 ‘오늘의 이야기’가 될 수 있다고<br>생각했습니다.</p>
+      </div>
+      <div class="story__ph story__ph--shadow" style="--x:3478;--y:299;--w:472;--h:372" aria-hidden="true"></div>
+      <div class="story__body reveal" style="--x:4014;--y:453;--w:390" data-reveal-start="0.35" data-reveal-end="0.75">
+        <p>그래서 저희는 28개의 별자리에 오늘날의 언어로 현대와 어<br>울리는 성격과 이야기를 다시 붙이고, 쉬운 이름을 새로 더<br>하고, 생년월일로 자신의 별자리를 확인할 수 있는 한국형<br>별자리 운세 서비스 ‘별운관’을 만들었습니다.</p>
+        <p>이곳에서 만난 짧은 이야기들이,<br>언젠가 여러분의 일상 속 작은 이정표가 되기를 바랍니다.</p>
+      </div>
+      </div>
+      <h2 class="story__title reveal" id="s05-title" style="--x:208;--y:778" data-reveal-start="0.1" data-reveal-end="0.5">천 년 전의 하늘을,<br>오늘의 언어로</h2>
+    </section>
+
   </div>
 </main>
 
-<script src="js/main.js?v=9"></script>
-<script src="js/opening.js?v=7"></script>
+<script src="js/main.js?v=14"></script>
+<script src="js/opening.js?v=8"></script>
 </body>
 </html>

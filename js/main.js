@@ -27,9 +27,22 @@
   const rail = document.querySelector('.rail');
   const progressFill = document.getElementById('rail-progress-fill');
   const railNavEntrance = document.getElementById('rail-navitem-entrance');
+  // 2026-10-16: F/C/S 표지(F-00/C-00/S-00)가 생기면서 '입구' 전용이던
+  // is-dimmed 토글을 네 메뉴 전체로 일반화 — 메뉴 ID 접두어(E-/F-/C-/S-)
+  // 별로 자신의 레일 항목을 찾아 매핑해둔다.
+  const railNavByPrefix = [
+    ['E-', railNavEntrance],
+    ['F-', document.getElementById('rail-navitem-fortune')],
+    ['C-', document.getElementById('rail-navitem-constellation')],
+    ['S-', document.getElementById('rail-navitem-story')],
+  ];
 
   // 화면별 폭 배율 (지정 없으면 1 = 기준 폭 1장)
   const widthMultipliers = screens.map((s) => parseFloat(s.dataset.widthMultiplier || '1'));
+
+  const s05ScreenIndex = screens.findIndex((s) => s.dataset.screenId === 'S-05');
+  const s05Content = s05ScreenIndex >= 0 ? screens[s05ScreenIndex].querySelector('.s05__content') : null;
+  const s05Pin = { start: 0, range: 0 };
 
   const state = {
     current: 0,   // 실제로 화면에 적용되는 값 (매 프레임 target 을 따라감)
@@ -37,7 +50,7 @@
     max: 0,       // 가로로 이동 가능한 최대 거리(px)
     unitWidth: 0, // 화면 "기준 폭" 1장의 실측 폭(px) — 배율의 기준 단위
     screenStarts: [], // 화면별 시작 위치(px, 누적합)
-    screenWidths: [], // 화면별 실제 폭(px) = unitWidth * 배율
+    screenWidths: [], // 화면별 진행 거리(px). S-05는 내부 이동 거리도 포함한다.
   };
 
   const EASE = 0.1; // 값이 작을수록 더 느리고 부드럽게 따라감
@@ -52,6 +65,40 @@
 
   function clamp(v, min, max) {
     return Math.min(max, Math.max(min, v));
+  }
+
+  // current/target은 내부 이동까지 포함한 기존의 연속 진행 거리다.
+  // S-05에서 소비한 거리만 바깥 트랙 이동에서 빼고, 가운데 트랙에 적용한다.
+  function renderScrollPosition() {
+    const innerX = s05Content ? clamp(state.current - s05Pin.start, 0, s05Pin.range) : 0;
+    track.style.transform = `translate3d(${-(state.current - innerX)}px, 0, 0)`;
+    if (s05Content) s05Content.style.transform = `translate3d(${-innerX}px, 0, 0)`;
+  }
+
+  // 한 입력이 진입/내부/종료 단계를 통째로 건너뛰지 않도록 경계에서 나눈다.
+  // 별도 잠금 상태가 없어 메뉴 이동이나 역방향 입력으로 항상 벗어날 수 있다.
+  function constrainScrollInput(nextTarget) {
+    const { start, range } = s05Pin;
+    if (range > 0) {
+      const end = start + range;
+      const delta = nextTarget - state.target;
+      if (delta > 0) {
+        if (state.current < start - 0.05 && state.target <= start) nextTarget = Math.min(nextTarget, start);
+        else if (state.current < end - 0.05 && state.target <= end) nextTarget = Math.min(nextTarget, end);
+      } else if (delta < 0) {
+        if (state.current > end + 0.05 && state.target >= end) nextTarget = Math.max(nextTarget, end);
+        else if (state.current > start + 0.05 && state.target >= start) nextTarget = Math.max(nextTarget, start);
+      }
+    }
+    return clamp(nextTarget, 0, state.max);
+  }
+
+  function scrollByInput(delta) {
+    let base = state.target;
+    // 내부에서 방향을 바꾸면 남은 보간 목표를 지나칠 때까지 기다리지 않는다.
+    if (s05Pin.range > 0 && state.current >= s05Pin.start && state.current <= s05Pin.start + s05Pin.range &&
+        delta * (state.target - state.current) < 0) base = state.current;
+    state.target = constrainScrollInput(base + delta);
   }
 
   // pos(트랙 좌표계의 한 지점)가 속한 화면의 인덱스를 찾는다.
@@ -83,11 +130,18 @@
       rail.dataset.theme = theme;
     }
 
-    // '입구'는 M-00(메인 사이트 표지)에서는 아직 어느 메뉴에도 "들어가
-    // 있지" 않은 상태라 다른 미구현 항목들처럼 옅게, E-00/E-01/E-02 중
-    // 하나라도 걸쳐 있으면(=입구 섹션 안에 있으면) 밝게 표시한다.
-    const inEntranceSection = (screens[idx].dataset.screenId || '').startsWith('E-');
-    railNavEntrance.classList.toggle('is-dimmed', !inEntranceSection);
+    // 네 메뉴(입구/운세 보기/별자리/이야기) 레일 항목은 "클릭 가능 여부"
+    // (is-disabled, 마크업에 고정)와 "현재 그 메뉴 안에 있는지"(is-dimmed,
+    // 매 프레임 갱신)를 분리해서 관리한다 — 페이지가 구현되어 클릭은
+    // 항상 가능하더라도, 지금 스크롤 위치가 그 메뉴 화면(데이터
+    // screenId가 해당 접두어로 시작하는 구간) 안에 있을 때만 밝게
+    // 표시한다. M-00이나 아직 구현 전인 IMG-xx 구간처럼 어떤 접두어와도
+    // 안 맞는 화면에서는 네 메뉴 전부 옅게 보인다(기존 '입구'의 M-00
+    // 처리 규칙을 네 메뉴 공통 규칙으로 일반화).
+    const currentScreenId = screens[idx].dataset.screenId || '';
+    railNavByPrefix.forEach(([prefix, el]) => {
+      if (el) el.classList.toggle('is-dimmed', !currentScreenId.startsWith(prefix));
+    });
 
     // M-00(진행도 0%)에서도 바가 완전히 비어 있지 않고, 햄버거 영역
     // 경계선(65/1024 지점)까지는 이미 내려와 있는 상태로 시작한다.
@@ -118,7 +172,26 @@
     start: parseFloat(el.dataset.revealStart || '0'),
     end: parseFloat(el.dataset.revealEnd || '0'),
     offset: el.classList.contains('reveal--image') ? 32 : 24,
+    byPosition: el.closest('.screen').dataset.revealByPosition === 'true',
+    entranceOffset: 0,
+    entranceWidth: 0,
+    inS05Content: s05Content ? s05Content.contains(el) : false,
   }));
+
+  // 긴 화면의 텍스트는 자기 가로 위치를 기준으로 진입한다.
+  // 좌표 읽기는 리사이즈 때만 수행하고, 렌더 루프는 캐시된 숫자만 사용한다.
+  function cacheRevealEntrances() {
+    revealItems.forEach((item) => {
+      const screen = screens[item.screenIndex];
+      item.entranceOffset = item.byPosition
+        ? Math.max(0, item.inS05Content ? item.el.offsetLeft : item.el.getBoundingClientRect().left - screen.getBoundingClientRect().left)
+        : 0;
+      // 마지막 텍스트도 스크롤 끝에서 완전히 표시되도록 남은 폭으로 제한.
+      item.entranceWidth = item.byPosition
+        ? Math.max(1, Math.min(state.unitWidth, state.screenWidths[item.screenIndex] - item.entranceOffset))
+        : state.unitWidth;
+    });
+  }
 
   function easeOutCubic(t) {
     return 1 - Math.pow(1 - t, 3);
@@ -127,8 +200,8 @@
   function updateReveals() {
     if (state.unitWidth <= 0) return;
     revealItems.forEach((item) => {
-      const transitionStart = state.screenStarts[item.screenIndex] - state.unitWidth;
-      const local = clamp((state.current - transitionStart) / state.unitWidth, 0, 1);
+      const transitionStart = state.screenStarts[item.screenIndex] + item.entranceOffset - state.unitWidth;
+      const local = clamp((state.current - transitionStart) / item.entranceWidth, 0, 1);
       const span = item.end - item.start;
       const raw = span > 0 ? clamp((local - item.start) / span, 0, 1) : (local >= item.start ? 1 : 0);
       const t = easeOutCubic(raw);
@@ -248,6 +321,12 @@
   // .screen / .track 의 실제 px 폭도 여기서 함께 다시 적용한다.
   function applySizes() {
     const newWidth = measureUnitWidth();
+    const oldPin = { ...s05Pin };
+    const preserveInternal = oldPin.range > 0 &&
+      state.current >= oldPin.start && state.current <= oldPin.start + oldPin.range &&
+      state.target >= oldPin.start && state.target <= oldPin.start + oldPin.range;
+    const currentRatio = preserveInternal ? (state.current - oldPin.start) / oldPin.range : 0;
+    const targetRatio = preserveInternal ? (state.target - oldPin.start) / oldPin.range : 0;
     // 아래 width 쓰기(screens[i].style.width 등)보다 먼저, viewport
     // 측정과 같은 타이밍에 함께 읽어서 별도의 강제 레이아웃이 한 번
     // 더 발생하지 않게 한다 — 두 getBoundingClientRect 호출 모두
@@ -255,6 +334,14 @@
     cachedRailWidth = rail.getBoundingClientRect().width;
 
     const screenWidths = widthMultipliers.map((m) => newWidth * m);
+    let innerWidth = newWidth;
+    if (s05Content) {
+      // offset 치수는 부모 translateX의 영향을 받지 않는다. 측정은 resize 때만 한다.
+      const contentRight = Array.from(s05Content.children).reduce((right, el) => Math.max(right, el.offsetLeft + el.offsetWidth), 0);
+      innerWidth = Math.max(screenWidths[s05ScreenIndex], contentRight);
+      s05Pin.range = contentRight > newWidth + 0.5 ? Math.max(0, innerWidth - newWidth) : 0;
+      screenWidths[s05ScreenIndex] = newWidth + s05Pin.range;
+    }
     const screenStarts = [];
     let acc = 0;
     for (let i = 0; i < screenWidths.length; i++) {
@@ -268,17 +355,24 @@
     const indexBefore = findScreenIndexAtPosition(state.target, oldStarts, oldWidths);
     const clampedIndex = clamp(indexBefore, 0, screens.length - 1);
 
-    screens.forEach((s, i) => { s.style.width = `${screenWidths[i]}px`; });
-    track.style.width = `${totalTrackWidth}px`;
+    screens.forEach((s, i) => { s.style.width = `${s05Content && i === s05ScreenIndex ? newWidth : screenWidths[i]}px`; });
+    track.style.width = `${totalTrackWidth - s05Pin.range}px`;
+    if (s05Content) s05Content.style.width = `${innerWidth}px`;
 
     state.unitWidth = newWidth;
     state.screenStarts = screenStarts;
     state.screenWidths = screenWidths;
+    s05Pin.start = s05ScreenIndex >= 0 ? screenStarts[s05ScreenIndex] : 0;
     state.max = Math.max(0, totalTrackWidth - newWidth);
     state.target = clamp(screenStarts[clampedIndex], 0, state.max);
-    state.current = state.target; // 리사이즈 중에는 애니메이션 없이 즉시 맞춤
+    state.current = state.target; // 일반 화면은 기존처럼 시작점으로 맞춤
+    if (preserveInternal) {
+      state.current = s05Pin.start + currentRatio * s05Pin.range;
+      state.target = s05Pin.start + targetRatio * s05Pin.range;
+    }
 
-    track.style.transform = `translate3d(${-state.current}px, 0, 0)`;
+    renderScrollPosition();
+    cacheRevealEntrances();
     updateRailChrome();
     updateReveals();
     updateE00ParallaxBg();
@@ -340,7 +434,7 @@
     if (isNavOverlayOpen()) return;
     e.preventDefault();
     const delta = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-    state.target = clamp(state.target + delta, 0, state.max);
+    scrollByInput(delta);
   }, { passive: false });
 
   // ------------------------------------------------------------
@@ -360,7 +454,12 @@
   function onPointerMove(e) {
     if (!isDragging) return;
     const delta = dragStartX - e.clientX;
-    state.target = clamp(dragStartTarget + delta, 0, state.max);
+    const nextTarget = dragStartTarget + delta;
+    state.target = constrainScrollInput(nextTarget);
+    if (Math.abs(state.target - nextTarget) > 0.05) {
+      dragStartX = e.clientX;
+      dragStartTarget = state.target;
+    }
   }
   function onPointerUp() {
     isDragging = false;
@@ -378,9 +477,11 @@
   window.addEventListener('keydown', (e) => {
     if (isNavOverlayOpen()) return;
     if (e.key === 'ArrowRight' || e.key === 'PageDown') {
-      goToIndex(nearestIndex() + 1);
+      if (s05Pin.range > 0 && state.target >= s05Pin.start && state.target < s05Pin.start + s05Pin.range) scrollByInput(state.unitWidth);
+      else if (nearestIndex() < screens.length - 1) goToIndex(nearestIndex() + 1);
     } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
-      goToIndex(nearestIndex() - 1);
+      if (s05Pin.range > 0 && state.target > s05Pin.start && state.target <= s05Pin.start + s05Pin.range) scrollByInput(-state.unitWidth);
+      else goToIndex(nearestIndex() - 1);
     }
   });
 
@@ -411,7 +512,7 @@
   function m00Enter() {
     goToIndex(screens.findIndex((s) => s.dataset.screenId === 'M-00'));
     state.current = state.target;
-    track.style.transform = `translate3d(${-state.current}px, 0, 0)`;
+    renderScrollPosition();
     updateRailChrome();
     updateReveals();
     updateE00ParallaxBg();
@@ -640,6 +741,395 @@
   });
 
   // ------------------------------------------------------------
+  // 28수 공용 데이터 — exhibition-site/pages/archive.html(기존 와이어
+  //프레임)에 이미 정의되어 있던 확정급 데이터를 그대로 재사용한다
+  // (PROJECT_CONTEXT.md 3번 "28수 전체 명단과 그룹 구조"·"관계 데이터"
+  // 항목과 동일 — 임의로 새로 만든 값이 아님). C-01~C-04가 공통으로
+  // 쓴다. desc는 "문체 참고용 초안"으로 명시된 자료지만 현재로선
+  // 유일한 실제 콘텐츠라 그대로 노출한다(임의 생성 금지 원칙 준수).
+  // ------------------------------------------------------------
+  const STARS = [
+    { hanja:'角', name:'각수', group:'청룡', groupLabel:'청룡 · 동방7수', desc:'새로운 시작을 두려워하지 않는 이. 무언가를 앞장서 여는 힘이 있습니다.' },
+    { hanja:'亢', name:'항수', group:'청룡', groupLabel:'청룡 · 동방7수', desc:'곧게 뻗은 뜻을 가진 이. 흔들림 없이 자신의 길을 지켜냅니다.' },
+    { hanja:'氐', name:'저수', group:'청룡', groupLabel:'청룡 · 동방7수', desc:'낮은 곳에서부터 단단히 쌓는 이. 성급함보다 다짐을 믿습니다.', animal:'너구리자리' },
+    { hanja:'房', name:'방수', group:'청룡', groupLabel:'청룡 · 동방7수', desc:'마음에 방을 하나 내어주는 이. 곁을 내주는 데 인색하지 않습니다.' },
+    { hanja:'心', name:'심수', group:'청룡', groupLabel:'청룡 · 동방7수', desc:'가장 깊은 곳의 진심을 아는 이. 겉보다 속을 먼저 들여다봅니다.' },
+    { hanja:'尾', name:'미수', group:'청룡', groupLabel:'청룡 · 동방7수', desc:'끝까지 놓지 않는 이. 마무리에서 진가를 드러냅니다.' },
+    { hanja:'箕', name:'기수', group:'청룡', groupLabel:'청룡 · 동방7수', desc:'바람을 읽고 방향을 고르는 이. 흐름을 타는 감각이 남다릅니다.' },
+    { hanja:'斗', name:'두수', group:'현무', groupLabel:'현무 · 북방7수', desc:'많은 것을 담아내는 이. 넉넉한 그릇으로 주변을 품습니다.' },
+    { hanja:'牛', name:'우수', group:'현무', groupLabel:'현무 · 북방7수', desc:'묵묵히 제 몫을 다하는 이. 성실함이 결국 신뢰가 됩니다.' },
+    { hanja:'女', name:'여수', group:'현무', groupLabel:'현무 · 북방7수', desc:'섬세하게 결을 살피는 이. 작은 신호도 놓치지 않습니다.' },
+    { hanja:'虛', name:'허수', group:'현무', groupLabel:'현무 · 북방7수', desc:'비워야 채워짐을 아는 이. 여백을 두려워하지 않습니다.' },
+    { hanja:'危', name:'위수', group:'현무', groupLabel:'현무 · 북방7수', desc:'위태로움 속에서도 중심을 잡는 이. 흔들려도 무너지지 않습니다.' },
+    { hanja:'室', name:'실수', group:'현무', groupLabel:'현무 · 북방7수', desc:'자기만의 방을 짓는 이. 안에서부터 단단해집니다.' },
+    { hanja:'壁', name:'벽수', group:'현무', groupLabel:'현무 · 북방7수', desc:'경계를 세우고 지키는 이. 지킬 것을 분명히 압니다.' },
+    { hanja:'奎', name:'규수', group:'백호', groupLabel:'백호 · 서방7수', desc:'문장과 결을 다루는 이. 기록하고 정리하는 데 능합니다.' },
+    { hanja:'婁', name:'루수', group:'백호', groupLabel:'백호 · 서방7수', desc:'끌어모아 엮어내는 이. 흩어진 것을 하나로 모읍니다.', animal:'개자리' },
+    { hanja:'胃', name:'위수', group:'백호', groupLabel:'백호 · 서방7수', desc:'받아들이고 소화하는 이. 무엇이든 제 것으로 만듭니다.' },
+    { hanja:'昴', name:'묘수', group:'백호', groupLabel:'백호 · 서방7수', desc:'작은 별들을 한데 보는 이. 전체를 조망하는 눈이 있습니다.' },
+    { hanja:'畢', name:'필수', group:'백호', groupLabel:'백호 · 서방7수', desc:'끝맺음이 분명한 이. 시작한 일은 반드시 매듭짓습니다.' },
+    { hanja:'觜', name:'자수', group:'백호', groupLabel:'백호 · 서방7수', desc:'예리하게 핵심을 짚는 이. 군더더기 없이 본질을 봅니다.' },
+    { hanja:'參', name:'삼수', group:'백호', groupLabel:'백호 · 서방7수', desc:'여럿이 함께일 때 빛나는 이. 어울림 속에서 힘을 냅니다.' },
+    { hanja:'井', name:'정수', group:'주작', groupLabel:'주작 · 남방7수', desc:'마르지 않는 우물 같은 이. 나눌수록 채워지는 사람입니다.' },
+    { hanja:'鬼', name:'귀수', group:'주작', groupLabel:'주작 · 남방7수', desc:'보이지 않는 것을 감지하는 이. 직감이 남들보다 앞섭니다.' },
+    { hanja:'柳', name:'류수', group:'주작', groupLabel:'주작 · 남방7수', desc:'바람에 몸을 맡기되 뿌리는 깊은 이. 유연함이 강함이 됩니다.' },
+    { hanja:'星', name:'성수', group:'주작', groupLabel:'주작 · 남방7수', desc:'어둠 속에서 스스로 빛나는 이. 존재만으로 길잡이가 됩니다.' },
+    { hanja:'張', name:'장수', group:'주작', groupLabel:'주작 · 남방7수', desc:'품을 넓게 펼치는 이. 크게 벌이는 일을 두려워하지 않습니다.' },
+    { hanja:'翼', name:'익수', group:'주작', groupLabel:'주작 · 남방7수', desc:'날개를 펴 멀리 보는 이. 남들이 못 본 곳까지 나아갑니다.' },
+    { hanja:'軫', name:'진수', group:'주작', groupLabel:'주작 · 남방7수', desc:'마지막에서 처음을 준비하는 이. 끝을 새로운 시작으로 바꿉니다.' },
+  ];
+  const STAR_GROUPS = ['청룡', '현무', '백호', '주작'];
+  const STAR_GROUP_LABEL = { 청룡:'청룡 · 동방', 현무:'현무 · 북방', 백호:'백호 · 서방', 주작:'주작 · 남방' };
+  const STAR_GROUP_COLOR = { 청룡:'#0BA295', 현무:'#285C6B', 백호:'#DFCD9D', 주작:'#B15456' };
+  const STAR_GROUP_RANGE = { 청룡:[0,6], 현무:[7,13], 백호:[14,20], 주작:[21,27] };
+  // 관계 규칙(동일 출처): 천생연분(정반대 idx+14) 1개, 보완(같은 그룹
+  // 내 앞뒤 이웃) 2개, 주의(다음 그룹의 같은 순번) 1개.
+  function relationsOfStar(idx) {
+    const rels = [];
+    const opp = (idx + 14) % 28;
+    rels.push({ idx: opp, type: '천생연분', color: '#DFCD9D', reason: '정반대의 기운이 서로를 완성시켜주는 관계입니다.' });
+    const g = STARS[idx].group;
+    const [gs] = STAR_GROUP_RANGE[g];
+    const offset = idx - gs;
+    const next = gs + ((offset + 1) % 7);
+    const prev = gs + ((offset + 6) % 7);
+    rels.push({ idx: next, type: '보완', color: '#0BA295', reason: '같은 기운을 나누며 서로를 자연스럽게 채워주는 관계입니다.' });
+    rels.push({ idx: prev, type: '보완', color: '#0BA295', reason: '같은 기운을 나누며 서로를 자연스럽게 채워주는 관계입니다.' });
+    const gi = STAR_GROUPS.indexOf(g);
+    const nextGroup = STAR_GROUPS[(gi + 1) % 4];
+    const [ngs] = STAR_GROUP_RANGE[nextGroup];
+    rels.push({ idx: ngs + offset, type: '주의', color: '#B15456', reason: '기질의 결이 달라 마찰이 생기기 쉬우니 배려가 필요한 관계입니다.' });
+    return rels;
+  }
+  // A·B가 서로의 relationsOfStar() 목록에 있는지(대칭적이지 않을 수
+  // 있어 양쪽 다 확인) — 있으면 그 관계를, 없으면 null을 돌려준다.
+  // C-04에서 "정의되지 않은 궁합은 지어내지 않는다" 원칙을 지키는 데 쓴다.
+  function relationBetween(idxA, idxB) {
+    const found = relationsOfStar(idxA).find((r) => r.idx === idxB);
+    if (found) return found;
+    return relationsOfStar(idxB).find((r) => r.idx === idxA) || null;
+  }
+  function starLabel(s) {
+    return s.animal ? (s.hanja + '宿 · ' + s.animal) : (s.hanja + '宿');
+  }
+
+  // ------------------------------------------------------------
+  // F-01 생년월일 입력 — <select> 3개(년/월/일) 채우기 + 최소한의
+  // 입력값 검증(월이 바뀌면 그 달의 실제 일수만큼만 '일' 옵션을
+  // 다시 채움, 윤년 포함). 28수 계산 로직이 아직 없어 결과를 만들어
+  // 내지는 않고, "별자리 찾기" 클릭 시 입력값만 sessionStorage에
+  // 저장해 F-02로 넘어갈 구조만 마련한다 — 콘솔 출력/서버 전송 없음.
+  // F-01이 없는 화면(E-xx 등)에서는 아무 일도 하지 않는다.
+  // ------------------------------------------------------------
+  const f01Year = document.getElementById('f01-year');
+  const f01Month = document.getElementById('f01-month');
+  const f01Day = document.getElementById('f01-day');
+  if (f01Year && f01Month && f01Day) {
+    const now = new Date();
+    const thisYear = now.getFullYear();
+    for (let y = thisYear; y >= 1930; y--) {
+      const opt = document.createElement('option');
+      opt.value = String(y);
+      opt.textContent = String(y);
+      f01Year.appendChild(opt);
+    }
+    for (let m = 1; m <= 12; m++) {
+      const opt = document.createElement('option');
+      opt.value = String(m);
+      opt.textContent = String(m);
+      f01Month.appendChild(opt);
+    }
+    function daysInMonth(year, month) {
+      return new Date(year, month, 0).getDate(); // month: 1~12
+    }
+    function refreshDayOptions() {
+      const year = parseInt(f01Year.value, 10);
+      const month = parseInt(f01Month.value, 10);
+      const prevDay = parseInt(f01Day.value, 10) || 1;
+      const max = daysInMonth(year, month);
+      f01Day.innerHTML = '';
+      for (let d = 1; d <= max; d++) {
+        const opt = document.createElement('option');
+        opt.value = String(d);
+        opt.textContent = String(d);
+        f01Day.appendChild(opt);
+      }
+      f01Day.value = String(Math.min(prevDay, max));
+    }
+    refreshDayOptions();
+    f01Year.addEventListener('change', refreshDayOptions);
+    f01Month.addEventListener('change', refreshDayOptions);
+  }
+
+  const f01Submit = document.getElementById('f01-submit');
+  if (f01Submit && f01Year && f01Month && f01Day) {
+    f01Submit.addEventListener('click', () => {
+      try {
+        sessionStorage.setItem('byeolungwan-f01-birthdate', JSON.stringify({
+          year: f01Year.value,
+          month: f01Month.value,
+          day: f01Day.value,
+        }));
+      } catch (err) {
+        // sessionStorage 접근 불가(프라이빗 모드 등)해도 페이지 이동 자체는
+        // [data-target] 리스너가 그대로 처리하므로 조용히 무시한다.
+      }
+    });
+  }
+
+  // ------------------------------------------------------------
+  // C-01 별자리 사전 — 방위 탭 필터 + 28수 그리드 + 선택 미리보기.
+  // ------------------------------------------------------------
+  const c01Grid = document.getElementById('c01-grid');
+  if (c01Grid) {
+    const c01Tabs = document.getElementById('c01-tabs');
+    const nameEl = document.getElementById('c01-preview-name');
+    const hanjaEl = document.getElementById('c01-preview-hanja');
+    const descEl = document.getElementById('c01-preview-desc');
+
+    STARS.forEach((s, i) => {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'c01__card';
+      card.dataset.idx = String(i);
+      card.dataset.group = s.group;
+      card.innerHTML = '<span class="c01__card-hanja">' + s.hanja + '</span><span class="c01__card-name">' + s.name + '</span>';
+      card.addEventListener('click', () => {
+        c01Grid.querySelectorAll('.c01__card.is-selected').forEach((el) => el.classList.remove('is-selected'));
+        card.classList.add('is-selected');
+        nameEl.textContent = s.name;
+        hanjaEl.textContent = starLabel(s);
+        descEl.textContent = s.desc;
+      });
+      c01Grid.appendChild(card);
+    });
+    // 기본 선택: 레퍼런스와 동일한 저수
+    const defaultStar = STARS.findIndex((s) => s.name === '저수');
+    if (descEl.dataset.referenceCopy !== 'true') descEl.textContent = STARS[defaultStar].desc;
+    const defaultCard = c01Grid.querySelector('[data-idx="' + defaultStar + '"]');
+    if (defaultCard) defaultCard.classList.add('is-selected');
+
+    c01Tabs.querySelectorAll('.c01__tab').forEach((tab) => {
+      tab.addEventListener('click', () => {
+        c01Tabs.querySelectorAll('.c01__tab').forEach((t) => t.classList.remove('is-active'));
+        tab.classList.add('is-active');
+        const g = tab.dataset.group;
+        c01Grid.querySelectorAll('.c01__card').forEach((card) => {
+          card.style.display = (g === 'all' || card.dataset.group === g) ? '' : 'none';
+        });
+      });
+    });
+  }
+
+  // ------------------------------------------------------------
+  // 이전 C-02 그래프의 데이터/로직 보관. 현재 PNG 재현 화면은 그래프
+  // 마운트를 만들지 않으므로 아래 코드는 실행되지 않는다.
+  // ------------------------------------------------------------
+  const c02Diagram = document.getElementById('c02-diagram');
+  if (c02Diagram) {
+    const dotsG = document.getElementById('c02-diagram-lines');
+    const linesG = document.getElementById('c02-diagram-dots');
+    const relWrap = document.getElementById('c02-relations');
+    const selNameEl = document.getElementById('c02-selected-name');
+    const selHanjaEl = document.getElementById('c02-selected-hanja');
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const cx = 280, cy = 280, r = 220;
+    const points = STARS.map((s, i) => {
+      const a = (i / 28) * Math.PI * 2 - Math.PI / 2;
+      return { x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r, color: STAR_GROUP_COLOR[s.group] };
+    });
+    const dotEls = points.map((p, i) => {
+      const c = document.createElementNS(svgNS, 'circle');
+      c.setAttribute('cx', p.x); c.setAttribute('cy', p.y); c.setAttribute('r', i === 2 ? 6 : 4);
+      c.setAttribute('fill', p.color);
+      c.setAttribute('opacity', '0.35');
+      dotsG.appendChild(c);
+      return c;
+    });
+
+    function renderC02(idx) {
+      const s = STARS[idx];
+      selNameEl.textContent = s.name;
+      selHanjaEl.textContent = starLabel(s);
+      linesG.innerHTML = '';
+      dotEls.forEach((el, i) => el.setAttribute('opacity', i === idx ? '1' : '0.35'));
+      dotEls[idx].setAttribute('r', 7);
+      points.forEach((p, i) => { if (i !== idx) dotEls[i].setAttribute('r', '4'); });
+
+      const rels = relationsOfStar(idx);
+      rels.forEach((rel) => {
+        dotEls[rel.idx].setAttribute('opacity', '1');
+        const line = document.createElementNS(svgNS, 'line');
+        line.setAttribute('x1', points[idx].x); line.setAttribute('y1', points[idx].y);
+        line.setAttribute('x2', points[rel.idx].x); line.setAttribute('y2', points[rel.idx].y);
+        line.setAttribute('stroke', rel.color);
+        line.setAttribute('stroke-width', '1.5');
+        line.setAttribute('opacity', '0.8');
+        linesG.appendChild(line);
+      });
+
+      relWrap.innerHTML = '';
+      rels.forEach((rel) => {
+        const target = STARS[rel.idx];
+        const item = document.createElement('div');
+        item.className = 'c02__rel-item';
+        item.innerHTML =
+          '<p class="c02__rel-type" style="color:' + rel.color + '">' + rel.type + '</p>' +
+          '<div class="c02__rel-row">' +
+            '<span class="c02__rel-ph" aria-hidden="true"></span>' +
+            '<div><p class="c02__rel-name">' + target.name + ' (' + target.groupLabel + ')</p>' +
+            '<p class="c02__rel-reason">' + rel.reason + '</p></div>' +
+          '</div>';
+        relWrap.appendChild(item);
+      });
+    }
+    const c02Default = STARS.findIndex((s) => s.name === '저수');
+    renderC02(c02Default);
+    dotEls.forEach((el, i) => el.style.cursor = 'pointer');
+    dotEls.forEach((el, i) => el.addEventListener('click', () => renderC02(i)));
+  }
+
+  // ------------------------------------------------------------
+  // C-03 별자리 궁합 보기 — 방위 아코디언(단일 확장) + 선택 슬롯 2개.
+  // 별자리를 클릭하면 비어있는 슬롯에 순서대로 채워지고, 두 슬롯이
+  // 다 차면 "궁합 보기"가 활성화된다. 궁합 "계산" 자체는 하지 않고
+  // (C-04로 넘길 인덱스만 저장) 실제 관계 판단은 C-04에서 한다.
+  // ------------------------------------------------------------
+  const c03Accordion = document.getElementById('c03-accordion');
+  if (c03Accordion) {
+    // 펼침 패널 내부의 세로 스크롤만 허용하고 메인 가로 휠로 전달하지 않는다.
+    c03Accordion.addEventListener('wheel', (e) => {
+      if (e.target.closest('.c03__acc-body')) e.stopPropagation();
+    }, { passive: true });
+    // 아코디언: 한 번에 하나만 펼침
+    c03Accordion.querySelectorAll('.c03__acc-item').forEach((item) => {
+      const head = item.querySelector('.c03__acc-head');
+      const body = item.querySelector('.c03__acc-body');
+      const group = item.dataset.group;
+      STARS.forEach((s, i) => {
+        if (s.group !== group) return;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'c03__acc-star';
+        btn.dataset.idx = String(i);
+        btn.innerHTML = '<span>' + s.hanja + '</span><span>' + s.name + '</span>';
+        body.appendChild(btn);
+      });
+      head.addEventListener('click', () => {
+        const wasOpen = item.classList.contains('is-open');
+        c03Accordion.querySelectorAll('.c03__acc-item').forEach((it) => {
+          const open = it === item && !wasOpen;
+          it.classList.toggle('is-open', open);
+          it.querySelector('.c03__acc-head').setAttribute('aria-expanded', String(open));
+          it.querySelector('.c03__acc-body').inert = !open;
+        });
+      });
+    });
+
+    const picked = [null, null];
+    let activeSlot = 0;
+    const pickers = [document.getElementById('c03-picker-0'), document.getElementById('c03-picker-1')];
+    const confirmBtn = document.getElementById('c03-confirm-btn');
+    const confirmLabel = document.getElementById('c03-confirm-label');
+
+    function setActiveSlot(slot) {
+      activeSlot = slot;
+      pickers.forEach((p, i) => {
+        p.classList.toggle('is-active', i === slot);
+        p.setAttribute('aria-pressed', String(i === slot));
+      });
+    }
+    pickers.forEach((p, i) => p.addEventListener('click', () => setActiveSlot(i)));
+    setActiveSlot(0);
+
+    c03Accordion.querySelectorAll('.c03__acc-star').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.idx, 10);
+        picked[activeSlot] = idx;
+        const s = STARS[idx];
+        document.getElementById('c03-picked-name-' + activeSlot).textContent = s.name;
+        document.getElementById('c03-picked-hanja-' + activeSlot).textContent = starLabel(s);
+        pickers[activeSlot].querySelector('.c03__picker-label').textContent = s.name;
+        // 다음 빈 슬롯으로 자동 이동(둘 다 찼으면 유지)
+        if (picked[0] === null) setActiveSlot(0);
+        else if (picked[1] === null) setActiveSlot(1);
+
+        if (picked[0] !== null && picked[1] !== null) {
+          confirmBtn.disabled = false;
+          confirmLabel.textContent = STARS[picked[0]].name + ' & ' + STARS[picked[1]].name;
+        } else {
+          confirmLabel.textContent = '별자리를 2개 골라주세요';
+        }
+      });
+    });
+
+    confirmBtn.addEventListener('click', () => {
+      if (picked[0] === null || picked[1] === null) return;
+      try {
+        sessionStorage.setItem('byeolungwan-c03-pair', JSON.stringify(picked));
+      } catch (err) { /* 접근 불가해도 화면 갱신은 아래에서 직접 진행 */ }
+      // 2026-10-16: 이 사이트는 실제 페이지 이동(새로고침) 없이 가상
+      // 스크롤만 하는 단일 페이지라, C-04의 DOM은 이미 로드 시점에
+      // 한 번 다 그려져 있다 — sessionStorage만 써두고 C-04가 "다시
+      // 로드될 때" 읽기를 기대하면 절대 갱신되지 않는다(실제로 이
+      // 버그가 있었다). 그래서 여기서 renderC04()를 직접 호출해 C-03
+      // 선택을 즉시 C-04 DOM에 반영한 뒤에 이동한다.
+      renderC04(picked.slice());
+      goToScreenId('C-04');
+    });
+  }
+
+  // ------------------------------------------------------------
+  // C-04 별자리 궁합 상세 — 실제 선택은 기존 relationBetween()으로
+  // 계산한다. 선택 전에는 PNG의 정적 저수·루수 화면을 유지한다.
+  // 이름별 상세 해설 데이터가 없는 경우 원본 예시 해설을 재사용하지 않는다.
+  // renderC04()는
+  // C-03의 confirm 클릭에서도 직접 호출된다(위 참고 — 단일 페이지라
+  // sessionStorage를 "나중에 다시 읽는" 방식만으로는 갱신되지 않음).
+  // ------------------------------------------------------------
+  function renderC04(pair) {
+    const c04Headline = document.getElementById('c04-headline');
+    if (!c04Headline) return;
+    const [a, b] = pair;
+    const sa = STARS[a], sb = STARS[b];
+    document.getElementById('c04-name-0').textContent = sa.name;
+    document.getElementById('c04-hanja-0').textContent = starLabel(sa);
+    document.getElementById('c04-name-1').textContent = sb.name;
+    document.getElementById('c04-hanja-1').textContent = starLabel(sb);
+    document.getElementById('c04-result-title').textContent = sa.name + ' & ' + sb.name;
+
+    const rel = relationBetween(a, b);
+    // PNG의 저수·루수 전용 해설은 다른 선택의 실제 결과로 노출하지 않는다.
+    document.getElementById('c04-result-body').textContent = '';
+    document.getElementById('c04-note-body').textContent = '';
+    document.getElementById('c04-note-title').textContent = '관계 안내';
+    if (rel) {
+      c04Headline.replaceChildren(document.createTextNode('우리의 별은'), document.createElement('br'), document.createTextNode(rel.reason));
+      document.getElementById('c04-result-desc').textContent = rel.reason;
+      document.getElementById('c04-result-note').textContent = '두 별자리 사이의 "' + rel.type + '" 관계입니다.';
+    } else {
+      c04Headline.textContent = '아직 두 별자리 사이에 정의된 궁합 관계가 없습니다.';
+      document.getElementById('c04-result-desc').textContent = '모든 별자리 쌍에 관계가 정의되어 있지는 않습니다 — 임의의 결과를 만들어내지 않습니다.';
+      document.getElementById('c04-result-note').textContent = '두 별자리 사이에 정의된 관계가 없습니다.';
+    }
+  }
+  (function initC04FromSession() {
+    if (!document.getElementById('c04-headline')) return;
+    try {
+      const raw = sessionStorage.getItem('byeolungwan-c03-pair');
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr) && arr.length === 2 && arr.every((idx) => Number.isInteger(idx) && idx >= 0 && idx < STARS.length) && arr[0] !== arr[1]) {
+          renderC04(arr);
+          return;
+        }
+      }
+    } catch (err) { /* 접근 불가 시 예시로 대체 */ }
+    // sessionStorage에 선택이 없으면(C-04로 바로 진입) 마크업에 적어둔
+    // 레퍼런스 정적 예시(저수·루수)를 그대로 유지한다.
+  })();
+
+  // ------------------------------------------------------------
   // 렌더 루프
   // 2026-10-14 9차(성능, 가장 큰 변경): 이 루프는 이전까지 state.current
   // 가 실제로 변하는지와 무관하게 매 프레임(최초 로드부터 페이지를
@@ -671,7 +1161,7 @@
       state.current = state.target;
     }
     if (state.current !== prevCurrent) {
-      track.style.transform = `translate3d(${-state.current}px, 0, 0)`;
+      renderScrollPosition();
       updateRailChrome();
       updateReveals();
       updateE00ParallaxBg();
