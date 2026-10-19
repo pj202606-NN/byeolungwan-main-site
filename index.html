@@ -16,23 +16,13 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 
 <!--
-  마루 부리(MaruBuri, 강조 서체)에는 한자(한문) 글리프가 없어, 入口처럼
-  한자가 들어가는 강조 요소에 한해 아래 Noto Serif KR을 대신 쓴다
-  (css/main.css .font-hanja-safe 참고). 한글 강조 요소에는 영향 없음.
--->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
-
-<!--
-  강조 서체: 마루 부리(MaruBuri, 네이버, SIL OFL 1.1)
-  MAIN_SITE/fonts/MaruBuri-Regular.woff2, MaruBuri-SemiBold.woff2 로 적용됨.
-  2026-10-12: 함렛(Hahmlet)에서 교체 — 포인트 서체 변경 요청.
-  https://hangeul.naver.com/font/maru
+  본명조(Source Han Serif KR, Adobe, SIL OFL 1.1).
+  fonts/SourceHanSerifKR-VF.otf.woff2 공식 원본을 로컬에서 로드.
+  한자 대체용 font-hanja-safe도 같은 본명조 사용. 출처·라이선스는 fonts/ 참고.
 -->
 
-<link rel="stylesheet" href="css/main.css?v=29">
-<link rel="stylesheet" href="css/opening.css?v=25">
+<link rel="stylesheet" href="css/main.css?v=30">
+<link rel="stylesheet" href="css/opening.css?v=26">
 </head>
 <body class="is-o01-active">
 <!-- is-o01-active: 페이지 로드 시 기본으로 켜져 있다(O-01이 첫
@@ -3319,6 +3309,10 @@
         <span class="o01__soundui-bar"></span>
         <span class="o01__soundui-bar"></span>
         <span class="o01__soundui-bar"></span>
+        <span class="o01__soundui-bar"></span>
+        <span class="o01__soundui-bar"></span>
+        <span class="o01__soundui-bar"></span>
+        <span class="o01__soundui-bar"></span>
       </button>
       <div class="o01__soundui-menu" id="o01-soundui-menu" role="menu">
         <button type="button" role="menuitemradio" data-sound-choice="on" aria-checked="true">ON</button>
@@ -3617,12 +3611,10 @@
     </div>
 
     <div class="nav-overlay__col nav-overlay__col--toc">
-      <p class="nav-overlay__toc-label">목차</p>
+      <button type="button" class="nav-overlay__toc-label" id="nav-opening-return" aria-label="오프닝 첫 화면으로 돌아가기">처음으로</button>
     </div>
 
-    <div class="nav-overlay__col nav-overlay__col--opening">
-      <span class="nav-overlay__vertical-text">오프닝 페이지로 이동</span>
-    </div>
+    <div class="nav-overlay__col nav-overlay__col--spacer" aria-hidden="true"></div>
 
   </div>
 </div>
@@ -7331,7 +7323,7 @@
     <section class="screen screen--e00" id="E-00" data-screen-id="E-00" data-rail-theme="navy" data-width-multiplier="1.4">
       <div class="e00__panel">
         <p class="e00__eyebrow reveal" data-reveal-start="0" data-reveal-end="0.3">입구</p>
-        <!-- 마루 부리(MaruBuri)에 한자 글리프가 없어 font-hanja-safe로 예외 처리 -->
+        <!-- 한글과 한자 모두 로컬 본명조로 표시 -->
         <h2 class="e00__glyph font-hanja-safe reveal" data-reveal-start="0.1" data-reveal-end="0.5">入口</h2>
 
         <p class="e00__intro reveal" data-reveal-start="0.35" data-reveal-end="0.75">
@@ -7404,13 +7396,11 @@
     <!-- E-02 : 별자리 소개 -->
     <section class="screen screen--e02" id="E-02" data-screen-id="E-02" data-rail-theme="navy">
       <!--
-        e-02-constellation.png(1440x1024)은 시안 전체 캔버스와 같은
-        해상도로 준비되어 있고, 이 프레임이 시안에서 차지하던 자리를
-        그대로 잘라내면 맞도록 만들어진 소스다. 그래서 확대/축소 없이
-        1:1 원본 크기로 두고, 프레임 자신의 위치만큼 반대 방향으로
-        당겨서(음수 left/top) 정확히 그 영역만 보이게 자른다.
+        확장된 프레임은 고정 마스크로 유지한다. 내부 성도 이미지만
+        E-00 배경과 같은 0.5배속으로 가로 이동한다(js/main.js 참고).
+        아래→위 reveal 및 진입 줌은 이 메인 이미지에 적용하지 않는다.
       -->
-      <div class="e02__photo-wrap reveal reveal--image" data-reveal-start="0" data-reveal-end="0.45">
+      <div class="e02__photo-wrap">
         <img class="e02__photo-img" src="01_SITE_IMAGES/e-02-constellation.png" alt="">
       </div>
 
@@ -7604,7 +7594,7 @@
     <!-- C-00 : 별자리 표지 — 공통 표지 레이아웃 + 블랙/블루 테마.
          레퍼런스(C-00_별자리표지.png) 우측 이미지 영역은 아직 실제
          이미지가 없어 #D9D9D9 placeholder(.c00__image-ph)로 유지. -->
-    <section class="screen screen--image" id="IMG-01" data-screen-id="IMG-01" data-rail-theme="light" aria-label="이미지 연결 구간 1"></section>
+    <section class="screen screen--image" id="IMG-01" data-screen-id="IMG-01" data-rail-theme="light" data-width-multiplier="0.72" aria-label="이미지 연결 구간 1"></section>
 
     <section class="screen screen--c00" id="C-00" data-screen-id="C-00" data-rail-theme="black">
       <div class="c00__panel">
@@ -7635,23 +7625,32 @@
 
     <!-- C-01 : 00_DESIGN_REFERENCE의 원본 이미지 영역과 텍스트 배치를 재현. -->
     <section class="screen screen--c01" id="C-01" data-screen-id="C-01" data-rail-theme="light" data-width-multiplier="1.2479166667" aria-labelledby="c01-title">
-      <h2 class="c-ref__at c-ref__title reveal" id="c01-title" style="--x:160;--y:103" data-reveal-start="0.1" data-reveal-end="0.5">별자리 지도</h2>
-      <p class="c-ref__at c-ref__body reveal" style="--x:440;--y:129" data-reveal-start="0.1" data-reveal-end="0.5">그리드 보기</p>
-      <div class="c-ref__at c01__head-line" style="--x:896;--y:147" aria-hidden="true"></div>
-      <div class="c-ref__at c01__head-dot" style="--x:1273;--y:133" aria-hidden="true"></div>
-      <div class="c-ref__at c-ref__ph" style="--x:160;--y:200;--w:1133;--h:573" aria-hidden="true"></div>
+      <h2 class="c-ref__at c-ref__title c01__upper reveal" id="c01-title" style="--x:160;--y:103" data-reveal-start="0.1" data-reveal-end="0.5">별자리 지도</h2>
+      <p class="c-ref__at c-ref__body c01__upper reveal" style="--x:440;--y:129" data-reveal-start="0.1" data-reveal-end="0.5">그리드 보기</p>
+      <form class="c01__search" id="c01-search" role="search" aria-label="별자리 검색">
+        <div class="c-ref__at c01__head-line c01__upper" style="--x:896;--y:147" aria-hidden="true"></div>
+        <input class="c-ref__at c01__search-input" id="c01-search-input" style="--x:896;--y:147" type="search" aria-label="별자리 이름 또는 한자" autocomplete="off" spellcheck="false" aria-describedby="c01-search-status">
+        <button class="c-ref__at c01__head-dot" style="--x:1273;--y:147" type="submit" aria-label="별자리 검색 실행"></button>
+        <p class="c-ref__at c01__search-status" id="c01-search-status" style="--x:896;--y:147" role="status"></p>
+      </form>
+      <div class="c-ref__at c-ref__ph c01__image" style="--x:160;--y:200;--w:1133;--h:573" aria-hidden="true"></div>
       <div class="c-ref__at c01__divider" style="--x:1365;--y:201" aria-hidden="true"></div>
-      <div class="c-ref__at c-ref__directions reveal" style="--x:170;--y:822" data-reveal-start="0.35" data-reveal-end="0.75">
-        <span>청룡·동방</span><span>현무·북방</span><span>백호·서방</span><span>주작·남방</span>
+      <div class="c-ref__at c-ref__directions c01__directions reveal" id="c01-directions" style="--x:170;--y:822" data-reveal-start="0.35" data-reveal-end="0.75" aria-label="네 방위의 별자리">
+        <div class="c01__direction"><button class="c01__direction-toggle" type="button" data-group="청룡" aria-expanded="false" aria-controls="c01-stars-east"><span>청룡·동방</span></button><div class="c01__stars" id="c01-stars-east" role="group" aria-label="청룡의 일곱 별자리" hidden></div></div>
+        <div class="c01__direction"><button class="c01__direction-toggle" type="button" data-group="현무" aria-expanded="false" aria-controls="c01-stars-north"><span>현무·북방</span></button><div class="c01__stars" id="c01-stars-north" role="group" aria-label="현무의 일곱 별자리" hidden></div></div>
+        <div class="c01__direction"><button class="c01__direction-toggle" type="button" data-group="백호" aria-expanded="false" aria-controls="c01-stars-west"><span>백호·서방</span></button><div class="c01__stars" id="c01-stars-west" role="group" aria-label="백호의 일곱 별자리" hidden></div></div>
+        <div class="c01__direction"><button class="c01__direction-toggle" type="button" data-group="주작" aria-expanded="false" aria-controls="c01-stars-south"><span>주작·남방</span></button><div class="c01__stars" id="c01-stars-south" role="group" aria-label="주작의 일곱 별자리" hidden></div></div>
       </div>
       <p class="c-ref__at c-ref__body reveal" style="--x:665;--y:820;--w:390" data-reveal-start="0.35" data-reveal-end="0.75">청룡·백호·주작·현무, 네 사신수가 지키는 하늘의 네가지 방위<br>에는 각 방위마다 일곱 개의 별자리가 자리하고 있습니다.</p>
       <p class="c-ref__at c-ref__body reveal" style="--x:1076;--y:820;--w:220" data-reveal-start="0.35" data-reveal-end="0.75">사신수를 고르고, 각 별자리를 눌러<br>자세히 살펴보세요.</p>
-      <div class="c-ref__at c-ref__label reveal" style="--x:1433;--y:117" data-reveal-start="0.4" data-reveal-end="0.7"><p>별자리</p><p>별자리 사전</p></div>
-      <div class="c-ref__at c-ref__ph" style="--x:1433;--y:201;--w:237;--h:292" aria-hidden="true"></div>
+      <div class="c-ref__at c-ref__label c01__upper reveal" style="--x:1433;--y:117" data-reveal-start="0.4" data-reveal-end="0.7"><p>별자리</p><p>별자리 사전</p></div>
+      <div class="c-ref__at c-ref__ph c01__image" style="--x:1433;--y:201;--w:237;--h:292" aria-hidden="true"></div>
       <h3 class="c-ref__at c01__preview-name reveal" id="c01-preview-name" style="--x:1433;--y:552;--w:237" data-reveal-start="0.35" data-reveal-end="0.75">저수</h3>
       <p class="c-ref__at c01__preview-hanja reveal" id="c01-preview-hanja" style="--x:1433;--y:633;--w:237" data-reveal-start="0.35" data-reveal-end="0.75">氐宿 · 너구리자리</p>
-      <p class="c-ref__at c-ref__body c01__preview-desc reveal" id="c01-preview-desc" data-reference-copy="true" style="--x:1433;--y:703;--w:237" data-reveal-start="0.35" data-reveal-end="0.75">옛 사람들은 하늘을 3개의 원과 28개<br>의 별자리로 나누어 그 뜻을 읽고 농경<br>과 정치, 삶에 적용해 살아갔습니다. 프<br>로젝트 별운관은 이러한 전통 천문 체<br>계인 3원 28수를 오늘날 사람들이 흔<br>히 즐기는 별자리 운세로 다시 엮어 새<br>로운 28개의 별자리와 함께 매일의</p>
-      <span class="c-ref__at c01__preview-link reveal" style="--x:1433;--y:919;--w:237" data-reveal-start="0.4" data-reveal-end="0.7" aria-disabled="true">별자리 상세 설명 보기</span>
+      <div class="c-ref__at c01__preview-copy" style="--x:1433;--y:703;--w:237">
+        <p class="c-ref__body c01__preview-desc reveal" id="c01-preview-desc" data-reference-copy="true" data-reveal-start="0.35" data-reveal-end="0.75">옛 사람들은 하늘을 3개의 원과 28개<br>의 별자리로 나누어 그 뜻을 읽고 농경<br>과 정치, 삶에 적용해 살아갔습니다. 프<br>로젝트 별운관은 이러한 전통 천문 체<br>계인 3원 28수를 오늘날 사람들이 흔<br>히 즐기는 별자리 운세로 다시 엮어 새<br>로운 28개의 별자리와 함께 매일의</p>
+        <span class="c01__preview-link reveal" data-reveal-start="0.4" data-reveal-end="0.7" aria-disabled="true">별자리 상세 설명 보기</span>
+      </div>
       <!-- 선택 데이터/필터 로직은 보관하되 이미지 자리에는 UI를 표시하지 않는다. -->
       <div hidden>
         <div id="c01-tabs"><button type="button" class="c01__tab is-active" data-group="all">전체</button><button type="button" class="c01__tab" data-group="청룡">청룡</button><button type="button" class="c01__tab" data-group="현무">현무</button><button type="button" class="c01__tab" data-group="백호">백호</button><button type="button" class="c01__tab" data-group="주작">주작</button></div>
@@ -7660,26 +7659,29 @@
     </section>
 
     <!-- C-02 : 00_DESIGN_REFERENCE의 원본 이미지 영역과 텍스트 배치를 재현. -->
-    <section class="screen screen--image" id="IMG-02" data-screen-id="IMG-02" data-rail-theme="light" aria-label="이미지 연결 구간 2"></section>
+    <section class="screen screen--image" id="IMG-02" data-screen-id="IMG-02" data-rail-theme="light" data-width-multiplier="0.72" aria-label="이미지 연결 구간 2"></section>
 
     <section class="screen screen--c02" id="C-02" data-screen-id="C-02" data-rail-theme="light" aria-labelledby="c02-title">
-      <div class="c-ref__at c-ref__label reveal" style="--x:187;--y:74" data-reveal-start="0" data-reveal-end="0.3"><p>별자리</p><p>별자리 궁합 관계도</p></div>
-      <div class="c-ref__at c-ref__ph" style="--x:187;--y:144;--w:548;--h:514" aria-hidden="true"></div>
-      <div class="c-ref__at c02__legend reveal" style="--x:552;--y:671" data-reveal-start="0.35" data-reveal-end="0.75"><span>천생연분</span><span>보완</span><span>주의</span></div>
+      <div class="c-ref__at c-ref__label c02__left reveal" style="--x:187;--y:74" data-reveal-start="0" data-reveal-end="0.3"><p>별자리</p><p>별자리 궁합 관계도</p></div>
+      <div class="c-ref__at c-ref__ph c02__left" style="--x:187;--y:144;--w:548;--h:514" aria-hidden="true"></div>
+      <div class="c-ref__at c02__legend c02__left reveal" style="--x:552;--y:671" data-reveal-start="0.35" data-reveal-end="0.75"><span>천생연분</span><span>보완</span><span>주의</span></div>
       <h2 class="c-ref__at c-ref__title reveal" id="c02-title" style="--x:818;--y:139" data-reveal-start="0.1" data-reveal-end="0.5">별자리 궁합 관계도</h2>
       <p class="c-ref__at c-ref__body reveal" style="--x:818;--y:242;--w:440" data-reveal-start="0.35" data-reveal-end="0.75">별자리 하나를 고르면, 그 별자리와 유의미하게 이어진<br>몇 개의 별이 밝아지며 별자리 사이의 관계를 나타냅니다.</p>
-      <div class="c-ref__at c-ref__ph" style="--x:818;--y:364;--w:209;--h:246" aria-hidden="true"></div>
+      <div class="c-ref__at c02__selection" style="--x:818;--y:364;--w:622">
+        <div class="c-ref__ph c02__selected-image" aria-hidden="true"></div>
+        <div class="c-ref__directions c02__directions reveal" id="c02-directions" data-reveal-start="0.35" data-reveal-end="0.75" aria-label="궁합 관계를 볼 별자리 방위">
+          <div class="c01__direction"><button class="c01__direction-toggle" type="button" data-group="청룡" aria-label="청룡·동방" aria-expanded="false" aria-controls="c02-stars-east"><span>청룡·동방</span></button><div class="c01__stars" id="c02-stars-east" role="group" aria-label="청룡의 일곱 별자리" hidden></div></div>
+          <div class="c01__direction"><button class="c01__direction-toggle" type="button" data-group="현무" aria-label="현무·북방" aria-expanded="false" aria-controls="c02-stars-north"><span>현무·북방</span></button><div class="c01__stars" id="c02-stars-north" role="group" aria-label="현무의 일곱 별자리" hidden></div></div>
+          <div class="c01__direction"><button class="c01__direction-toggle" type="button" data-group="백호" aria-label="백호·서방" aria-expanded="false" aria-controls="c02-stars-west"><span>백호·서방</span></button><div class="c01__stars" id="c02-stars-west" role="group" aria-label="백호의 일곱 별자리" hidden></div></div>
+          <div class="c01__direction"><button class="c01__direction-toggle" type="button" data-group="주작" aria-label="주작·남방" aria-expanded="false" aria-controls="c02-stars-south"><span>주작·남방</span></button><div class="c01__stars" id="c02-stars-south" role="group" aria-label="주작의 일곱 별자리" hidden></div></div>
+        </div>
+      </div>
       <h3 class="c-ref__at c-ref__name reveal" id="c02-selected-name" style="--x:1063;--y:372" data-reveal-start="0.35" data-reveal-end="0.75">저수</h3>
       <p class="c-ref__at c-ref__hanja reveal" id="c02-selected-hanja" style="--x:1063;--y:407" data-reveal-start="0.35" data-reveal-end="0.75">氐宿 · 너구리자리</p>
-      <div class="c-ref__at c-ref__directions c02__directions reveal" style="--x:1061;--y:487" data-reveal-start="0.35" data-reveal-end="0.75"><span>청룡·동방</span><span>현무·북방</span><span>백호·서방</span><span>주작·남방</span></div>
-      <div class="c-ref__at c02__relation reveal" style="--x:187;--y:722" data-reveal-start="0.4" data-reveal-end="0.8"><p>천생연분</p><div class="c02__relation-copy"><p>루수 (백호 · 서방7수)</p><p>정반대의 기운이 서로를 완성시켜주는 관계입니다.</p></div></div>
-      <div class="c-ref__at c02__relation reveal" style="--x:818;--y:722" data-reveal-start="0.4" data-reveal-end="0.8"><p>보완</p><div class="c02__relation-copy"><p>각수 (청룡 · 동방7수)</p><p>같은 기운을 나누며 서로를 자연스럽게 채워주는 관계입니다.</p></div></div>
-      <div class="c-ref__at c02__relation reveal" style="--x:187;--y:849" data-reveal-start="0.4" data-reveal-end="0.8"><p>보완</p><div class="c02__relation-copy"><p>저수 (청룡 · 동방7수)</p><p>같은 기운을 나누며 서로를 자연스럽게 채워주는 관계입니다.</p></div></div>
-      <div class="c-ref__at c02__relation reveal" style="--x:818;--y:849" data-reveal-start="0.4" data-reveal-end="0.8"><p>주의</p><div class="c02__relation-copy"><p>우수 (현무 · 북방7수)</p><p>기질의 결이 달라 마찰이 생기기 쉬우니 배려가 필요한 관계입니다.</p></div></div>
-      <div class="c-ref__at c-ref__ph" style="--x:187;--y:760;--w:47;--h:47" aria-hidden="true"></div>
-      <div class="c-ref__at c-ref__ph" style="--x:818;--y:760;--w:47;--h:47" aria-hidden="true"></div>
-      <div class="c-ref__at c-ref__ph" style="--x:187;--y:887;--w:47;--h:47" aria-hidden="true"></div>
-      <div class="c-ref__at c-ref__ph" style="--x:818;--y:887;--w:47;--h:47" aria-hidden="true"></div>
+      <div class="c-ref__at c02__relation c02__left" style="--x:187;--y:722"><p class="reveal" data-reveal-start="0.4" data-reveal-end="0.8">천생연분</p><div class="c-ref__ph c02__relation-image" style="--h:47" aria-hidden="true"></div><div class="c02__relation-copy reveal" data-reveal-start="0.4" data-reveal-end="0.8"><p>루수 (백호 · 서방7수)</p><p>정반대의 기운이 서로를 완성시켜주는 관계입니다.</p></div></div>
+      <div class="c-ref__at c02__relation" style="--x:818;--y:722"><p class="reveal" data-reveal-start="0.4" data-reveal-end="0.8">보완</p><div class="c-ref__ph c02__relation-image" style="--h:47" aria-hidden="true"></div><div class="c02__relation-copy reveal" data-reveal-start="0.4" data-reveal-end="0.8"><p>각수 (청룡 · 동방7수)</p><p>같은 기운을 나누며 서로를 자연스럽게 채워주는 관계입니다.</p></div></div>
+      <div class="c-ref__at c02__relation c02__left" style="--x:187;--y:849"><p class="reveal" data-reveal-start="0.4" data-reveal-end="0.8">보완</p><div class="c-ref__ph c02__relation-image" style="--h:47" aria-hidden="true"></div><div class="c02__relation-copy reveal" data-reveal-start="0.4" data-reveal-end="0.8"><p>저수 (청룡 · 동방7수)</p><p>같은 기운을 나누며 서로를 자연스럽게 채워주는 관계입니다.</p></div></div>
+      <div class="c-ref__at c02__relation" style="--x:818;--y:849"><p class="reveal" data-reveal-start="0.4" data-reveal-end="0.8">주의</p><div class="c-ref__ph c02__relation-image" style="--h:47" aria-hidden="true"></div><div class="c02__relation-copy reveal" data-reveal-start="0.4" data-reveal-end="0.8"><p>우수 (현무 · 북방7수)</p><p>기질의 결이 달라 마찰이 생기기 쉬우니 배려가 필요한 관계입니다.</p></div></div>
     </section>
 
     <!-- C-03 : 00_DESIGN_REFERENCE의 원본 이미지 영역과 텍스트 배치를 재현. -->
@@ -7690,13 +7692,14 @@
       <p class="c-ref__at c-ref__body c-ref__muted reveal" style="--x:169;--y:380" data-reveal-start="0.35" data-reveal-end="0.75">나의 별자리와 상대의 별자리를 골라보세요.<br>별자리 간의 궁합과 관계가 나타납니다.</p>
       <div class="c-ref__at c-ref__ph" style="--x:632;--y:211;--w:286;--h:356" aria-hidden="true"></div>
       <div class="c-ref__at c-ref__ph" style="--x:1011;--y:211;--w:286;--h:356" aria-hidden="true"></div>
+      <svg class="c-ref__at c03__cross" style="--x:964.5;--y:389;--w:24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 3 21 21 M21 3 3 21" fill="none" stroke="currentColor" stroke-width="1" vector-effect="non-scaling-stroke"/></svg>
       <button type="button" class="c-ref__at c03__picker reveal" id="c03-picker-0" style="--x:656;--y:579;--w:238" aria-label="첫 번째 별자리 선택" data-reveal-start="0.35" data-reveal-end="0.75"><span class="c03__picker-label c-ref__name" id="c03-picked-name-0">저수</span><span class="c-ref__hanja" id="c03-picked-hanja-0">氐宿 · 너구리자리</span></button>
       <button type="button" class="c-ref__at c03__picker reveal" id="c03-picker-1" style="--x:1035;--y:579;--w:238" aria-label="두 번째 별자리 선택" data-reveal-start="0.35" data-reveal-end="0.75"><span class="c03__picker-label c-ref__name" id="c03-picked-name-1">루수</span><span class="c-ref__hanja" id="c03-picked-hanja-1">婁宿 · 개자리</span></button>
-      <div class="c-ref__at c03__accordion" id="c03-accordion" style="--x:236;--y:610">
-        <div class="c03__acc-item" data-group="청룡"><button type="button" class="c03__acc-head" aria-label="동방 청룡 별자리 펼치기" aria-expanded="false" aria-controls="c03-east" title="동방 청룡"><span class="c-ref__sr-only">동방 청룡</span></button><div class="c03__acc-body" id="c03-east" inert></div></div>
-        <div class="c03__acc-item" data-group="현무"><button type="button" class="c03__acc-head" aria-label="북방 현무 별자리 펼치기" aria-expanded="false" aria-controls="c03-north" title="북방 현무"><span class="c-ref__sr-only">북방 현무</span></button><div class="c03__acc-body" id="c03-north" inert></div></div>
-        <div class="c03__acc-item" data-group="백호"><button type="button" class="c03__acc-head" aria-label="서방 백호 별자리 펼치기" aria-expanded="false" aria-controls="c03-west" title="서방 백호"><span class="c-ref__sr-only">서방 백호</span></button><div class="c03__acc-body" id="c03-west" inert></div></div>
-        <div class="c03__acc-item" data-group="주작"><button type="button" class="c03__acc-head" aria-label="남방 주작 별자리 펼치기" aria-expanded="false" aria-controls="c03-south" title="남방 주작"><span class="c-ref__sr-only">남방 주작</span></button><div class="c03__acc-body" id="c03-south" inert></div></div>
+      <div class="c-ref__at c03__accordion" id="c03-accordion" style="--x:172;--y:610">
+        <div class="c03__acc-item" data-group="청룡"><button type="button" class="c03__acc-head" aria-label="동방 청룡 별자리 펼치기" aria-expanded="false" aria-controls="c03-east" title="동방 청룡"><span>청룡 · 동방</span></button><div class="c03__acc-body" id="c03-east" inert></div></div>
+        <div class="c03__acc-item" data-group="현무"><button type="button" class="c03__acc-head" aria-label="북방 현무 별자리 펼치기" aria-expanded="false" aria-controls="c03-north" title="북방 현무"><span>현무 · 북방</span></button><div class="c03__acc-body" id="c03-north" inert></div></div>
+        <div class="c03__acc-item" data-group="백호"><button type="button" class="c03__acc-head" aria-label="서방 백호 별자리 펼치기" aria-expanded="false" aria-controls="c03-west" title="서방 백호"><span>백호 · 서방</span></button><div class="c03__acc-body" id="c03-west" inert></div></div>
+        <div class="c03__acc-item" data-group="주작"><button type="button" class="c03__acc-head" aria-label="남방 주작 별자리 펼치기" aria-expanded="false" aria-controls="c03-south" title="남방 주작"><span>주작 · 남방</span></button><div class="c03__acc-body" id="c03-south" inert></div></div>
       </div>
       <p class="c-ref__at c-ref__name reveal" id="c03-confirm-label" style="--x:791;--y:757;--w:130" aria-live="polite" data-reveal-start="0.4" data-reveal-end="0.8">저수 &amp; 루수</p>
       <button type="button" class="c-ref__at c03__confirm-btn" id="c03-confirm-btn" style="--x:930;--y:749" disabled>궁합 보기</button>
@@ -7704,24 +7707,23 @@
 
     <!-- C-04 : 00_DESIGN_REFERENCE의 원본 이미지 영역과 텍스트 배치를 재현. -->
     <section class="screen screen--c04" id="C-04" data-screen-id="C-04" data-rail-theme="navy" aria-labelledby="c04-headline">
-      <div class="c-ref__at c-ref__label reveal" style="--x:1205;--y:109" data-reveal-start="0" data-reveal-end="0.3"><p>별자리</p><p>별자리 궁합 보기</p></div>
       <h2 class="c-ref__at c04__headline reveal" id="c04-headline" style="--x:570;--y:106;--w:350" data-reveal-start="0.1" data-reveal-end="0.5">우리의 별은 서로를 완성시켜주는<br>천생연분과도 같은 관계입니다.</h2>
       <div class="c-ref__at c-ref__ph" style="--x:234;--y:211;--w:286;--h:356" aria-hidden="true"></div>
       <div class="c-ref__at c-ref__ph" style="--x:965;--y:211;--w:286;--h:356" aria-hidden="true"></div>
-      <svg class="c-ref__at c04__constellation" style="--x:574;--y:257" viewBox="574 257 342 310" preserveAspectRatio="none" aria-hidden="true">
-        <g fill="none" stroke="#D9D9D9" stroke-width="1"><path d="M577 299 617 423 634 513 M617 423 667 331 738 260 M667 331 798 377 752 421 774 499 M798 377 912 465 900 334 M912 465 824 541 845 558"/></g>
-        <g fill="#D9D9D9"><circle cx="577" cy="299" r="3"/><circle cx="617" cy="423" r="3"/><circle cx="634" cy="513" r="3"/><circle cx="667" cy="331" r="3"/><circle cx="738" cy="260" r="3"/><circle cx="798" cy="377" r="3"/><circle cx="752" cy="421" r="3"/><circle cx="774" cy="499" r="3"/><circle cx="912" cy="465" r="3"/><circle cx="900" cy="334" r="3"/><circle cx="824" cy="541" r="3"/><circle cx="845" cy="558" r="3"/></g>
+      <svg class="c-ref__at c04__constellation" style="--x:574;--y:257" viewBox="574 257 342 310" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <g class="c04__base-lines" fill="none" stroke="#D9D9D9" stroke-width="1"><path d="M577 299 617 423 634 513 M617 423 667 331 738 260 M667 331 798 377 752 421 774 499 M798 377 912 465 900 334 M912 465 824 541 845 558"/></g>
+        <g class="c04__points" fill="#D9D9D9"><circle cx="577" cy="299" r="3"/><circle cx="617" cy="423" r="3"/><circle cx="634" cy="513" r="3"/><circle cx="667" cy="331" r="3"/><circle cx="738" cy="260" r="3"/><circle cx="798" cy="377" r="3"/><circle cx="752" cy="421" r="3"/><circle cx="774" cy="499" r="3"/><circle cx="912" cy="465" r="3"/><circle cx="900" cy="334" r="3"/><circle cx="824" cy="541" r="3"/><circle cx="845" cy="558" r="3"/></g>
       </svg>
       <h3 class="c-ref__at c-ref__name reveal" id="c04-name-0" style="--x:258;--y:579" data-reveal-start="0.35" data-reveal-end="0.75">저수</h3>
       <p class="c-ref__at c-ref__hanja reveal" id="c04-hanja-0" style="--x:377;--y:582" data-reveal-start="0.35" data-reveal-end="0.75">氐宿 · 너구리자리</p>
       <h3 class="c-ref__at c-ref__name reveal" id="c04-name-1" style="--x:989;--y:579" data-reveal-start="0.35" data-reveal-end="0.75">루수</h3>
       <p class="c-ref__at c-ref__hanja reveal" id="c04-hanja-1" style="--x:1138;--y:582" data-reveal-start="0.35" data-reveal-end="0.75">婁宿 · 개자리</p>
-      <h3 class="c-ref__at c-ref__name c04__pair-title reveal" id="c04-result-title" style="--x:234;--y:746;--w:135" data-reveal-start="0.4" data-reveal-end="0.8">저수 &amp; 루수</h3>
-      <p class="c-ref__at c-ref__body c-ref__muted c04__copy reveal" id="c04-result-desc" style="--x:383;--y:747;--w:345" data-reveal-start="0.4" data-reveal-end="0.8">정반대의 기운이 서로를 완성시켜주는 관계입니다.</p>
-      <p class="c-ref__at c-ref__body c-ref__muted c04__copy reveal" id="c04-result-body" style="--x:383;--y:797;--w:345" data-reveal-start="0.4" data-reveal-end="0.8">단단히 받쳐주는 안정감과 한결같은 인내심을 가진 저수<br>의 특징과, 루수가 가진 거침없는 결단력이 만나 같은 목<br>표에 도전한다면 더 큰 성과를 얻을 수 있는 상호 보완적<br>인 이상적인 관계입니다. 팀원이나 사업 동료도 좋습니다.</p>
-      <h3 class="c-ref__at c-ref__name reveal" id="c04-note-title" style="--x:823;--y:746" data-reveal-start="0.4" data-reveal-end="0.8">주의</h3>
-      <p class="c-ref__at c-ref__body c-ref__muted c04__copy reveal" id="c04-result-note" style="--x:906;--y:747;--w:350" data-reveal-start="0.4" data-reveal-end="0.8">다만, 서로 발 맞춰 나가야 하는 관계이기에 어느 한 쪽이<br>속도를 맞추지 않는다면 쉽게 어긋나갈 수 도 있습니다.</p>
-      <p class="c-ref__at c-ref__body c-ref__muted c04__copy reveal" id="c04-note-body" style="--x:906;--y:822;--w:350" data-reveal-start="0.4" data-reveal-end="0.8">상대를 배려하며 같은 곳을 바라보고 살아가는 것이<br>이 이상적인 관계를 유지할 수 있는 지름길입니다.</p>
+      <h3 class="c-ref__at c-ref__name c04__pair-title c04__after-constellation" id="c04-result-title" style="--x:234;--y:746;--w:135" data-reveal-start="0.4" data-reveal-end="0.8">저수 &amp; 루수</h3>
+      <p class="c-ref__at c-ref__body c-ref__muted c04__copy c04__after-constellation" id="c04-result-desc" style="--x:383;--y:747;--w:345" data-reveal-start="0.4" data-reveal-end="0.8">정반대의 기운이 서로를 완성시켜주는 관계입니다.</p>
+      <p class="c-ref__at c-ref__body c-ref__muted c04__copy c04__after-constellation" id="c04-result-body" style="--x:383;--y:797;--w:345" data-reveal-start="0.4" data-reveal-end="0.8">단단히 받쳐주는 안정감과 한결같은 인내심을 가진 저수<br>의 특징과, 루수가 가진 거침없는 결단력이 만나 같은 목<br>표에 도전한다면 더 큰 성과를 얻을 수 있는 상호 보완적<br>인 이상적인 관계입니다. 팀원이나 사업 동료도 좋습니다.</p>
+      <h3 class="c-ref__at c-ref__name c04__after-constellation" id="c04-note-title" style="--x:823;--y:746" data-reveal-start="0.4" data-reveal-end="0.8">주의</h3>
+      <p class="c-ref__at c-ref__body c-ref__muted c04__copy c04__after-constellation" id="c04-result-note" style="--x:906;--y:747;--w:350" data-reveal-start="0.4" data-reveal-end="0.8">다만, 서로 발 맞춰 나가야 하는 관계이기에 어느 한 쪽이<br>속도를 맞추지 않는다면 쉽게 어긋나갈 수 도 있습니다.</p>
+      <p class="c-ref__at c-ref__body c-ref__muted c04__copy c04__after-constellation" id="c04-note-body" style="--x:906;--y:822;--w:350" data-reveal-start="0.4" data-reveal-end="0.8">상대를 배려하며 같은 곳을 바라보고 살아가는 것이<br>이 이상적인 관계를 유지할 수 있는 지름길입니다.</p>
     </section>
 
     <!-- S-00 : 이야기 표지 — 공통 표지 레이아웃, F-00과 동일한
@@ -7731,7 +7733,7 @@
          텍스트를 그대로 옮겼다(줄바꿈은 레퍼런스가 좁은 폭에서 임의
          개행한 것으로 보여, 동일한 25vw 폭 컨테이너에서 자연스럽게
          흐르도록 <br> 없이 그대로 둠). -->
-    <section class="screen screen--image" id="IMG-03" data-screen-id="IMG-03" data-rail-theme="light" aria-label="이미지 연결 구간 3"></section>
+    <section class="screen screen--image" id="IMG-03" data-screen-id="IMG-03" data-rail-theme="light" data-width-multiplier="0.72" aria-label="이미지 연결 구간 3"></section>
 
     <section class="screen screen--s00" id="S-00" data-screen-id="S-00" data-rail-theme="light">
       <div class="s00__panel">
@@ -7781,7 +7783,7 @@
         <p>천상열차분야지도 이야기</p>
       </div>
     </section>
-    <section class="screen screen--image" id="IMG-04" data-screen-id="IMG-04" data-rail-theme="light" aria-label="이미지 연결 구간 4"></section>
+    <section class="screen screen--image" id="IMG-04" data-screen-id="IMG-04" data-rail-theme="light" data-width-multiplier="0.72" aria-label="이미지 연결 구간 4"></section>
 
     <!-- S-02 — 원본 1440×1024. 두 회색 사각형이 맞닿는 구성. -->
     <section class="screen screen--story" id="S-02" data-screen-id="S-02" data-rail-theme="black" aria-labelledby="s02-title">
@@ -7802,30 +7804,30 @@
     <!-- S-03 — 원본 2084×1024. 카드 UI가 아닌 독립 이미지/본문 배치. -->
     <section class="screen screen--story" id="S-03" data-screen-id="S-03" data-reveal-by-position="true" data-rail-theme="light" data-width-multiplier="1.4472222222" aria-labelledby="s03-title">
       <h2 class="story__title reveal" id="s03-title" style="--x:144;--y:144" data-reveal-start="0.1" data-reveal-end="0.5">네 방위를 지키는 신수</h2>
-      <div class="story__ph" style="--x:506;--y:342;--w:291;--h:424" aria-hidden="true"></div>
-      <div class="story__ph" style="--x:887;--y:248;--w:291;--h:424" aria-hidden="true"></div>
-      <div class="story__ph" style="--x:1268;--y:342;--w:291;--h:424" aria-hidden="true"></div>
-      <div class="story__ph" style="--x:1649;--y:248;--w:291;--h:424" aria-hidden="true"></div>
-      <div class="story__guardian reveal" style="--x:513;--y:800;--w:310" data-reveal-start="0.35" data-reveal-end="0.75">
-        <h3>청룡</h3><p class="story__direction">동방 · 봄</p>
+      <div class="story__ph" data-guardian="청룡" style="--x:506;--y:342;--w:291;--h:424" aria-hidden="true"></div>
+      <div class="story__ph" data-guardian="현무" style="--x:887;--y:248;--w:291;--h:424" aria-hidden="true"></div>
+      <div class="story__ph" data-guardian="백호" style="--x:1268;--y:342;--w:291;--h:424" aria-hidden="true"></div>
+      <div class="story__ph" data-guardian="주작" style="--x:1649;--y:248;--w:291;--h:424" aria-hidden="true"></div>
+      <div class="story__guardian reveal" data-guardian="청룡" style="--x:513;--y:800;--w:310" data-reveal-start="0.35" data-reveal-end="0.75">
+        <h3>청룡<span class="story__guardian-hanja">靑龍</span></h3><p class="story__direction">동방 · 봄</p>
         <p class="story__guardian-body">푸른 용은 동쪽 하늘과 봄을 다스립니다.<br>만물이 움트는 계절, 생명이 시작되는 방위를<br>지키는 신수입니다.</p>
       </div>
-      <div class="story__guardian reveal" style="--x:894;--y:701;--w:310" data-reveal-start="0.35" data-reveal-end="0.75">
-        <h3>백호</h3><p class="story__direction">서방 · 가을</p>
+      <div class="story__guardian reveal" data-guardian="현무" style="--x:894;--y:706;--w:310" data-reveal-start="0.35" data-reveal-end="0.75">
+        <h3>현무<span class="story__guardian-hanja">玄武</span></h3><p class="story__direction">북방 · 겨울</p>
+        <p class="story__guardian-body">검은 거북은 북쪽 하늘과 겨울을 다스립니다.<br>만물이 갈무리되는 계절, 인내와 지혜를<br>상징합니다.</p>
+      </div>
+      <div class="story__guardian reveal" data-guardian="백호" style="--x:1275;--y:795;--w:310" data-reveal-start="0.35" data-reveal-end="0.75">
+        <h3>백호<span class="story__guardian-hanja">白虎</span></h3><p class="story__direction">서방 · 가을</p>
         <p class="story__guardian-body">흰 호랑이는 서쪽 하늘과 가을을 다스립니다.<br>결실을 거두고 다음을 준비하는 계절, 엄정함과<br>결단을 상징합니다.</p>
       </div>
-      <div class="story__guardian reveal" style="--x:1275;--y:800;--w:310" data-reveal-start="0.35" data-reveal-end="0.75">
-        <h3>주작</h3><p class="story__direction">남방 · 여름</p>
+      <div class="story__guardian reveal" data-guardian="주작" style="--x:1656;--y:706;--w:310" data-reveal-start="0.35" data-reveal-end="0.75">
+        <h3>주작<span class="story__guardian-hanja">朱雀</span></h3><p class="story__direction">남방 · 여름</p>
         <p class="story__guardian-body">붉은 봉황은 남쪽 하늘과 여름을 다스립니다.<br>만물이 무성해지는 계절, 화려함과 뜨거운<br>생명력을 상징합니다.</p>
-      </div>
-      <div class="story__guardian reveal" style="--x:1656;--y:706;--w:310" data-reveal-start="0.35" data-reveal-end="0.75">
-        <h3>현무</h3><p class="story__direction">북방 · 겨울</p>
-        <p class="story__guardian-body">검은 거북은 북쪽 하늘과 겨울을 다스립니다.<br>만물이 갈무리되는 계절, 인내와 지혜를<br>상징합니다.</p>
       </div>
       <div class="story__label reveal" style="--x:145;--y:908" data-reveal-start="0.4" data-reveal-end="0.7"><p>이야기</p><p>사신수 이야기</p></div>
     </section>
 
-    <section class="screen screen--image" id="IMG-05" data-screen-id="IMG-05" data-rail-theme="light" aria-label="이미지 연결 구간 5"></section>
+    <section class="screen screen--image" id="IMG-05" data-screen-id="IMG-05" data-rail-theme="light" data-width-multiplier="0.72" aria-label="이미지 연결 구간 5"></section>
 
     <!-- S-04 — 원본 1899×1024. 반복 문단 역시 원본 그대로 유지. -->
     <section class="screen screen--story" id="S-04" data-screen-id="S-04" data-rail-theme="navy" data-width-multiplier="1.31875" aria-labelledby="s04-title">
@@ -7874,7 +7876,7 @@
   </div>
 </main>
 
-<script src="js/main.js?v=14"></script>
+<script src="js/main.js?v=15"></script>
 <script src="js/opening.js?v=8"></script>
 </body>
 </html>

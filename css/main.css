@@ -38,50 +38,67 @@
 
   /* 기본/본문(메뉴바 포함) 서체: 프리텐다드 */
   --font-sans: 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif;
-  /* 강조 서체: 마루 부리(MaruBuri, 네이버). 폰트 파일이 fonts/ 안에
-     없으면 세리프로 대체.
-     2026-10-12: 함렛(Hahmlet)에서 교체 — 포인트 서체를 마루 부리로
-     바꿔달라는 요청. 공식 배포처: https://hangeul.naver.com/font/maru
-     (SIL OFL 1.1 — Naver 나눔글꼴 라이선스 전문에 MaruBuri가 Reserved
-     Font Name으로 명시되어 있음) */
-  --font-emphasis: 'MaruBuri', 'Noto Serif KR', serif;
+  /* 본명조 한국어판 — Adobe 공식 가변 WOFF2 원본, SIL OFL 1.1. */
+  --font-emphasis: 'Source Han Serif KR', serif;
+  --font-emphasis-tracking-adjust: -0.025em;
 
   /* 레일(좌측 메뉴바) 폭 — REFERENCE_CANALS.md 분석 당시 Canals Amsterdam의
      #nav 규격(1440 기준 60px 고정폭)과 동일 비율로 맞춤 */
   --rail-w: 4.1667vw; /* 60 / 1440 */
 }
 
-/* 강조 서체 — 마루 부리(MaruBuri, 네이버, SIL OFL 1.1). 기존 코드가
-   쓰던 두 굵기(500=일반, 600=진함) 역할에 맞춰 Regular(400)/
-   SemiBold(600)만 받아왔다 — 마루 부리엔 500(Medium)이 없어 가장
-   가까운 아래쪽 굵기(400)로 대체. 디자인에 실제로 쓰이는 굵기만
-   포함, 불필요한 굵기(ExtraLight/Light/Bold)는 추가하지 않음.
-   공식 배포는 OTF/TTF만 제공해서 fontTools로 WOFF2 변환(OFL
-   PERMISSION & CONDITIONS가 포맷 변환을 허용). 라이선스 원문은
-   fonts/MaruBuri-OFL.txt 참고. */
+/* 본명조 2.003: 실제 wght 축 250–900을 그대로 등록한다.
+   Regular 400 / Medium 500 / SemiBold 600 / Bold 700을 모두 포함.
+   파일 원본·출처·라이선스: fonts/SourceHanSerif-README.md 참고. */
 @font-face {
-  font-family: 'MaruBuri';
-  src: url('../fonts/MaruBuri-Regular.woff2') format('woff2');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'MaruBuri';
-  src: url('../fonts/MaruBuri-SemiBold.woff2') format('woff2');
-  font-weight: 600;
+  font-family: 'Source Han Serif KR';
+  src: url('../fonts/SourceHanSerifKR-VF.otf.woff2') format('woff2');
+  font-weight: 250 900;
   font-style: normal;
   font-display: swap;
 }
 
-/* 마루 부리는 한자(한문) 글리프를 포함하지 않는다(入, 口, 氐, 宿 등은
-   빈 글자로 렌더링됨 — 함렛 때와 동일한 제약, fontTools cmap으로
-   실측 확인됨). 入口처럼 한자가 들어가는 강조 요소에는 --font-emphasis
-   대신 이 클래스를 써서 한자가 보이는 세리프로 예외 처리한다. 28수
-   한자 표기(角亢氐房 등)가 들어가는 추후 화면에서도 동일하게 재사용할
-   것. */
+/* 본명조를 지정하는 영역만 기본 자간을 좁힌다.
+   :where로 기존 개별 자간의 우선순위를 유지하며, 그 값은 아래에서
+   공통 보정값을 더한다. 동일 속성을 상속하므로 자식에 중복 누적되지 않는다.
+   날짜 select는 브라우저 기본 자간을 쓰므로 명시적으로 포함한다. */
+:where(
+  .font-hanja-safe,
+  .rail__logo-text,
+  .nav-overlay__glyph,
+  .nav-overlay__toc-label,
+  .m00__tagline,
+  .e00__glyph,
+  .e00__intro,
+  .e01__headline,
+  .e02__headline,
+  .e02__sample-title,
+  .f00__glyph,
+  .c00__glyph,
+  .s00__glyph,
+  .f00__intro,
+  .c00__intro,
+  .s00__intro,
+  .s01__title,
+  .story__title,
+  .story__guardian h3,
+  .f01__headline,
+  .f01__date-field,
+  .f01__date-field select,
+  .f02__title,
+  .c-ref__title,
+  .c-ref__name,
+  .c-ref__directions span,
+  .c01__preview-name,
+  .c03__question,
+  .c04__headline
+) {
+  letter-spacing: var(--font-emphasis-tracking-adjust);
+}
+
+/* 기존 한자 대체용 클래스도 한글·한자를 모두 지원하는 본명조로 통합. */
 .font-hanja-safe {
-  font-family: 'Noto Serif KR', 'Batang', serif !important;
+  font-family: var(--font-emphasis) !important;
 }
 
 * { box-sizing: border-box; }
@@ -278,7 +295,7 @@ h1, h2, h3, p { margin: 0; }
   writing-mode: vertical-rl;
   text-orientation: upright;
   font-family: var(--font-emphasis);
-  font-weight: 500; /* 2026-10-14: 더 얇게 해달라는 요청으로 600(SemiBold) -> 500(Regular, 마루 부리에서 로드한 두 굵기 중 가장 얇음) */
+  font-weight: 300; /* Light */
   font-size: 1.25vw;
   line-height: 1.15;
   /* vertical-rl + text-orientation:upright에서는 글자가 세로로
@@ -287,7 +304,7 @@ h1, h2, h3, p { margin: 0; }
      적용된다(Playwright로 getBoundingClientRect 세로 간격 실측해
      확인). 2026-10-15: 0.05em -> 0.08em. 2026-10-16: "살짝만 더"
      재요청으로 0.08em -> 0.1em. */
-  letter-spacing: 0.1em; /* 2026-10-14: 0.3em으로 벌렸다가 "원래대로" 요청으로 되돌림 */
+  letter-spacing: calc(0.175em + var(--font-emphasis-tracking-adjust));
   color: var(--rail-fg);
   transition: color 0.35s ease;
 }
@@ -467,7 +484,7 @@ h1, h2, h3, p { margin: 0; }
 .nav-overlay__col--toc {
   cursor: default;
 }
-.nav-overlay__col--opening {
+.nav-overlay__col--spacer {
   flex: 0 0 7.639vw; /* 110 / 1440 */
   border-right: none;
 }
@@ -497,7 +514,7 @@ h1, h2, h3, p { margin: 0; }
   writing-mode: vertical-rl;
   text-orientation: upright;
   font-family: var(--font-emphasis);
-  font-weight: 600; /* MaruBuri SemiBold — 강조가 필요한 큰 글자 */
+  font-weight: 600; /* 본명조 SemiBold — 강조가 필요한 큰 글자 */
   font-size: 7vw;
   line-height: 0.95;
   color: var(--white);
@@ -511,7 +528,7 @@ h1, h2, h3, p { margin: 0; }
 .nav-overlay__sublist {
   position: absolute;
   left: 2.083vw;
-  top: 71.875vh; /* 네 칼럼의 목록 시작선: 736 / 1024 */
+  top: 69.53125vh; /* 네 칼럼 공통: 기존 시작선보다 24 / 1024 상향 */
   font-size: 0.9vw;
   line-height: 2;
   /* 기본(네이비) 배경 위에서도 보이도록 옅은 톤으로 — 칼럼에 호버/
@@ -534,24 +551,15 @@ h1, h2, h3, p { margin: 0; }
   writing-mode: vertical-rl;
   text-orientation: upright;
   font-family: var(--font-emphasis);
-  font-weight: 600; /* MaruBuri SemiBold — 강조가 필요한 큰 글자 */
+  font-weight: 500; /* 본명조 Medium */
   font-size: 3.2vw;
+  letter-spacing: calc(0.05em + var(--font-emphasis-tracking-adjust));
   color: var(--white);
+  padding: 0;
+  text-align: start;
+  cursor: pointer;
 }
-
-.nav-overlay__vertical-text {
-  position: absolute;
-  left: 2.5vw;
-  bottom: 9.77vh; /* 100 / 1024 */
-  display: inline-block;
-  transform: rotate(-90deg);
-  transform-origin: left bottom;
-  white-space: nowrap;
-  font-size: 0.75vw;
-  font-weight: 300;
-  letter-spacing: 0.04em;
-  color: var(--text-muted-on-navy);
-}
+.nav-overlay__toc-label:focus-visible { outline: 1px solid var(--white); outline-offset: 6px; }
 
 /* ============================================================
    가로 진행 뷰포트 / 트랙
@@ -1025,15 +1033,14 @@ h1, h2, h3, p { margin: 0; }
      따라야 한다. 창 비율이 1440:1024가 아니면 vh 기준으로는
      반드시 어긋난다. */
   top: 3.7vw; /* 로고는 그대로, 텍스트만 살짝 아래로 */
-  right: 18.9vw; /* 2026-10-16: 18.3vw에서 "조금만 더 왼쪽으로" 재요청
-    — 18.9vw로 소폭 더 당겼다(로고 위치/크기는 불변). */
+  right: 15.832vw; /* 로고와 함께 오른쪽으로 0.5vw 추가 이동. */
   text-align: right;
   /* 2026-10-14 2차: O-01의 .o01__subtitle과 동일한 색(#DCE6F0)으로
      통일 — 로고와 같은 톤이 되도록 var(--white) 대신 직접 지정. */
   color: #DCE6F0;
-  font-family: var(--font-emphasis); /* 마루 부리(MaruBuri) */
-  font-weight: 500; /* 보유한 두 두께(500/600) 중 얇은 쪽 */
-  font-size: 1.04vw;
+  font-family: var(--font-emphasis); /* 본명조 */
+  font-weight: 400; /* Regular */
+  font-size: 0.84474vw;
   line-height: 1.45;
 }
 /* 2026-10-14: 두 줄("28수로 보는"/"별자리 운세")의 실제 렌더링 폭이
@@ -1046,7 +1053,7 @@ h1, h2, h3, p { margin: 0; }
    크기와 함께 비례하도록 px가 아니라 em 단위를 썼다. O-01 부제목
    (.o01__subtitle)에는 적용하지 않음 — 별개 요소. */
 .m00__tagline-sub {
-  letter-spacing: 0.0313em;
+  letter-spacing: calc(0.0313em + var(--font-emphasis-tracking-adjust));
 }
 
 .m00__wordmark {
@@ -1061,9 +1068,10 @@ h1, h2, h3, p { margin: 0; }
      가로세로 비율이 1440:1024에서 벗어날 때마다 로고와 어긋난다.
      같은 1440 기준 픽셀값(-66.25px)을 vw로 환산해 로고 크기와
      같은 축(가로 폭)을 기준으로 움직이게 했다. */
-  top: -4.601vw;
-  right: 5.9vw;
-  width: 15.9vw;
+  /* 실제 로고의 위쪽 기준점과 크기를 유지하고 오른쪽으로 0.5vw 추가 이동. */
+  top: -3.069vw;
+  right: 5.7601vw;
+  width: 12.914775vw;
   height: auto; /* 원본 비율(343.45:754.5) 그대로, 찌그러짐 없음 */
   display: block;
   /* 2026-10-14 2차: "로고 색을 O-01과 통일" 요청 — O-01의 .o01__logo와
@@ -1122,7 +1130,7 @@ h1, h2, h3, p { margin: 0; }
   writing-mode: vertical-rl;
   text-orientation: upright;
   font-family: var(--font-emphasis);
-  font-weight: 600; /* MaruBuri SemiBold — 강조가 필요한 큰 글자 */
+  font-weight: 600; /* 본명조 SemiBold — 강조가 필요한 큰 글자 */
   font-size: 9vw;
   line-height: 0.95;
   color: var(--white);
@@ -1133,8 +1141,8 @@ h1, h2, h3, p { margin: 0; }
   left: 33.328vw; /* 562 / 1440, 전체 텍스트 블록 왼쪽으로 이동 */
   top: 54.199vh;  /* 555 / 1024 */
   width: 25vw;
-  font-family: var(--font-emphasis); /* 마루 부리(MaruBuri) */
-  font-weight: 500; /* 보유한 두 두께(500/600) 중 얇은 쪽 */
+  font-family: var(--font-emphasis); /* 본명조 */
+  font-weight: 400; /* Regular */
   font-size: 1.53vw;
   line-height: 1.55;
   color: var(--white);
@@ -1258,36 +1266,19 @@ h1, h2, h3, p { margin: 0; }
 
 .e02__photo-wrap {
   position: absolute;
-  left: 7.639vw; /* 110 / 1440 — 왼쪽 끝은 그대로 고정 */
-  top: 3.906vh;  /* 40 / 1024 */
-  width: 40.278vw; /* (700 - 60 - 60) / 1440 — 오른쪽 끝을 60px 더 왼쪽으로 */
-  height: 91.8vh;  /* 940 / 1024 */
+  left: 0; /* E-02 파란 배경의 왼쪽 경계까지만 확장. */
+  top: 0;
+  width: 51vw; /* 왼쪽 경계는 유지하고 이미지 프레임만 오른쪽으로 확장. */
+  height: 100%; /* 파란 배경의 상·하단 경계까지 확장. */
   overflow: hidden;
 }
 .e02__photo-img {
-  /* e-02-constellation.png(1440x1024)은 시안 캔버스 전체와 같은 크기로
-     준비된 소스라, 확대/축소 없이 1:1로 깔고 이 프레임 자신의 위치만큼
-     반대로 당겨서 정확히 시안과 같은 영역만 보이게 자른다.
-     width/height를 100vw/100vh처럼 가로·세로 따로 잡으면 뷰포트 비율이
-     1440:1024가 아닐 때 이미지 자체가 가로나 세로로 눌리거나 늘어난다
-     (반응형 사이트에서 모니터마다 사진 비율이 달라지는 버그). 그래서
-     캔버스 폭(--e02-canvas-w) 하나만 "뷰포트를 항상 덮을 만큼 크게"
-     정하고, aspect-ratio로 높이를 거기서 그대로 유도해서 원본 비율이
-     뷰포트 크기와 무관하게 항상 유지되게 한다. left/top도 전부 같은
-     캔버스 폭 기준 비율로 계산해서, 비율이 깨지지 않는 한 크롭 위치도
-     항상 시안과 같은 지점을 가리킨다. */
-  --e02-canvas-w: max(100vw, 140.625vh); /* 140.625 = 1440/1024 * 100 */
-  /* 줌(--e02-zoom, JS가 스크롤에 맞춰 매 프레임 덮어씀 — 아래 값은
-     JS 실행 전 기본값/폴백용): 1보다 작으면 이미지를 그만큼 작게
-     그려서 틀(.e02__photo-wrap, 크기는 그대로) 안에 더 넓은 캔버스
-     영역이 들어오게 한다. 틀이 보여주는 크롭 중심(캔버스 기준
-     x=400, y=510 — 원래 크롭 영역의 중앙)은 줌 값이 바뀌어도 항상
-     그대로 유지되도록 left/top을 줌의 1차식으로 일반화해 뒀다
-     (아래 두 calc를 봐도 어떤 --e02-zoom 값에도 중심이 안 틀어짐).
-     주의: 틀의 세로 940px가 원본 캔버스 세로(1024px)의 91.8%를 이미
-     차지하고 있어서, 중심을 유지하며 줌아웃할 수 있는 한계가 세로
-     기준 약 8%(Z≈0.92)뿐이다 — 그 이상 줄이면 캔버스 바깥(빈 캔버스
-     여백)이 보이기 시작한다. */
+  /* 원본(1440x1024)의 비율을 유지하면서 확대된 프레임을 채운다.
+     가로·세로를 따로 늘리지 않고 캔버스 폭 하나로 높이를 유도한다.
+     정착 상태의 크롭은 유지하고, 패럴랙스는 transform의 가로 이동만 사용한다. */
+  --e02-canvas-w: max(100vw, 151.9vh); /* 최종 줌 0.93에서도 확장된 프레임 하단에 빈틈이 없도록 원본 비율 유지. */
+  /* 기존 최종 배율 0.93으로 고정한다. 스크롤에 따른 확대·축소는 하지 않는다.
+     원본 전체 캔버스의 여유분 안에서만 이동하며 overflow:hidden으로 마스킹한다. */
   --e02-zoom: 0.93;
   position: absolute;
   left: calc(var(--e02-canvas-w) / 1440 * (290 - 400 * var(--e02-zoom)));
@@ -1299,7 +1290,7 @@ h1, h2, h3, p { margin: 0; }
 
 .e02__breadcrumb {
   position: absolute;
-  left: 54.167vw; /* (900 - 60 - 60) / 1440 — 사진 오른쪽 끝이 더 줄어든 만큼 */
+  left: 56.25vw; /* 텍스트·청룡 프레임과 함께 왼쪽으로 0.5vw 추가 이동. */
   top: 8.105vh; /* (103 - 10 - 10) / 1024 — 조금 더 위로 */
 }
 .e02__breadcrumb-label {
@@ -1314,7 +1305,7 @@ h1, h2, h3, p { margin: 0; }
 
 .e02__headline {
   position: absolute;
-  left: 54.167vw; /* (900 - 60 - 60) / 1440 */
+  left: 56.25vw;
   top: 20.31vh; /* (228 - 10 - 10) / 1024 — 조금 더 위로 */
   font-family: var(--font-emphasis);
   font-weight: 600;
@@ -1325,12 +1316,12 @@ h1, h2, h3, p { margin: 0; }
 
 .e02__sample {
   position: absolute;
-  left: 54.167vw; /* (900 - 60 - 60) / 1440 */
+  left: 56.25vw;
   top: 39.26vh; /* (422 - 10 - 10) / 1024 — 조금 더 위로 */
 }
 .e02__sample-title {
   font-family: var(--font-emphasis);
-  font-weight: 500; /* 명시적으로 지정 — @font-face에서 MaruBuri-Regular.otf를 500으로 등록해둠(마루 부리엔 실제 500이 없어서) */
+  font-weight: 400; /* Regular */
   font-size: 1.8vw;
   color: var(--white);
   margin-bottom: 0.8vh;
@@ -1342,7 +1333,7 @@ h1, h2, h3, p { margin: 0; }
 
 .e02__body {
   position: absolute;
-  left: 54.167vw; /* (900 - 60 - 60) / 1440 */
+  left: 56.25vw;
   top: 51.37vh; /* 526 / 1024 */
   width: 36vw;
   display: flex;
@@ -1362,7 +1353,7 @@ h1, h2, h3, p { margin: 0; }
    바로 지정한다. */
 .e02__dragon-wrap {
   position: absolute;
-  left: 41.042vw; /* (593 - 2) / 1440 — 아주 살짝 더 왼쪽으로 */
+  left: 43.125vw; /* 텍스트와 함께 왼쪽으로 0.5vw 추가 이동. */
   top: 66.41vh;   /* 680 / 1024 */
   width: 30.694vw; /* (472 - 30) / 1440 — 프레임 가로 길이를 더 줄임 */
   height: 22.46vh; /* 230 / 1024 — 프레임 위아래 폭을 더 늘림 */
@@ -1395,9 +1386,8 @@ h1, h2, h3, p { margin: 0; }
 
 .e02__dragon-caption {
   position: absolute;
-  /* .e02__dragon-wrap 오른쪽 끝(591 + 442 = 1033px)에서 23px 여백을
-     두는 위치 — 프레임이 왼쪽으로 이동한 만큼 캡션도 같이 이동. */
-  left: 73.333vw; /* (591 + 442 + 23) / 1440 */
+  /* 청룡 프레임과 같은 거리만큼 이동해 기존 캡션 간격을 유지한다. */
+  left: 75.416vw;
   top: 78.32vh;  /* 802 / 1024 */
   width: 15vw;
 }
@@ -1498,7 +1488,7 @@ h1, h2, h3, p { margin: 0; }
   top: 54.199vh;
   width: 25vw;
   font-family: var(--font-emphasis);
-  font-weight: 500;
+  font-weight: 400;
   font-size: 1.53vw;
   line-height: 1.55;
 }
@@ -1672,7 +1662,7 @@ h1, h2, h3, p { margin: 0; }
   font-family: var(--font-emphasis);
   /* E-02의 1.8vw를 기본으로, 고정된 제목 행 안에서 보조 라벨과 겹치지 않게 제한. */
   font-size: min(1.8vw, 2.53125vh);
-  font-weight: 500;
+  font-weight: 400;
   line-height: 2.929688vh;
 }
 .story__direction {
@@ -1683,6 +1673,18 @@ h1, h2, h3, p { margin: 0; }
   line-height: 2.148438vh;
 }
 .story__guardian-body { margin-top: 1.660156vh; }
+#S-03 .story__guardian-hanja {
+  margin-inline-start: 0.65em;
+  font-family: var(--font-emphasis);
+  font-size: 0.62em;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: var(--font-emphasis-tracking-adjust);
+}
+#S-03 .story__direction { margin-top: 0.78125vh; }
+/* 본문의 기준선은 유지하고 제목과 방위 라벨 사이에 여백을 확보한다. */
+#S-03 .story__guardian-body { margin-top: 0.87890625vh; }
+#S-04 > .story__body { top: calc(var(--y) * 100vh / 1024 - 1.5625vh); }
 .story__ph--shadow { box-shadow: 0 1.171875vh 1.666667vw rgba(0, 0, 0, 0.12); }
 
 /* 이야기 페이지의 색상만 테마별로 지정한다. placeholder와 서체 규칙은 공통 유지. */
@@ -1925,7 +1927,7 @@ h1, h2, h3, p { margin: 0; }
 .c-ref__title {
   font-family: var(--font-emphasis);
   font-size: 3.263889vw;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.3;
   white-space: nowrap;
   color: var(--navy-brand);
@@ -1945,7 +1947,7 @@ h1, h2, h3, p { margin: 0; }
 .c-ref__name {
   font-family: var(--font-emphasis);
   font-size: 1.388889vw;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.5;
   color: var(--navy-brand);
   white-space: nowrap;
@@ -1960,49 +1962,244 @@ h1, h2, h3, p { margin: 0; }
   text-orientation: upright;
   font-family: var(--font-emphasis);
   font-size: 1.388889vw;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.1;
-  letter-spacing: 0.14em;
+  letter-spacing: calc(0.14em + var(--font-emphasis-tracking-adjust));
   color: var(--navy-brand);
 }
 .c01__head-line { width: 24.930556vw; border-top: 1px solid var(--navy-brand); }
 .c01__head-dot { width: 0.555556vw; height: 0.78125vh; background: var(--navy-brand); border-radius: 50%; }
 .c01__divider { height: 55.957031vh; border-left: 1px solid #D9D9D9; }
-.c01__preview-name { font-family: var(--font-emphasis); font-size: 3.263889vw; font-weight: 500; line-height: 1.3; color: var(--navy-brand); text-align: center; }
+.c01__preview-name { font-family: var(--font-emphasis); font-size: 3.263889vw; font-weight: 400; line-height: 1.3; color: var(--navy-brand); text-align: center; }
 .c01__preview-hanja { font-size: 1vw; line-height: 1.7; color: #AAA; text-align: center; }
 .c01__preview-link { font-size: 0.95vw; line-height: 1.8; color: #C7C7C7; text-align: center; }
+
+/* C-01 전용: 이미지 하단과 그 아래 콘텐츠는 고정하고 상단만 확장한다. */
+.screen--c01 { --c01-image-lift: 2.9296875vh; /* 30 / 1024 */ }
+.screen--c01 .c01__image {
+  top: auto;
+  bottom: calc((1024 - var(--y) - var(--h)) * 100vh / 1024);
+  height: calc(var(--h) * 100vh / 1024 + var(--c01-image-lift));
+}
+.screen--c01 .c01__upper {
+  top: calc(var(--y) * 100vh / 1024 - var(--c01-image-lift));
+}
+.screen--c01 .c01__head-dot {
+  width: 0.555556vw;
+  height: 0.555556vw;
+  aspect-ratio: 1 / 1;
+  flex-shrink: 0;
+  /* 1px 가로선의 중심에 원의 중심을 맞춘다. */
+  top: calc(var(--y) * 100vh / 1024 - var(--c01-image-lift) + 0.5px - 0.277778vw);
+}
+.screen--c01 .c01__preview-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8em;
+  font-size: 0.95vw;
+  /* 공간이 충분하면 링크의 기존 Y=919 기준선을 유지한다.
+     부족할 때만 문단의 실제 높이와 간격을 수용하도록 늘어난다. */
+  min-height: calc(216 * 100vh / 1024 + 1.8em);
+}
+.screen--c01 .c01__preview-desc {
+  width: calc(100% - 1vw);
+  white-space: normal;
+  overflow-wrap: break-word;
+  text-align: justify;
+  text-align-last: start;
+}
+/* 원문은 보존하고, 기존 수동 줄바꿈 대신 설명 블록 폭 안에서 흐르게 한다. */
+.screen--c01 .c01__preview-desc br { display: none; }
+.screen--c01 .c01__preview-link {
+  display: block;
+  width: 100%;
+  margin-top: auto;
+}
+
+/* C-01 검색과 방위 선택: 이미지 및 주변 콘텐츠의 좌표는 유지한다. */
+
+.screen--c01 { --c01-info-lift: 1.953125vh; --c01-copy-tighten: 0.9765625vh; }
+.screen--c01 :is(.c01__preview-name, .c01__preview-hanja, .c01__preview-copy) {
+  top: calc(var(--y) * 100vh / 1024 - var(--c01-info-lift));
+}
+.screen--c01 .c01__preview-copy {
+  top: calc(var(--y) * 100vh / 1024 - var(--c01-info-lift) - var(--c01-copy-tighten));
+}
+
+.screen--c01 #c01-title {
+  top: calc(var(--y) * 100vh / 1024 - var(--c01-image-lift) - 0.78125vh);
+}
+.screen--c01 .c01__preview-name { font-size: 2.9375vw; }
+/* 제목 높이 감소로 부제와의 여백만 늘리고 부제 기준선은 유지한다. */
+.screen--c01 .c01__search-input {
+  top: calc(var(--y) * 100vh / 1024 - var(--c01-image-lift) - 2em);
+  width: 24.930556vw;
+  height: 2em;
+  padding: 0 0 0.25em;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--navy-brand);
+  font-family: var(--font-sans);
+  font-size: 0.95vw;
+  line-height: 1.5;
+  cursor: text;
+  appearance: none;
+}
+.screen--c01 .c01__search-input::-webkit-search-cancel-button { appearance: none; }
+.screen--c01 .c01__search-input:focus-visible { outline: none; }
+.screen--c01 .c01__head-dot { padding: 0; border: 0; color: inherit; }
+.screen--c01 .c01__head-dot::before { content: ''; position: absolute; inset: -0.65vw; }
+.screen--c01 .c01__search-status {
+  top: calc(var(--y) * 100vh / 1024 - var(--c01-image-lift) + 0.5em);
+  width: 24.930556vw;
+  color: var(--navy-brand);
+  font-family: var(--font-sans);
+  font-size: 0.75vw;
+  line-height: 1.5;
+}
+:is(.screen--c01, .screen--c02) .c01__directions { width: 32.5vw; align-items: flex-start; }
+:is(.screen--c01, .screen--c02) .c01__direction { display: flex; align-items: flex-start; flex-shrink: 0; gap: 1.1vw; }
+:is(.screen--c01, .screen--c02) .c01__direction-toggle { padding: 0; display: flex; flex-shrink: 0; }
+:is(.screen--c01, .screen--c02) .c01__direction-toggle span { display: block; }
+:is(.screen--c01, .screen--c02) .c01__directions.is-expanded { gap: 1.45vw; }
+:is(.screen--c01, .screen--c02) .c01__direction-toggle[aria-expanded="true"] span { text-shadow: 0 0 0.025em currentColor; }
+:is(.screen--c01, .screen--c02) .c01__stars { display: flex; flex-direction: row; gap: 0.65vw; padding-top: 0.12em; writing-mode: horizontal-tb; }
+:is(.screen--c01, .screen--c02) .c01__stars[hidden] { display: none; }
+:is(.screen--c01, .screen--c02) .c01__star {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  flex-shrink: 0;
+  padding: 0;
+  font-family: var(--font-emphasis);
+  font-size: 0.95vw;
+  font-weight: 400;
+  line-height: 1.35;
+  letter-spacing: var(--font-emphasis-tracking-adjust);
+  color: var(--navy-brand);
+  opacity: 0.7;
+}
+:is(.screen--c01, .screen--c02) .c01__star[aria-pressed="true"] { opacity: 1; text-decoration: underline; text-underline-offset: 0.2em; }
+:is(.screen--c01, .screen--c02) :is(.c01__head-dot, .c01__direction-toggle, .c01__star):focus-visible { outline: 1px solid var(--navy-brand); outline-offset: 4px; }
+
 .c02__legend { display: flex; gap: 1.388889vw; font-size: 0.9vw; line-height: 1.6; white-space: nowrap; }
 .c02__legend span::before { content: ''; display: inline-block; width: 0.555556vw; height: 0.78125vh; margin-right: 0.555556vw; border-radius: 50%; background: #929292; }
 .c02__directions { gap: 2.777778vw; }
 .c02__relation { font-size: 0.95vw; font-weight: 400; line-height: 1.8; white-space: nowrap; }
 .c02__relation-copy { position: absolute; left: 5.763889vw; top: 3.515625vh; }
-.c03__question { font-family: var(--font-emphasis); font-size: 1.53vw; font-weight: 500; line-height: 1.55; }
+/* C-02 전용: 왼쪽 그룹만 24 / 1440만큼 이동하고 기존 간격은 유지한다. */
+.screen--c02 { --c02-left-shift: 1.666666667vw; }
+.screen--c02 .c02__left { left: calc(var(--x) * 100vw / 1440 - var(--c02-left-shift)); }
+.screen--c02 .c02__legend span { display: inline-flex; align-items: center; }
+.screen--c02 .c02__legend span::before {
+  width: 0.555556vw;
+  height: 0.555556vw;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.screen--c02 .c02__selection {
+  display: grid;
+  grid-template-columns: 14.513888889vw minmax(0, 1fr);
+  column-gap: 2.361111111vw;
+  grid-template-rows: 12.01171875vh auto;
+}
+.screen--c02 .c02__selected-image { grid-column: 1; grid-row: 1 / 3; height: auto; }
+.screen--c02 .c02__directions { grid-column: 2; grid-row: 2; align-items: flex-start; }
+.screen--c02 .c02__directions.is-expanded { gap: 1.45vw; }
+.screen--c02 .c02__relation {
+  display: grid;
+  grid-template-columns: 3.263888889vw max-content;
+  column-gap: 2.5vw;
+  grid-template-rows: 3.515625vh auto;
+}
+.screen--c02 .c02__relation > p { grid-column: 1 / 3; grid-row: 1; place-self: start; }
+.screen--c02 .c02__relation-copy { position: static; grid-column: 2; grid-row: 2; }
+.screen--c02 .c02__relation-image { grid-column: 1; grid-row: 2; height: auto; align-self: stretch; }
+
+/* C-02 세부 보정: 주변 콘텐츠와 이미지 기준선은 유지한다. */
+.screen--c02 #c02-title { top: calc(var(--y) * 100vh / 1024 - 0.9765625vh); }
+.screen--c02 .c02__legend { top: calc(var(--y) * 100vh / 1024 + 0.78125vh); }
+.screen--c02 .c01__direction-toggle { display: grid; }
+.screen--c02 .c01__direction-toggle::before {
+  /* 원래 크기의 라벨로 배치 공간만 보존해 이미지 높이와 방위명 X좌표를 고정한다. */
+  content: attr(aria-label);
+  visibility: hidden;
+  grid-area: 1 / 1;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  font-family: var(--font-emphasis);
+  font-size: 1.388889vw;
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: calc(0.14em + var(--font-emphasis-tracking-adjust));
+}
+.screen--c02 .c01__direction-toggle span { grid-area: 1 / 1; place-self: start; font-size: 1.25vw; }
+.c03__question { font-family: var(--font-emphasis); font-size: 1.53vw; font-weight: 400; line-height: 1.55; }
 .c03__picker { display: flex; align-items: baseline; justify-content: space-between; background: none; border: 0; padding: 0; text-align: left; cursor: pointer; }
 .c03__picker .c-ref__hanja { position: absolute; left: 8.263889vw; top: 0.292969vh; }
 .c03__picker:focus-visible { outline: 1px solid var(--white); outline-offset: 4px; }
-.c03__accordion { width: 19.861111vw; height: 24.609375vh; }
-.c03__acc-item { position: absolute; left: 0; width: 100%; }
-.c03__acc-item:nth-child(1) { --row-offset: 0vh; top: 0; }
-.c03__acc-item:nth-child(2) { --row-offset: 6.542969vh; top: var(--row-offset); }
-.c03__acc-item:nth-child(3) { --row-offset: 13.085938vh; top: var(--row-offset); }
-.c03__acc-item:nth-child(4) { --row-offset: 19.628906vh; top: var(--row-offset); }
-.c03__acc-head { display: block; width: 100%; height: 4.980469vh; padding: 0; border: 0; background: #808080; cursor: pointer; }
-.c03__acc-head:focus-visible { outline: 1px solid var(--white); outline-offset: 3px; }
-.c03__acc-body {
-  /* 펼침 패널은 설명문과 접힌 행 사이의 빈 공간에 겹친다. 네 행은 움직이지 않는다. */
-  position: absolute; top: calc(-16.015625vh - var(--row-offset)); left: 0;
-  display: none; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.555556vw;
-  width: 100%; padding: 0.555556vw; background: var(--navy-brand);
-  max-height: 15.625vh; overflow-y: auto;
-  border: 1px solid var(--text-muted-on-navy); box-shadow: 0 4px 16px rgba(0,0,0,.2);
+
+.screen--c03 { --c03-surface: #065182; background: var(--c03-surface); }
+.screen--c03 .c03__cross { height: 1.666666667vw; transform: translate(-50%, -50%); color: var(--white); pointer-events: none; }
+
+/* C-01/C-02와 같은 세로쓰기·가로 펼침을 C-03의 기존 선택 슬롯에 연결한다. */
+.screen--c03 { --c03-bottom-shift: 1.5625vh; }
+.screen--c03 :is(.c03__accordion, #c03-confirm-label, .c03__confirm-btn) {
+  top: calc(var(--y) * 100vh / 1024 + var(--c03-bottom-shift));
 }
-.c03__acc-item.is-open { z-index: 2; }
-.c03__acc-item.is-open .c03__acc-body { display: grid; }
-.c03__acc-star { display: flex; align-items: baseline; justify-content: center; gap: 0.416667vw; padding: 0.390625vh 0.277778vw; font-family: var(--font-sans); font-size: 0.9vw; line-height: 1.6; color: var(--white); background: transparent; border: 1px solid var(--text-label-on-navy); cursor: pointer; }
-.c03__acc-star:hover, .c03__acc-star:focus-visible { background: var(--cream); color: var(--navy-brand); }
-.c03__confirm-btn { width: 19.861111vw; height: 4.980469vh; border: none; padding: 0; font-family: var(--font-sans); font-size: 1.04vw; font-weight: 400; background: #808080; color: #444; cursor: pointer; }
-.c03__confirm-btn:disabled { cursor: default; }
-.c04__headline { font-family: var(--font-emphasis); font-size: 1.53vw; font-weight: 500; line-height: 1.4; text-align: center; overflow-wrap: anywhere; }
+.screen--c03 .c03__accordion { display: flex; align-items: flex-start; gap: 5vw; width: 32.5vw; }
+.screen--c03 .c03__accordion:has(.is-open) { gap: 1.3vw; }
+.screen--c03 .c03__acc-item { display: flex; align-items: flex-start; gap: 1.1vw; flex-shrink: 0; }
+.screen--c03 .c03__acc-head {
+  display: block; padding: 0; flex-shrink: 0;
+  width: 1.5277779vw; /* 기존 라벨 폭을 유지해 네 방위 사이의 가로 간격을 보존한다. */
+  border: 0; background: transparent; color: var(--white);
+  font-family: var(--font-emphasis); font-size: 1.25vw; font-weight: 400;
+  letter-spacing: calc(0.14em + var(--font-emphasis-tracking-adjust)); line-height: 1.1;
+}
+.screen--c03 .c03__acc-head span { display: block; writing-mode: vertical-rl; text-orientation: upright; white-space: nowrap; }
+.screen--c03 .c03__acc-head[aria-expanded="true"] { text-shadow: 0 0 0.025em currentColor; }
+.screen--c03 .c03__acc-body { display: none; flex-direction: row; gap: 0.65vw; padding-top: 0.12em; }
+.screen--c03 .c03__acc-item.is-open .c03__acc-body { display: flex; }
+.screen--c03 .c03__acc-star {
+  display: block; flex-shrink: 0; padding: 0;
+  writing-mode: vertical-rl; text-orientation: upright;
+  font-family: var(--font-emphasis); font-size: 0.95vw; font-weight: 400;
+  letter-spacing: var(--font-emphasis-tracking-adjust); line-height: 1.35;
+  color: var(--white); background: transparent; border: 0;
+}
+.screen--c03 :is(.c03__acc-head, .c03__acc-star, .c03__confirm-btn):focus-visible { outline: 1px solid var(--white); outline-offset: 3px; }
+.screen--c03 .c03__acc-star:hover { text-decoration: underline; text-underline-offset: 0.2em; }
+.screen--c03 #c03-confirm-label { white-space: normal; overflow-wrap: break-word; }
+.screen--c03 .c03__confirm-btn {
+  width: 17.361111vw; height: 4.980469vh; padding: 0; border: 0; border-radius: 0;
+  font-family: var(--font-emphasis); font-size: 1.04vw; font-weight: 400;
+  letter-spacing: var(--font-emphasis-tracking-adjust); text-align: center;
+  background: var(--white); color: var(--c03-surface); cursor: pointer;
+}
+.screen--c03 .c03__confirm-btn:disabled { opacity: 0.5; cursor: default; }
+
+.screen--c04 #c04-headline { top: calc(var(--y) * 100vh / 1024 - 1.3671875vh); }
+.screen--c04 :is(#c04-result-note, #c04-note-body) { left: calc(var(--x) * 100vw / 1440 + 2.222222222vw); }
+.screen--c04 .c04__base-lines { opacity: 0.1; }
+.screen--c04 .c04__lit-lines { clip-path: inset(0 100% 0 0); }
+.screen--c04 .c04__points circle { opacity: 0.12; }
+.screen--c04 .c04__points circle:first-child { opacity: 1; }
+.screen--c04 .c04__after-constellation { opacity: 0; transform: translateY(4px); }
+.screen--c04.is-constellation-playing .c04__lit-lines { animation: c04-connect 3.2s linear both; }
+.screen--c04.is-constellation-playing .c04__points circle:not(:first-child) { animation: c04-point 0.35s ease var(--point-delay) both; }
+.screen--c04.is-constellation-playing .c04__after-constellation { animation: c04-copy 0.7s ease 3.6s both; }
+.screen--c04.is-constellation-playing :is(.c04__lit-lines, .c04__points circle:not(:first-child), .c04__after-constellation) { animation-play-state: paused; }
+.screen--c04.is-constellation-playing.is-result-active :is(.c04__lit-lines, .c04__points circle:not(:first-child), .c04__after-constellation) { animation-play-state: running; }
+@keyframes c04-connect { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes c04-point { from { opacity: 0.12; } to { opacity: 1; } }
+@keyframes c04-copy { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .screen--c04.is-constellation-playing :is(.c04__lit-lines, .c04__points circle:not(:first-child), .c04__after-constellation) { animation-duration: 1ms; animation-delay: 0ms; }
+}
+.c04__headline { font-family: var(--font-emphasis); font-size: 1.53vw; font-weight: 400; line-height: 1.4; text-align: center; overflow-wrap: anywhere; }
 .c04__constellation { width: 23.75vw; height: 30.273438vh; }
 .c04__copy { white-space: normal; overflow-wrap: anywhere; }
 .c04__pair-title { white-space: normal; overflow-wrap: anywhere; }

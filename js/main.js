@@ -41,6 +41,7 @@
   const widthMultipliers = screens.map((s) => parseFloat(s.dataset.widthMultiplier || '1'));
 
   const s05ScreenIndex = screens.findIndex((s) => s.dataset.screenId === 'S-05');
+  const c03ScreenIndex = screens.findIndex((s) => s.dataset.screenId === 'C-03');
   const s05Content = s05ScreenIndex >= 0 ? screens[s05ScreenIndex].querySelector('.s05__content') : null;
   const s05Pin = { start: 0, range: 0 };
 
@@ -51,6 +52,14 @@
     unitWidth: 0, // 화면 "기준 폭" 1장의 실측 폭(px) — 배율의 기준 단위
     screenStarts: [], // 화면별 시작 위치(px, 누적합)
     screenWidths: [], // 화면별 진행 거리(px). S-05는 내부 이동 거리도 포함한다.
+  };
+
+  // 양 끝의 실제 화면만 경계 너머에 배치한다. 복제 DOM이나 추가 화면은 없다.
+  const loop = {
+    enabled: !!s05Content && screens[0].id === 'M-00' && s05ScreenIndex === screens.length - 1,
+    span: 0,          // S-05 내부 이동을 포함한 한 바퀴의 거리
+    physicalSpan: 0,  // 실제 트랙 길이(S-05 내부 이동 제외)
+    placement: '',
   };
 
   const EASE = 0.1; // 값이 작을수록 더 느리고 부드럽게 따라감
@@ -70,14 +79,39 @@
   // current/target은 내부 이동까지 포함한 기존의 연속 진행 거리다.
   // S-05에서 소비한 거리만 바깥 트랙 이동에서 빼고, 가운데 트랙에 적용한다.
   function renderScrollPosition() {
-    const innerX = s05Content ? clamp(state.current - s05Pin.start, 0, s05Pin.range) : 0;
-    track.style.transform = `translate3d(${-(state.current - innerX)}px, 0, 0)`;
+    const reverseSeam = loop.enabled && state.current < 0;
+    const innerX = s05Content ? (reverseSeam ? s05Pin.range : clamp(state.current - s05Pin.start, 0, s05Pin.range)) : 0;
+    const outerX = reverseSeam ? state.current : state.current - innerX;
+    const placement = !loop.enabled ? 'normal' : reverseSeam ? 'reverse' : state.current > state.max ? 'forward' : 'normal';
+    if (placement !== loop.placement) {
+      screens[0].style.transform = placement === 'forward' ? `translate3d(${loop.physicalSpan}px, 0, 0)` : '';
+      if (s05Content) screens[s05ScreenIndex].style.transform = placement === 'reverse' ? `translate3d(${-loop.physicalSpan}px, 0, 0)` : '';
+      loop.placement = placement;
+    }
+    track.style.transform = `translate3d(${-outerX}px, 0, 0)`;
     if (s05Content) s05Content.style.transform = `translate3d(${-innerX}px, 0, 0)`;
+  }
+
+  function loopPosition(position) {
+    return loop.enabled && loop.span > 0 ? ((position % loop.span) + loop.span) % loop.span : position;
+  }
+
+  function normalizeLoopPosition() {
+    if (!loop.enabled || loop.span <= 0) return;
+    let shift = 0;
+    if (state.current >= loop.span) shift = -loop.span;
+    else if (state.current <= -state.unitWidth) shift = loop.span;
+    if (!shift) return;
+    state.current += shift;
+    state.target += shift;
+    // 드래그 도중 좌표가 정규화되어도 손가락/포인터의 기준점은 연속이다.
+    if (isDragging) dragStartTarget += shift;
   }
 
   // 한 입력이 진입/내부/종료 단계를 통째로 건너뛰지 않도록 경계에서 나눈다.
   // 별도 잠금 상태가 없어 메뉴 이동이나 역방향 입력으로 항상 벗어날 수 있다.
   function constrainScrollInput(nextTarget) {
+    const inputDelta = nextTarget - state.target;
     const { start, range } = s05Pin;
     if (range > 0) {
       const end = start + range;
@@ -90,13 +124,27 @@
         else if (state.current > start + 0.05 && state.target >= start) nextTarget = Math.max(nextTarget, start);
       }
     }
-    return clamp(nextTarget, 0, state.max);
+    if (loop.enabled) {
+      // 시작점도 한 번 온전히 보여준 뒤 추가 역방향 입력으로 경계를 통과한다.
+      if (inputDelta < 0 && state.current > 0.05 && state.target >= 0) nextTarget = Math.max(nextTarget, 0);
+      // 역방향 연결 중 방향을 돌리면 M-00에서 먼저 정착한다.
+      if (inputDelta > 0 && state.current < 0 && state.target <= 0) nextTarget = Math.min(nextTarget, 0);
+    }
+    // C-03은 결과 선택 화면이다. 일반 전진 입력은 이 화면을 온전히
+    // 보여주는 시작점에서 멈추고, 버튼·메뉴의 goToScreenId는 그대로 허용한다.
+    const c03Start = state.screenStarts[c03ScreenIndex];
+    if (c03ScreenIndex >= 0 && nextTarget > state.target && state.target <= c03Start && state.current <= c03Start + 0.05) {
+      nextTarget = Math.min(nextTarget, c03Start);
+    }
+    return clamp(nextTarget, loop.enabled ? -state.unitWidth : 0, loop.enabled ? loop.span : state.max);
   }
 
   function scrollByInput(delta) {
     let base = state.target;
     // 내부에서 방향을 바꾸면 남은 보간 목표를 지나칠 때까지 기다리지 않는다.
-    if (s05Pin.range > 0 && state.current >= s05Pin.start && state.current <= s05Pin.start + s05Pin.range &&
+    const inInternal = s05Pin.range > 0 && state.current >= s05Pin.start && state.current <= s05Pin.start + s05Pin.range;
+    const inSeam = loop.enabled && (state.current < 0 || state.current > state.max);
+    if ((inInternal || inSeam) &&
         delta * (state.target - state.current) < 0) base = state.current;
     state.target = constrainScrollInput(base + delta);
   }
@@ -124,7 +172,7 @@
     if (state.unitWidth <= 0) return;
 
     const railWidth = cachedRailWidth || rail.getBoundingClientRect().width;
-    const idx = findScreenIndexAtPosition(state.current + railWidth, state.screenStarts, state.screenWidths);
+    const idx = findScreenIndexAtPosition(loopPosition(state.current + railWidth), state.screenStarts, state.screenWidths);
     const theme = screens[idx].dataset.railTheme || 'dark';
     if (rail.dataset.theme !== theme) {
       rail.dataset.theme = theme;
@@ -147,7 +195,9 @@
     // 경계선(65/1024 지점)까지는 이미 내려와 있는 상태로 시작한다.
     // 스크롤하면 그 지점부터 바닥까지 더 내려간다.
     const MIN_PROGRESS_PCT = 6.3477; // 65 / 1024 * 100
-    const progress = state.max > 0 ? state.current / state.max : 0;
+    const progress = loop.enabled && state.current < 0 ? -state.current / state.unitWidth
+      : loop.enabled && state.current > state.max ? 1 - (state.current - state.max) / state.unitWidth
+      : state.max > 0 ? state.current / state.max : 0;
     const pct = MIN_PROGRESS_PCT + clamp(progress, 0, 1) * (100 - MIN_PROGRESS_PCT);
     progressFill.style.height = `${pct}%`;
   }
@@ -201,7 +251,10 @@
     if (state.unitWidth <= 0) return;
     revealItems.forEach((item) => {
       const transitionStart = state.screenStarts[item.screenIndex] + item.entranceOffset - state.unitWidth;
-      const local = clamp((state.current - transitionStart) / item.entranceWidth, 0, 1);
+      let position = state.current;
+      if (loop.enabled && item.screenIndex === 0 && state.current > state.max) position -= loop.span;
+      if (loop.enabled && item.screenIndex === s05ScreenIndex && state.current < 0) position = state.max;
+      const local = clamp((position - transitionStart) / item.entranceWidth, 0, 1);
       const span = item.end - item.start;
       const raw = span > 0 ? clamp((local - item.start) / span, 0, 1) : (local >= item.start ? 1 : 0);
       const t = easeOutCubic(raw);
@@ -215,7 +268,7 @@
   }
 
   // ------------------------------------------------------------
-  // E-01 / E-02 대표 이미지 "들어올 때는 확대, 다 들어오면 원래 크기"
+  // E-01 대표 이미지 "들어올 때는 확대, 다 들어오면 원래 크기"
   // 효과. 원본 사이트(REFERENCE_CANALS.md 5번 — 요소마다 자기만의
   // 활성 구간을 갖고 그 구간에서 트랜스폼이 변하는 구조)를 참고해,
   // reveal과 똑같은 "이 화면의 진입 구간(= 바로 전 화면 → 이 화면,
@@ -224,8 +277,10 @@
   // 바꿔서 "이미지가 안쪽에서 줌되는" 느낌을 낸다.
   const e01PhotoImg = document.querySelector('.e01__photo-img');
   const e02PhotoImg = document.querySelector('.e02__photo-img');
+  const e02PhotoWrap = document.querySelector('.e02__photo-wrap');
   const e01ScreenIndex = screens.findIndex((s) => s.dataset.screenId === 'E-01');
   const e02ScreenIndex = screens.findIndex((s) => s.dataset.screenId === 'E-02');
+  const e02Parallax = { exit: 0, lastX: null };
 
   // E-01은 사진 자체가 가로로 완만한 톤의 실내 사진이라, E-02(별자리
   // 점·선이라 축척 변화가 눈에 선명하게 드러남)와 같은 배율·같은
@@ -235,8 +290,6 @@
   // 화면에 거의 다 들어올 때까지도 눈에 띄게 확대된 채로 남아 있다가
   // 막판에 "느리게 줄어들며" 정착하는 느낌을 낸다.
   const E01_ZOOM_ENTRANCE_FACTOR = 1.35;
-  const E02_ZOOM_ENTRANCE_FACTOR = 1.08; // 진입 시작 시점엔 최종 상태보다 8% 더 확대
-  const E02_ZOOM_REST = 0.93; // css의 --e02-zoom 기본값과 반드시 맞춰둘 것
 
   function easeInCubic(t) {
     return t * t * t;
@@ -256,12 +309,6 @@
       const t = easeInCubic(screenEntranceLocal(e01ScreenIndex));
       const scale = E01_ZOOM_ENTRANCE_FACTOR + (1 - E01_ZOOM_ENTRANCE_FACTOR) * t; // 1.35 → 1.0
       e01PhotoImg.style.transform = `scale(${scale})`;
-    }
-    if (e02PhotoImg) {
-      const t = easeOutCubic(screenEntranceLocal(e02ScreenIndex));
-      const zStart = E02_ZOOM_REST * E02_ZOOM_ENTRANCE_FACTOR;
-      const z = zStart + (E02_ZOOM_REST - zStart) * t; // 확대 상태 → E02_ZOOM_REST
-      e02PhotoImg.style.setProperty('--e02-zoom', String(z));
     }
   }
 
@@ -297,6 +344,20 @@
     e00BgLayer.style.transform = `translate3d(${x}px, 0, 0)`;
   }
 
+  // E-02도 E-00과 동일하게 전경 1.0 / 배경 0.5의 속도 차이를 사용한다.
+  // 프레임은 기존 트랙 안에 그대로 두고 내부 이미지에 (1 - 배경 배속)을
+  // 보상하므로, 화면 기준 이미지 속도는 -1 + 0.5 = -0.5가 된다.
+  // E-02 시작점에서 보상값은 0이어서 기존 정착 크롭을 유지한다.
+  function updateE02ParallaxImage() {
+    if (!e02PhotoImg || state.unitWidth <= 0 || e02ScreenIndex < 0) return;
+    const local = clamp(state.current - state.screenStarts[e02ScreenIndex], -state.unitWidth, e02Parallax.exit);
+    const x = local * (1 - E00_PARALLAX_FACTOR);
+    // 진입 전/프레임 퇴장 후에는 경계값을 유지하며 DOM 쓰기도 건너뛴다.
+    if (x === e02Parallax.lastX) return;
+    e02PhotoImg.style.transform = `translate3d(${x}px, 0, 0)`;
+    e02Parallax.lastX = x;
+  }
+
   // ------------------------------------------------------------
   // M-00 표지 배경 패럴랙스 — E-00과 같은 원리지만 훨씬 더 미묘하게.
   // 화면 폭을 늘리는 건 필요 없고(= M-00은 기준 폭 1장 그대로), 그냥
@@ -311,7 +372,8 @@
   function updateM00ParallaxBg() {
     if (!m00BgLayer || state.unitWidth <= 0 || m00ScreenIndex < 0) return;
     const m00Start = state.screenStarts[m00ScreenIndex];
-    const x = m00Start * M00_PARALLAX_FACTOR - state.current * M00_PARALLAX_FACTOR;
+    const position = loop.enabled && state.current > state.max ? state.current - loop.span : state.current;
+    const x = m00Start * M00_PARALLAX_FACTOR - position * M00_PARALLAX_FACTOR;
     m00BgLayer.style.transform = `translate3d(${x}px, 0, 0)`;
   }
 
@@ -322,6 +384,14 @@
   function applySizes() {
     const newWidth = measureUnitWidth();
     const oldPin = { ...s05Pin };
+    const seamSide = loop.enabled && state.unitWidth > 0
+      ? (state.current < 0 || state.target < 0 ? 'reverse' : state.current > state.max || state.target > state.max ? 'forward' : '') : '';
+    function seamRatio(value) {
+      if (seamSide === 'reverse' && value <= 0) return { side: 'reverse', ratio: value / state.unitWidth };
+      if (seamSide === 'forward' && value >= state.max) return { side: 'forward', ratio: (value - state.max) / state.unitWidth };
+      return null;
+    }
+    const currentSeam = seamRatio(state.current), targetSeam = seamRatio(state.target);
     const preserveInternal = oldPin.range > 0 &&
       state.current >= oldPin.start && state.current <= oldPin.start + oldPin.range &&
       state.target >= oldPin.start && state.target <= oldPin.start + oldPin.range;
@@ -362,22 +432,31 @@
     state.unitWidth = newWidth;
     state.screenStarts = screenStarts;
     state.screenWidths = screenWidths;
+    // 치수는 리사이즈 때만 읽고, 스크롤 중에는 캐시된 퇴장 경계만 사용한다.
+    e02Parallax.exit = e02PhotoWrap ? e02PhotoWrap.offsetLeft + e02PhotoWrap.offsetWidth : 0;
     s05Pin.start = s05ScreenIndex >= 0 ? screenStarts[s05ScreenIndex] : 0;
     state.max = Math.max(0, totalTrackWidth - newWidth);
+    loop.span = state.max + newWidth;
+    loop.physicalSpan = loop.span - s05Pin.range;
+    loop.placement = ''; // 리사이즈된 폭으로 경계 배치도 다시 적용한다.
     state.target = clamp(screenStarts[clampedIndex], 0, state.max);
     state.current = state.target; // 일반 화면은 기존처럼 시작점으로 맞춤
     if (preserveInternal) {
       state.current = s05Pin.start + currentRatio * s05Pin.range;
       state.target = s05Pin.start + targetRatio * s05Pin.range;
     }
+    if (currentSeam) state.current = (currentSeam.side === 'forward' ? state.max : 0) + currentSeam.ratio * newWidth;
+    if (targetSeam) state.target = (targetSeam.side === 'forward' ? state.max : 0) + targetSeam.ratio * newWidth;
 
     renderScrollPosition();
     cacheRevealEntrances();
     updateRailChrome();
     updateReveals();
     updateE00ParallaxBg();
+    updateE02ParallaxImage();
     updateM00ParallaxBg();
     updateImageZooms();
+    updateC04Sequence();
   }
 
   // ------------------------------------------------------------
@@ -414,13 +493,10 @@
     if (e.key === 'Escape' && isNavOverlayOpen()) closeNavOverlay();
   });
 
-  // 전체 메뉴의 '오프닝 페이지로 이동' 칼럼 — 기존 마크업(과거
-  // is-disabled 상태였던 바로 그 요소)에 클릭 동작만 추가한다. 새
-  // 버튼/중복 메뉴는 만들지 않는다. js/opening.js가 window에 노출한
-  // o01Enter()를 호출해 O-01 첫 화면(문 닫힌 상태)으로 복귀시킨다.
-  const navOverlayOpeningCol = document.querySelector('.nav-overlay__col--opening');
-  if (navOverlayOpeningCol) {
-    navOverlayOpeningCol.addEventListener('click', (e) => {
+  // '처음으로'는 기존 오프닝 초기화·복귀 함수를 그대로 사용한다.
+  const navOpeningReturn = document.getElementById('nav-opening-return');
+  if (navOpeningReturn) {
+    navOpeningReturn.addEventListener('click', (e) => {
       e.stopPropagation();
       closeNavOverlay();
       if (window.o01Enter) window.o01Enter();
@@ -477,16 +553,18 @@
   window.addEventListener('keydown', (e) => {
     if (isNavOverlayOpen()) return;
     if (e.key === 'ArrowRight' || e.key === 'PageDown') {
-      if (s05Pin.range > 0 && state.target >= s05Pin.start && state.target < s05Pin.start + s05Pin.range) scrollByInput(state.unitWidth);
-      else if (nearestIndex() < screens.length - 1) goToIndex(nearestIndex() + 1);
+      if (loop.enabled && (state.target < 0 || state.target >= state.max)) scrollByInput(state.unitWidth);
+      else if (s05Pin.range > 0 && state.target >= s05Pin.start && state.target < s05Pin.start + s05Pin.range) scrollByInput(state.unitWidth);
+      else if (nearestIndex() < screens.length - 1) scrollByInput(state.screenStarts[nearestIndex() + 1] - state.target);
     } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
-      if (s05Pin.range > 0 && state.target > s05Pin.start && state.target <= s05Pin.start + s05Pin.range) scrollByInput(-state.unitWidth);
+      if (loop.enabled && (state.target <= 0 || state.target > state.max)) scrollByInput(-state.unitWidth);
+      else if (s05Pin.range > 0 && state.target > s05Pin.start && state.target <= s05Pin.start + s05Pin.range) scrollByInput(-state.unitWidth);
       else goToIndex(nearestIndex() - 1);
     }
   });
 
   function nearestIndex() {
-    return findScreenIndexAtPosition(state.target, state.screenStarts, state.screenWidths);
+    return findScreenIndexAtPosition(loopPosition(state.target), state.screenStarts, state.screenWidths);
   }
 
   function goToIndex(i) {
@@ -516,8 +594,10 @@
     updateRailChrome();
     updateReveals();
     updateE00ParallaxBg();
+    updateE02ParallaxImage();
     updateM00ParallaxBg();
     updateImageZooms();
+    updateC04Sequence();
     if (isNavOverlayOpen()) closeNavOverlay();
   }
   window.m00Enter = m00Enter;
@@ -878,14 +958,86 @@
   }
 
   // ------------------------------------------------------------
-  // C-01 별자리 사전 — 방위 탭 필터 + 28수 그리드 + 선택 미리보기.
+  // C-01 별자리 사전 — 검색·방위 아코디언·기존 그리드의 선택 상태 공유.
   // ------------------------------------------------------------
+  function initDirectionAccordion(directions, selectStar) {
+    directions.addEventListener('pointerdown', (e) => e.stopPropagation());
+    directions.querySelectorAll('.c01__direction-toggle').forEach((toggle) => {
+      const panel = document.getElementById(toggle.getAttribute('aria-controls'));
+      STARS.forEach((star, index) => {
+        if (star.group !== toggle.dataset.group) return;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'c01__star';
+        button.dataset.idx = String(index);
+        button.textContent = star.name;
+        button.setAttribute('aria-label', star.group + ' ' + star.name + ' ' + star.hanja + '宿');
+        button.addEventListener('click', () => selectStar(index));
+        panel.appendChild(button);
+      });
+      toggle.addEventListener('click', () => {
+        const open = toggle.getAttribute('aria-expanded') !== 'true';
+        directions.querySelectorAll('.c01__direction-toggle').forEach((other) => {
+          const expanded = other === toggle && open;
+          other.setAttribute('aria-expanded', String(expanded));
+          document.getElementById(other.getAttribute('aria-controls')).hidden = !expanded;
+        });
+        directions.classList.toggle('is-expanded', open);
+      });
+    });
+  }
+
   const c01Grid = document.getElementById('c01-grid');
   if (c01Grid) {
     const c01Tabs = document.getElementById('c01-tabs');
     const nameEl = document.getElementById('c01-preview-name');
     const hanjaEl = document.getElementById('c01-preview-hanja');
     const descEl = document.getElementById('c01-preview-desc');
+    const directions = document.getElementById('c01-directions');
+    const search = document.getElementById('c01-search');
+    const searchInput = document.getElementById('c01-search-input');
+    const searchStatus = document.getElementById('c01-search-status');
+    let selectedIndex = STARS.findIndex((s) => s.name === '저수');
+
+    function syncSelection() {
+      document.querySelectorAll('#c01-grid [data-idx], #c01-directions [data-idx]').forEach((button) => {
+        const selected = Number(button.dataset.idx) === selectedIndex;
+        button.classList.toggle('is-selected', selected);
+        button.setAttribute('aria-pressed', String(selected));
+      });
+    }
+    function selectStar(index) {
+      const star = STARS[index];
+      if (!star) return;
+      selectedIndex = index;
+      nameEl.textContent = star.name;
+      hanjaEl.textContent = starLabel(star);
+      descEl.textContent = star.desc || '';
+      syncSelection();
+      searchStatus.textContent = '';
+    }
+
+    // 입력 커서 조작과 텍스트 선택은 C-01 안에서만 가로 탐색과 분리한다.
+    search.addEventListener('pointerdown', (e) => e.stopPropagation());
+    search.addEventListener('keydown', (e) => e.stopPropagation());
+    search.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const normalize = (value) => value.normalize('NFC').replace(/\s|·/g, '').toLowerCase();
+      const query = normalize(searchInput.value);
+      if (!query) { searchStatus.textContent = '별자리 이름을 입력해 주세요.'; return; }
+      const matches = STARS.map((star, index) => ({ star, index })).filter(({ star }) =>
+        [star.name, star.hanja, star.hanja + '宿', star.animal || '', star.group + star.name, star.name + star.group]
+          .some((key) => key && normalize(key) === query));
+      if (!matches.length) { searchStatus.textContent = '일치하는 별자리가 없습니다.'; return; }
+      const match = matches.find(({ index }) => index === selectedIndex) || matches[0];
+      selectStar(match.index);
+      searchStatus.textContent = matches.length > 1
+        ? match.star.group + ' ' + match.star.name + ' 선택 · 같은 이름은 방위와 함께 검색해 주세요.'
+        : match.star.group + ' ' + match.star.name + ' 선택';
+    });
+    searchInput.addEventListener('input', () => { searchStatus.textContent = ''; });
+
+    initDirectionAccordion(directions, selectStar);
 
     STARS.forEach((s, i) => {
       const card = document.createElement('button');
@@ -894,20 +1046,13 @@
       card.dataset.idx = String(i);
       card.dataset.group = s.group;
       card.innerHTML = '<span class="c01__card-hanja">' + s.hanja + '</span><span class="c01__card-name">' + s.name + '</span>';
-      card.addEventListener('click', () => {
-        c01Grid.querySelectorAll('.c01__card.is-selected').forEach((el) => el.classList.remove('is-selected'));
-        card.classList.add('is-selected');
-        nameEl.textContent = s.name;
-        hanjaEl.textContent = starLabel(s);
-        descEl.textContent = s.desc;
-      });
+      card.addEventListener('click', () => selectStar(i));
       c01Grid.appendChild(card);
     });
     // 기본 선택: 레퍼런스와 동일한 저수
     const defaultStar = STARS.findIndex((s) => s.name === '저수');
     if (descEl.dataset.referenceCopy !== 'true') descEl.textContent = STARS[defaultStar].desc;
-    const defaultCard = c01Grid.querySelector('[data-idx="' + defaultStar + '"]');
-    if (defaultCard) defaultCard.classList.add('is-selected');
+    syncSelection();
 
     c01Tabs.querySelectorAll('.c01__tab').forEach((tab) => {
       tab.addEventListener('click', () => {
@@ -922,9 +1067,39 @@
   }
 
   // ------------------------------------------------------------
-  // 이전 C-02 그래프의 데이터/로직 보관. 현재 PNG 재현 화면은 그래프
-  // 마운트를 만들지 않으므로 아래 코드는 실행되지 않는다.
+  // C-02 — C-01과 같은 방위 아코디언으로 기존 선택 정보·관계를 갱신한다.
   // ------------------------------------------------------------
+  const c02Directions = document.getElementById('c02-directions');
+  if (c02Directions) {
+    const c02Screen = document.getElementById('C-02');
+    const relationBlocks = c02Screen.querySelectorAll('.c02__relation');
+    function syncC02Selection(index) {
+      c02Directions.querySelectorAll('.c01__star').forEach((button) => {
+        const selected = Number(button.dataset.idx) === index;
+        button.classList.toggle('is-selected', selected);
+        button.setAttribute('aria-pressed', String(selected));
+      });
+    }
+    initDirectionAccordion(c02Directions, (index) => {
+      const star = STARS[index];
+      document.getElementById('c02-selected-name').textContent = star.name;
+      document.getElementById('c02-selected-hanja').textContent = starLabel(star);
+      // 기존 관계 조회 규칙과 데이터만 사용하며 회색 지도는 그대로 둔다.
+      relationsOfStar(index).forEach((relation, i) => {
+        const target = STARS[relation.idx];
+        const block = relationBlocks[i];
+        block.querySelector(':scope > p').textContent = relation.type;
+        const paragraphs = block.querySelectorAll('.c02__relation-copy p');
+        paragraphs[0].textContent = target.name + ' (' + target.groupLabel + ')';
+        paragraphs[1].textContent = relation.reason;
+      });
+      syncC02Selection(index);
+    });
+    // 초기 레퍼런스 문구는 유지하고 선택 표시만 저수에 맞춘다.
+    syncC02Selection(STARS.findIndex((star) => star.name === '저수'));
+  }
+
+  // 이전 그래프 구현 보관: 현재 화면에는 마운트가 없어 실행되지 않는다.
   const c02Diagram = document.getElementById('c02-diagram');
   if (c02Diagram) {
     const dotsG = document.getElementById('c02-diagram-lines');
@@ -995,12 +1170,44 @@
   // 다 차면 "궁합 보기"가 활성화된다. 궁합 "계산" 자체는 하지 않고
   // (C-04로 넘길 인덱스만 저장) 실제 관계 판단은 C-04에서 한다.
   // ------------------------------------------------------------
+  // C-04는 기존 RAF의 위치 갱신 시점에 진입만 감지한다.
+  // 실제 선·점·본문 연출은 CSS가 실행하며, 화면 밖/숨김 탭에서는 정지한다.
+  const c04Screen = document.getElementById('C-04');
+  const c04ScreenIndex = screens.findIndex((screen) => screen.id === 'C-04');
+  let c04SequencePlayed = false;
+  let c04SequenceKey = 'reference';
+  if (c04Screen) {
+    const graphic = c04Screen.querySelector('.c04__constellation');
+    const brightLines = graphic.querySelector('.c04__base-lines').cloneNode(true);
+    brightLines.setAttribute('class', 'c04__lit-lines');
+    graphic.insertBefore(brightLines, graphic.querySelector('.c04__points'));
+    graphic.querySelectorAll('circle').forEach((point) => {
+      const progress = clamp((point.cx.baseVal.value - graphic.viewBox.baseVal.x) / graphic.viewBox.baseVal.width, 0, 1);
+      point.style.setProperty('--point-delay', (progress * 3.2) + 's');
+    });
+  }
+  function resetC04Sequence(key) {
+    if (!c04Screen || key === c04SequenceKey) return;
+    c04SequenceKey = key;
+    c04SequencePlayed = false;
+    c04Screen.classList.remove('is-constellation-playing', 'is-result-active');
+  }
+  function updateC04Sequence() {
+    if (!c04Screen || state.unitWidth <= 0) return;
+    const start = state.screenStarts[c04ScreenIndex];
+    const visible = !document.hidden && state.current > start - state.unitWidth && state.current < start + state.unitWidth;
+    c04Screen.classList.toggle('is-result-active', visible);
+    if (!c04SequencePlayed && !document.hidden && Math.abs(state.current - start) < 1) {
+      c04Screen.classList.add('is-constellation-playing');
+      c04SequencePlayed = true;
+    }
+  }
+  document.addEventListener('visibilitychange', updateC04Sequence);
+
   const c03Accordion = document.getElementById('c03-accordion');
   if (c03Accordion) {
-    // 펼침 패널 내부의 세로 스크롤만 허용하고 메인 가로 휠로 전달하지 않는다.
-    c03Accordion.addEventListener('wheel', (e) => {
-      if (e.target.closest('.c03__acc-body')) e.stopPropagation();
-    }, { passive: true });
+    c03Accordion.addEventListener('pointerdown', (e) => e.stopPropagation());
+    c03Accordion.addEventListener('keydown', (e) => e.stopPropagation());
     // 아코디언: 한 번에 하나만 펼침
     c03Accordion.querySelectorAll('.c03__acc-item').forEach((item) => {
       const head = item.querySelector('.c03__acc-head');
@@ -1012,7 +1219,8 @@
         btn.type = 'button';
         btn.className = 'c03__acc-star';
         btn.dataset.idx = String(i);
-        btn.innerHTML = '<span>' + s.hanja + '</span><span>' + s.name + '</span>';
+        btn.textContent = s.name;
+        btn.setAttribute('aria-label', s.name + ' ' + s.hanja + '宿 선택');
         body.appendChild(btn);
       });
       head.addEventListener('click', () => {
@@ -1090,6 +1298,7 @@
   function renderC04(pair) {
     const c04Headline = document.getElementById('c04-headline');
     if (!c04Headline) return;
+    resetC04Sequence(pair.join(':'));
     const [a, b] = pair;
     const sa = STARS[a], sb = STARS[b];
     document.getElementById('c04-name-0').textContent = sa.name;
@@ -1160,13 +1369,16 @@
     if (Math.abs(state.target - state.current) < 0.05) {
       state.current = state.target;
     }
+    normalizeLoopPosition();
     if (state.current !== prevCurrent) {
       renderScrollPosition();
       updateRailChrome();
       updateReveals();
       updateE00ParallaxBg();
+      updateE02ParallaxImage();
       updateM00ParallaxBg();
       updateImageZooms();
+      updateC04Sequence();
     }
     requestAnimationFrame(raf);
   }
