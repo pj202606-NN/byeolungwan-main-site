@@ -23,8 +23,11 @@
 (() => {
   const viewport = document.getElementById('viewport');
   const track = document.getElementById('track');
+  // Keep desktop geometry and input paths intact; mobile shares this engine.
+  const mobileLayout = window.matchMedia('(max-width: 767px), (max-width: 1023px) and (max-height: 500px) and (pointer: coarse)');
   const screens = Array.from(track.children);
   const rail = document.querySelector('.rail');
+  let mobileM00Backdrop = null;
   const progressFill = document.getElementById('rail-progress-fill');
   const railNavEntrance = document.getElementById('rail-navitem-entrance');
   // 2026-10-16: F/C/S 표지(F-00/C-00/S-00)가 생기면서 '입구' 전용이던
@@ -171,8 +174,9 @@
   function updateRailChrome() {
     if (state.unitWidth <= 0) return;
 
-    const railWidth = cachedRailWidth || rail.getBoundingClientRect().width;
-    const idx = findScreenIndexAtPosition(loopPosition(state.current + railWidth), state.screenStarts, state.screenWidths);
+    const railWidth = mobileLayout.matches ? 0 : cachedRailWidth || rail.getBoundingClientRect().width;
+    // Mobile screen starts can be fractional after the IMG connector widths.
+    const idx = findScreenIndexAtPosition(loopPosition(state.current + railWidth + (mobileLayout.matches ? 0.05 : 0)), state.screenStarts, state.screenWidths);
     const theme = screens[idx].dataset.railTheme || 'dark';
     if (rail.dataset.theme !== theme) {
       rail.dataset.theme = theme;
@@ -187,6 +191,16 @@
     // 안 맞는 화면에서는 네 메뉴 전부 옅게 보인다(기존 '입구'의 M-00
     // 처리 규칙을 네 메뉴 공통 규칙으로 일반화).
     const currentScreenId = screens[idx].dataset.screenId || '';
+    if (mobileLayout.matches) {
+      if (!mobileM00Backdrop) {
+        mobileM00Backdrop = document.createElement('div');
+        mobileM00Backdrop.className = 'mobile-m00-backdrop';
+        mobileM00Backdrop.hidden = true; // Remains hidden outside the mobile media query.
+        mobileM00Backdrop.setAttribute('aria-hidden', 'true');
+        document.body.prepend(mobileM00Backdrop);
+      }
+      mobileM00Backdrop.classList.toggle('is-active', currentScreenId === 'M-00');
+    }
     railNavByPrefix.forEach(([prefix, el]) => {
       if (el) el.classList.toggle('is-dimmed', !currentScreenId.startsWith(prefix));
     });
@@ -226,6 +240,7 @@
     entranceOffset: 0,
     entranceWidth: 0,
     inS05Content: s05Content ? s05Content.contains(el) : false,
+    lastProgress: null,
   }));
 
   // 긴 화면의 텍스트는 자기 가로 위치를 기준으로 진입한다.
@@ -258,8 +273,12 @@
       const span = item.end - item.start;
       const raw = span > 0 ? clamp((local - item.start) / span, 0, 1) : (local >= item.start ? 1 : 0);
       const t = easeOutCubic(raw);
+      // Offscreen/settled items keep the same endpoint. Re-entering, reversing
+      // and loop seams still use the original timing calculation above.
+      if (t === item.lastProgress) return;
       item.el.style.opacity = String(t);
       item.el.style.transform = `translateY(${(1 - t) * item.offset}px)`;
+      item.lastProgress = t;
     });
   }
 
@@ -290,6 +309,7 @@
   // 화면에 거의 다 들어올 때까지도 눈에 띄게 확대된 채로 남아 있다가
   // 막판에 "느리게 줄어들며" 정착하는 느낌을 낸다.
   const E01_ZOOM_ENTRANCE_FACTOR = 1.35;
+  let e01LastScale = null;
 
   function easeInCubic(t) {
     return t * t * t;
@@ -308,7 +328,9 @@
     if (e01PhotoImg) {
       const t = easeInCubic(screenEntranceLocal(e01ScreenIndex));
       const scale = E01_ZOOM_ENTRANCE_FACTOR + (1 - E01_ZOOM_ENTRANCE_FACTOR) * t; // 1.35 → 1.0
+      if (scale === e01LastScale) return;
       e01PhotoImg.style.transform = `scale(${scale})`;
+      e01LastScale = scale;
     }
   }
 
@@ -375,6 +397,11 @@
     const position = loop.enabled && state.current > state.max ? state.current - loop.span : state.current;
     const x = m00Start * M00_PARALLAX_FACTOR - position * M00_PARALLAX_FACTOR;
     m00BgLayer.style.transform = `translate3d(${x}px, 0, 0)`;
+    // Extend only the raster sky behind the mobile rail. The existing image,
+    // SVG mounts and their rotation centres stay in the original viewport.
+    if (mobileLayout.matches && mobileM00Backdrop && Math.abs(position) <= state.unitWidth) {
+      mobileM00Backdrop.style.setProperty('--m00-parallax-x', `${x}px`);
+    }
   }
 
   // 화면 폭이 바뀌면(창 리사이즈, 모니터 이동, OS 배율 변경, 브라우저
@@ -403,7 +430,8 @@
     // "쓰기 전"이라 같은 레이아웃 패스에서 한 번에 처리된다.
     cachedRailWidth = rail.getBoundingClientRect().width;
 
-    const screenWidths = widthMultipliers.map((m) => newWidth * m);
+    const screenWidths = widthMultipliers.map((m, i) =>
+      newWidth * (mobileLayout.matches && !screens[i].classList.contains('screen--image') ? 1 : m));
     let innerWidth = newWidth;
     if (s05Content) {
       // offset 치수는 부모 translateX의 영향을 받지 않는다. 측정은 resize 때만 한다.
@@ -477,12 +505,16 @@
     navOverlay.setAttribute('aria-hidden', 'false');
     railBurger.setAttribute('aria-expanded', 'true');
     railBurger.classList.add('is-active');
+    if (mobileLayout.matches) {
+      navOverlay.querySelector('a,button')?.focus({ preventScroll: true });
+    }
   }
   function closeNavOverlay() {
     navOverlay.classList.remove('is-open');
     navOverlay.setAttribute('aria-hidden', 'true');
     railBurger.setAttribute('aria-expanded', 'false');
     railBurger.classList.remove('is-active');
+    if (mobileLayout.matches && navOverlay.contains(document.activeElement)) railBurger.focus({ preventScroll: true });
   }
   railBurger.addEventListener('click', () => {
     if (isNavOverlayOpen()) closeNavOverlay(); else openNavOverlay();
@@ -508,6 +540,9 @@
   // ------------------------------------------------------------
   window.addEventListener('wheel', (e) => {
     if (isNavOverlayOpen()) return;
+    const mobileScroller = mobileLayout.matches && e.target instanceof Element ? e.target.closest('.rail,.s05__content > .story__body,.screen') : null;
+    if (mobileScroller && Math.abs(e.deltaY) > Math.abs(e.deltaX) &&
+        mobileScroller.scrollHeight > mobileScroller.clientHeight + 1) return;
     e.preventDefault();
     const delta = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
     scrollByInput(delta);
@@ -519,9 +554,20 @@
   let isDragging = false;
   let dragStartX = 0;
   let dragStartTarget = 0;
+  let dragStartY = 0;
+  let dragAxis = '';
+  let dragPointerId = null;
+  let suppressMobileClick = false;
 
   function onPointerDown(e) {
     if (isNavOverlayOpen()) return;
+    if (mobileLayout.matches) {
+      suppressMobileClick = false;
+      if (!e.isPrimary || e.button !== 0 || e.target.closest('button,a,input,select,textarea,label,[data-mobile-native]')) return;
+      dragStartY = e.clientY;
+      dragAxis = '';
+      dragPointerId = e.pointerId;
+    }
     isDragging = true;
     dragStartX = e.clientX;
     dragStartTarget = state.target;
@@ -529,6 +575,17 @@
   }
   function onPointerMove(e) {
     if (!isDragging) return;
+    if (mobileLayout.matches) {
+      if (e.pointerId !== dragPointerId) return;
+      if (!dragAxis) {
+        const dx = Math.abs(e.clientX - dragStartX), dy = Math.abs(e.clientY - dragStartY);
+        if (Math.max(dx, dy) < 8) return;
+        dragAxis = dx > dy ? 'x' : 'y';
+      }
+      if (dragAxis !== 'x') return;
+      suppressMobileClick = true;
+      if (e.cancelable) e.preventDefault();
+    }
     const delta = dragStartX - e.clientX;
     const nextTarget = dragStartTarget + delta;
     state.target = constrainScrollInput(nextTarget);
@@ -543,8 +600,21 @@
   }
 
   track.addEventListener('pointerdown', onPointerDown);
+  // Child accordions intentionally stop bubbling pointerdown. Clear a previous
+  // swipe's click suppression before those handlers run, so the next tap works.
+  track.addEventListener('pointerdown', () => {
+    if (mobileLayout.matches) suppressMobileClick = false;
+  }, true);
   window.addEventListener('pointermove', onPointerMove);
   window.addEventListener('pointerup', onPointerUp);
+  window.addEventListener('pointercancel', () => { if (mobileLayout.matches) onPointerUp(); });
+  track.addEventListener('click', (e) => {
+    if (mobileLayout.matches && suppressMobileClick) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      suppressMobileClick = false;
+    }
+  }, true);
   track.style.cursor = 'grab';
 
   // ------------------------------------------------------------
@@ -552,6 +622,7 @@
   // ------------------------------------------------------------
   window.addEventListener('keydown', (e) => {
     if (isNavOverlayOpen()) return;
+    if (mobileLayout.matches && e.target.closest('input,select,textarea')) return;
     if (e.key === 'ArrowRight' || e.key === 'PageDown') {
       if (loop.enabled && (state.target < 0 || state.target >= state.max)) scrollByInput(state.unitWidth);
       else if (s05Pin.range > 0 && state.target >= s05Pin.start && state.target < s05Pin.start + s05Pin.range) scrollByInput(state.unitWidth);
@@ -960,6 +1031,30 @@
   // ------------------------------------------------------------
   // C-01 별자리 사전 — 검색·방위 아코디언·기존 그리드의 선택 상태 공유.
   // ------------------------------------------------------------
+  function setDirectionPanel(toggle, panel, expanded) {
+    // One measurement on opening, never an animation loop. vw keeps the
+    // measured endpoint proportional when the desktop viewport is resized.
+    if (expanded && !mobileLayout.matches) {
+      const first = panel.firstElementChild.getBoundingClientRect();
+      const last = panel.lastElementChild.getBoundingClientRect();
+      const width = last.right - first.left;
+      panel.style.setProperty('--direction-panel-width', `${width / window.innerWidth * 100}vw`);
+    }
+    toggle.setAttribute('aria-expanded', String(expanded));
+    panel.hidden = !expanded;
+    panel.inert = !expanded;
+    panel.setAttribute('aria-hidden', String(!expanded));
+  }
+
+  function refreshOpenDirectionPanels() {
+    if (mobileLayout.matches) return;
+    document.querySelectorAll('#c01-directions [aria-expanded="true"], #c02-directions [aria-expanded="true"], #c03-accordion [aria-expanded="true"]').forEach((toggle) => {
+      setDirectionPanel(toggle, document.getElementById(toggle.getAttribute('aria-controls')), true);
+    });
+  }
+  mobileLayout.addEventListener('change', refreshOpenDirectionPanels);
+  document.fonts.ready.then(refreshOpenDirectionPanels);
+
   function initDirectionAccordion(directions, selectStar) {
     directions.addEventListener('pointerdown', (e) => e.stopPropagation());
     directions.querySelectorAll('.c01__direction-toggle').forEach((toggle) => {
@@ -975,12 +1070,12 @@
         button.addEventListener('click', () => selectStar(index));
         panel.appendChild(button);
       });
+      setDirectionPanel(toggle, panel, false);
       toggle.addEventListener('click', () => {
         const open = toggle.getAttribute('aria-expanded') !== 'true';
         directions.querySelectorAll('.c01__direction-toggle').forEach((other) => {
           const expanded = other === toggle && open;
-          other.setAttribute('aria-expanded', String(expanded));
-          document.getElementById(other.getAttribute('aria-controls')).hidden = !expanded;
+          setDirectionPanel(other, document.getElementById(other.getAttribute('aria-controls')), expanded);
         });
         directions.classList.toggle('is-expanded', open);
       });
@@ -997,6 +1092,22 @@
     const search = document.getElementById('c01-search');
     const searchInput = document.getElementById('c01-search-input');
     const searchStatus = document.getElementById('c01-search-status');
+    const desktopSearchPlaceholder = searchInput.placeholder;
+    let placeholderInView = false;
+    const updateSearchPlaceholder = () => {
+      const placeholder = mobileLayout.matches ? '' : desktopSearchPlaceholder;
+      if (searchInput.placeholder !== placeholder) searchInput.placeholder = placeholder;
+      document.getElementById('C-01').classList.toggle('is-search-placeholder-active',
+        placeholderInView && !document.hidden && !mobileLayout.matches);
+    };
+    updateSearchPlaceholder();
+    const placeholderObserver = new IntersectionObserver(([entry]) => {
+      placeholderInView = entry.isIntersecting;
+      updateSearchPlaceholder();
+    }, { root: viewport, threshold: 0 });
+    placeholderObserver.observe(searchInput);
+    document.addEventListener('visibilitychange', updateSearchPlaceholder);
+    mobileLayout.addEventListener('change', updateSearchPlaceholder);
     let selectedIndex = STARS.findIndex((s) => s.name === '저수');
 
     function syncSelection() {
@@ -1176,6 +1287,66 @@
   const c04ScreenIndex = screens.findIndex((screen) => screen.id === 'C-04');
   let c04SequencePlayed = false;
   let c04SequenceKey = 'reference';
+  let c04ConnectionAnimation = null;
+  let c04ProgressComplete = false;
+  let c04LastProgress = -1;
+  let c04LastPercent = -1;
+  const c04Progress = c04Screen?.querySelector('.c04__progress');
+  const c04ProgressFill = c04Progress?.querySelector('.c04__progress-fill');
+  const c04ProgressValue = document.getElementById('c04-progress-value');
+  const c04ProgressTitle = c04Progress?.querySelector('.c04__progress-title');
+  const c04ProgressLabel = c04Progress?.querySelector('.c04__progress-label');
+  let c04LabelAnimation = null;
+  let c04LabelGeneration = 0;
+  function syncC04LabelPlayback() {
+    if (!c04LabelAnimation) return;
+    const visible = !document.hidden && c04Screen.classList.contains('is-result-active');
+    if (!visible && c04LabelAnimation.playState === 'running') c04LabelAnimation.pause();
+    else if (visible && c04LabelAnimation.playState === 'paused') c04LabelAnimation.play();
+  }
+  async function finishC04Label() {
+    const generation = ++c04LabelGeneration;
+    const duration = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 1 : 180;
+    try {
+      c04LabelAnimation = c04ProgressLabel.animate([{ opacity: 1 }, { opacity: 0 }],
+        { delay: 2000, duration, easing: 'ease', fill: 'both' });
+      syncC04LabelPlayback();
+      await c04LabelAnimation.finished;
+      if (generation !== c04LabelGeneration) return;
+      c04ProgressTitle.textContent = '궁합도';
+      c04LabelAnimation.cancel();
+      c04LabelAnimation = c04ProgressLabel.animate([{ opacity: 0 }, { opacity: 1 }],
+        { duration, easing: 'ease', fill: 'both' });
+      syncC04LabelPlayback();
+      await c04LabelAnimation.finished;
+      if (generation !== c04LabelGeneration) return;
+      c04LabelAnimation.cancel();
+      c04LabelAnimation = null;
+    } catch (error) {
+      if (error.name !== 'AbortError') throw error;
+    }
+  }
+  function setC04Progress(progress) {
+    if (!c04Progress || progress === c04LastProgress) return;
+    c04LastProgress = progress;
+    c04ProgressFill.style.transform = 'scaleX(' + progress + ')';
+    const percent = Math.floor(progress * 100 + 1e-7);
+    if (percent !== c04LastPercent) {
+      c04LastPercent = percent;
+      c04ProgressValue.textContent = String(percent);
+      c04Progress.setAttribute('aria-valuenow', String(percent));
+    }
+  }
+  function updateC04Progress() {
+    if (!c04ConnectionAnimation || c04ProgressComplete || document.hidden ||
+        !c04Screen.classList.contains('is-result-active')) return;
+    // Read the existing CSS animation clock, not layout or a second timer.
+    const progress = c04ConnectionAnimation.effect.getComputedTiming().progress;
+    if (progress === null) return;
+    setC04Progress(clamp(progress, 0, 1));
+    c04ProgressComplete = progress >= 1;
+    if (c04ProgressComplete) finishC04Label();
+  }
   if (c04Screen) {
     const graphic = c04Screen.querySelector('.c04__constellation');
     const brightLines = graphic.querySelector('.c04__base-lines').cloneNode(true);
@@ -1186,10 +1357,17 @@
       point.style.setProperty('--point-delay', (progress * 3.2) + 's');
     });
   }
-  function resetC04Sequence(key) {
-    if (!c04Screen || key === c04SequenceKey) return;
+  function resetC04Sequence(key, replay = false) {
+    if (!c04Screen || (!replay && key === c04SequenceKey)) return;
     c04SequenceKey = key;
     c04SequencePlayed = false;
+    c04ConnectionAnimation = null;
+    c04ProgressComplete = false;
+    c04LabelGeneration++;
+    c04LabelAnimation?.cancel();
+    c04LabelAnimation = null;
+    c04ProgressTitle.textContent = '연결 진행';
+    setC04Progress(0);
     c04Screen.classList.remove('is-constellation-playing', 'is-result-active');
   }
   function updateC04Sequence() {
@@ -1197,9 +1375,12 @@
     const start = state.screenStarts[c04ScreenIndex];
     const visible = !document.hidden && state.current > start - state.unitWidth && state.current < start + state.unitWidth;
     c04Screen.classList.toggle('is-result-active', visible);
+    syncC04LabelPlayback();
     if (!c04SequencePlayed && !document.hidden && Math.abs(state.current - start) < 1) {
       c04Screen.classList.add('is-constellation-playing');
       c04SequencePlayed = true;
+      c04ConnectionAnimation = c04Screen.querySelector('.c04__lit-lines').getAnimations()
+        .find((animation) => animation.animationName === 'c04-connect') || null;
     }
   }
   document.addEventListener('visibilitychange', updateC04Sequence);
@@ -1223,13 +1404,13 @@
         btn.setAttribute('aria-label', s.name + ' ' + s.hanja + '宿 선택');
         body.appendChild(btn);
       });
+      setDirectionPanel(head, body, false);
       head.addEventListener('click', () => {
         const wasOpen = item.classList.contains('is-open');
         c03Accordion.querySelectorAll('.c03__acc-item').forEach((it) => {
           const open = it === item && !wasOpen;
           it.classList.toggle('is-open', open);
-          it.querySelector('.c03__acc-head').setAttribute('aria-expanded', String(open));
-          it.querySelector('.c03__acc-body').inert = !open;
+          setDirectionPanel(it.querySelector('.c03__acc-head'), it.querySelector('.c03__acc-body'), open);
         });
       });
     });
@@ -1298,7 +1479,7 @@
   function renderC04(pair) {
     const c04Headline = document.getElementById('c04-headline');
     if (!c04Headline) return;
-    resetC04Sequence(pair.join(':'));
+    resetC04Sequence(pair.join(':'), true);
     const [a, b] = pair;
     const sa = STARS[a], sb = STARS[b];
     document.getElementById('c04-name-0').textContent = sa.name;
@@ -1380,6 +1561,7 @@
       updateImageZooms();
       updateC04Sequence();
     }
+    updateC04Progress();
     requestAnimationFrame(raf);
   }
 
