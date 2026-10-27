@@ -27,6 +27,7 @@
   const mobileLayout = window.matchMedia('(max-width: 767px), (max-width: 1023px) and (max-height: 500px) and (pointer: coarse)');
   const screens = Array.from(track.children);
   const rail = document.querySelector('.rail');
+  const mobileNext = document.getElementById('mobile-next');
   let mobileM00Backdrop = null;
   const progressFill = document.getElementById('rail-progress-fill');
   const railNavEntrance = document.getElementById('rail-navitem-entrance');
@@ -200,6 +201,12 @@
         document.body.prepend(mobileM00Backdrop);
       }
       mobileM00Backdrop.classList.toggle('is-active', currentScreenId === 'M-00');
+      if (mobileNext) {
+        const blocked = currentScreenId === 'C-03';
+        if (mobileNext.disabled !== blocked) mobileNext.disabled = blocked;
+        const internal = String(currentScreenId === 'S-05');
+        if (mobileNext.dataset.internalScroll !== internal) mobileNext.dataset.internalScroll = internal;
+      }
     }
     railNavByPrefix.forEach(([prefix, el]) => {
       if (el) el.classList.toggle('is-dimmed', !currentScreenId.startsWith(prefix));
@@ -637,6 +644,25 @@
   function nearestIndex() {
     return findScreenIndexAtPosition(loopPosition(state.target), state.screenStarts, state.screenWidths);
   }
+
+  // One settled step per tap. Keep the engine's easing, connector starts,
+  // C-03 guard, S-05 pin boundaries and final seam in the same input path.
+  mobileNext?.addEventListener('click', () => {
+    if (!mobileLayout.matches || document.body.classList.contains('is-o01-active') ||
+        isNavOverlayOpen() || Math.abs(state.target - state.current) > 0.05) return;
+    // Loop normalization can put a fractional connector boundary a few ulps
+    // before its start. Use the same 0.05px tolerance as the mobile rail.
+    const index = findScreenIndexAtPosition(loopPosition(state.target) + 0.05, state.screenStarts, state.screenWidths);
+    if (index === c03ScreenIndex) return;
+    const internalEnd = s05Pin.start + s05Pin.range;
+    const next = index === s05ScreenIndex
+      ? (state.target < internalEnd - 0.05 ? Math.min(state.target + state.unitWidth, internalEnd) : loop.span)
+      : state.target < 0 ? 0 : state.screenStarts[index + 1];
+    if (Number.isFinite(next)) scrollByInput(next - state.target);
+  });
+  // Keep Enter/Space native to the button and prevent the global arrow-key
+  // navigation from acting on this control as a second input source.
+  mobileNext?.addEventListener('keydown', (event) => event.stopPropagation());
 
   function goToIndex(i) {
     const clamped = clamp(i, 0, screens.length - 1);

@@ -15,6 +15,37 @@
   .rail { width: var(--mobile-rail-w); height: 100dvh; flex-direction: column; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; pointer-events: auto; scrollbar-width: none; }
   .rail::-webkit-scrollbar { display: none; }
   body.is-o01-active .rail { visibility: hidden; }
+  /* Inherit the rail's palette and interpolated foreground directly. The fixed
+     control stays outside the track, so its pointer input cannot start a drag. */
+  .mobile-next {
+    position: fixed;
+    right: calc(16px + env(safe-area-inset-right, 0px));
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    display: grid;
+    place-items: center;
+    width: 60px;
+    height: 60px;
+    padding: 0;
+    border: 1px solid var(--rail-line);
+    border-radius: 50%;
+    color: inherit;
+    background-color: var(--rail-bg);
+    box-shadow: none;
+    cursor: pointer;
+    pointer-events: auto;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.35s ease, border-color 0.35s ease;
+  }
+  .mobile-next svg { pointer-events: none; }
+  .mobile-next:active:not(:disabled) svg { transform: translateX(2px); }
+  .mobile-next:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+  .mobile-next:disabled { cursor: default; }
+  .mobile-next:disabled svg { opacity: 0.35; }
+  body.is-o01-active .mobile-next,
+  #rail-burger[aria-expanded="true"] ~ .mobile-next { visibility: hidden; pointer-events: none; }
+  /* Lift above S-05's fixed closing title; its text column remains scrollable. */
+  .mobile-next[data-internal-scroll="true"] { bottom: calc(112px + env(safe-area-inset-bottom, 0px)); }
   /* Continue the original 2880x2048 cover image into the 44px rail strip.
      Use the content viewport's cover scale and crop, rather than resizing it
      to the whole page. 50vw offsets the strip's centre to the image's centre.
@@ -62,6 +93,7 @@
   /* Full size reading surfaces inside the shared horizontal track. */
   #viewport .screen:not(.screen--m00):not(.screen--s05):not(.screen--image) {
     display: flex; flex-direction: column; gap: 24px; padding: 32px 24px max(36px, env(safe-area-inset-bottom)); overflow-x: hidden; overflow-y: auto;
+    padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
   }
   #viewport .screen:not(.screen--m00):not(.screen--s05) > *,
   #viewport :is(.e00__panel,.f00__panel,.c00__panel,.s00__panel) > * {
@@ -162,7 +194,7 @@
   #viewport .s05__content { position: absolute; top: 92px; bottom: 106px; left: 0; height: auto; width: max-content !important; display: grid; grid-auto-flow: column; grid-auto-columns: calc(var(--mobile-content-w) - 48px); grid-template-rows: minmax(100px, 0.8fr) minmax(0,1fr); column-gap: 48px; row-gap: 20px; padding: 0 24px; }
   #viewport .s05__content > * { position: relative; inset: auto; width: 100%; height: 100%; min-height: 0; margin: 0; }
   #viewport .s05__content > .story__ph { aspect-ratio: auto; }
-  #viewport .s05__content > .story__body { overflow-y: auto; font-size: 16px; line-height: 1.85; padding-bottom: 8px; }
+  #viewport .s05__content > .story__body { overflow-y: auto; font-size: 16px; line-height: 1.85; padding-bottom: 80px; }
 
   /* Opening: keep the original logo's ink centre shared with both sky layers. */
   .opening { height: 100dvh; --mobile-logo-width: min(42vw, 160px, 28dvh); --mobile-logo-top: 18dvh; }
@@ -190,10 +222,16 @@
   .m00__footer { left: 24px; bottom: max(24px, env(safe-area-inset-bottom)); font-size: 12px; }
   .e00-bg-layer { display: none; }
   #viewport .screen--e00 { background: var(--navy-brand); }
+  /* Stacked cover panels are transparent on mobile. Paint their PC surface
+     colour on the whole screen so padding cannot expose the black body. */
+  #viewport :is(.screen--f00, .screen--s00) { background-color: var(--cream); }
+  #viewport .screen--c00 { background-color: var(--black-brand); }
 
   @media (max-height: 500px) {
+    .mobile-next { width: 48px; height: 48px; right: calc(12px + env(safe-area-inset-right, 0px)); bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
+    .mobile-next[data-internal-scroll="true"] { bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
     #viewport .s05__content { top: 72px; bottom: 76px; grid-template-rows: minmax(60px,.7fr) minmax(0,1fr); }
-    #viewport .screen--s05 > .story__title { bottom: 16px; font-size: 22px; }
+    #viewport .screen--s05 > .story__title { bottom: 16px; font-size: 22px; width: calc(var(--mobile-content-w) - 108px); }
     #viewport .screen--s05 > .story__label { top: 16px; }
   }
 
