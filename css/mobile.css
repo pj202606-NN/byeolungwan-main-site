@@ -82,15 +82,19 @@
   .rail__navitem a { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: var(--mobile-rail-w); height: var(--mobile-rail-w); font-size: 12px; }
   .rail__progress-track { width: 2px; }
   .rail__dot { width: 6px; height: 6px; }
-  .nav-overlay { inset: 0 0 0 var(--mobile-rail-w); height: 100dvh; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; }
-  .nav-overlay__content { position: relative; inset: auto; width: 100%; min-height: 100%; height: auto; display: flex; flex-direction: column; padding: 24px; gap: 28px; }
-  .nav-overlay__col { flex: 0 0 auto; width: 100%; height: auto; min-height: 0; padding: 0; border: 0; display: grid; grid-template-columns: 65px 1fr; column-gap: 20px; }
-  .nav-overlay__label { position: static; grid-column: 1; font-size: 12px; opacity: 1; }
-  .nav-overlay__glyph { position: static; grid-column: 1; grid-row: 2; writing-mode: horizontal-tb; font-size: 44px; line-height: 1.4; }
-  .nav-overlay__sublist { position: static; grid-column: 2; grid-row: 1 / 3; opacity: 1; transform: none; font-size: 16px; line-height: 1.5; }
+  /* Keep the viewport-sized background still; scroll only the menu content. */
+  .nav-overlay { inset: 0 0 0 var(--mobile-rail-w); height: 100dvh; overflow: hidden; }
+  .nav-overlay__content { position: absolute; inset: 0; width: 100%; min-height: 0; height: 100%; display: flex; flex-direction: column; padding: 24px 0 max(32px, env(safe-area-inset-bottom)); gap: 28px; border: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; scrollbar-width: none; }
+  .nav-overlay__content::-webkit-scrollbar { display: none; }
+  /* Independent, content-sized frames extend to the right viewport edge. */
+  .nav-overlay__col { flex: 0 0 auto; width: calc(100% - 24px); height: auto; min-height: 0; margin-left: 24px; padding: 16px 16px 20px 12px; border: 1px solid var(--cream); border-right: 0; display: grid; grid-template-columns: 65px minmax(0, 1fr); column-gap: 20px; row-gap: 12px; align-items: start; }
+  .nav-overlay__label { position: static; grid-column: 1; grid-row: 1; font-size: 12px; opacity: 1; }
+  .nav-overlay__glyph { position: static; grid-column: 1; grid-row: 2; writing-mode: vertical-rl; text-orientation: upright; font-size: 44px; line-height: 1.4; letter-spacing: 0; margin-top: 8px; }
+  .nav-overlay__sublist { position: static; grid-column: 2; grid-row: 2; opacity: 1; transform: none; font-size: 16px; line-height: 1.5; }
   .nav-overlay__sublist a { display: flex; align-items: center; min-height: 44px; padding: 6px 0; }
   .nav-overlay__col--spacer { display: none; }
-  .nav-overlay__toc-label { position: static; font-size: 18px; min-height: 44px; white-space: nowrap; }
+  .nav-overlay__col--toc { display: block; margin-top: 8px; }
+  .nav-overlay__toc-label { position: static; writing-mode: horizontal-tb; font-size: 18px; min-height: 44px; width: 100%; white-space: nowrap; }
 
   /* Full size reading surfaces inside the shared horizontal track. */
   #viewport .screen:not(.screen--m00):not(.screen--s05):not(.screen--image) {
