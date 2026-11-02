@@ -109,6 +109,11 @@
   #viewport :is(.e00__toc-list,.f00__toc-list,.c00__toc-list,.s00__toc-list) li { font-size: 17px; line-height: 1.6; margin: 0; }
   #viewport :is(.e00__toc-list,.f00__toc-list,.c00__toc-list,.s00__toc-list) a { display: block; padding: 10px 0; }
   #viewport :is(.e00__hint,.f00__hint,.c00__hint,.s00__hint,.f01__hint) { font-size: 12px; line-height: 1.6; white-space: normal; }
+  /* Section covers: fill spare height above the existing lower information.
+     Long panels keep their natural height and the screen remains scrollable. */
+  #viewport :is(.screen--e00,.screen--f00,.screen--c00,.screen--s00) > :is(.e00__panel,.f00__panel,.c00__panel,.s00__panel) { flex: 1 0 auto; }
+  #viewport :is(.e00__eyebrow,.f00__eyebrow,.c00__eyebrow,.s00__eyebrow) { top: 1lh; }
+  #viewport :is(.e00__toc,.f00__toc,.c00__toc,.s00__toc) { margin-top: auto; padding-top: 32px; }
   #viewport :is(.e01__headline,.e02__headline,.f01__headline,.f02__title,.s01__title,.story__title,.c-ref__title) { font-size: 30px; line-height: 1.5; white-space: normal; }
   #viewport :is(.e01__body,.e02__body) { display: flex; flex-direction: column; gap: 20px; }
   #viewport :is(.e01__body-col,.e02__body-col,.f01__body,.f02__desc,.f02__fortune,.s01__body,.story__body,.story__guardian,.c-ref__body) { width: 100%; font-size: 16px; line-height: 1.85; white-space: normal; overflow-wrap: break-word; }
