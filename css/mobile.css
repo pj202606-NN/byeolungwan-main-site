@@ -78,7 +78,7 @@
   /* Compact only the four items inside the unchanged navigation zone.
      Keep each link's 44px hit area; centre the freed space above and below. */
   .rail__navlist { gap: 0; justify-content: center; }
-  .rail__navitem { width: 100%; flex: 0 0 max(44px, calc(25% - 4px)); transform: none; }
+  .rail__navitem { width: 100%; flex: 0 0 max(44px, calc(25% - 6px)); transform: none; }
   .rail__navitem a { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: var(--mobile-rail-w); height: var(--mobile-rail-w); font-size: 12px; }
   .rail__progress-track { width: 2px; }
   .rail__dot { width: 6px; height: 6px; }
@@ -219,7 +219,7 @@
   .o01__railing { height: 12dvh; }
 
   /* Shift the logo/subtitle pair together without touching their transforms. */
-  #M-00 { --mobile-m00-logo-shift: 16px; }
+  #M-00 { --mobile-m00-logo-shift: 22px; }
   .m00-bg-layer { width: 100%; height: 100%; }
   .m00__wordmark { top: 24px; left: calc(50% + var(--mobile-m00-logo-shift)); right: auto; transform: translateX(-50%); width: min(32vw, 150px, 28dvh); }
   .m00__tagline { top: calc(24px + min(32vw, 150px, 28dvh) * .525); right: calc(50% + min(32vw, 150px, 28dvh) * .28 - var(--mobile-m00-logo-shift)); font-size: 12px; }
