@@ -129,6 +129,10 @@
   #viewport .e02__dragon-img { position: static; width: 100%; height: auto; }
   #viewport :is(.e01__breadcrumb,.e02__breadcrumb,.f02__breadcrumb,.story__label,.s01__label,.c-ref__label) { font-size: 13px; line-height: 1.65; }
   #viewport :is(.e01__breadcrumb,.e02__breadcrumb,.f02__breadcrumb) p { font-size: inherit; }
+  /* Existing labels lead both DOM and visual reading order. Keep their fonts,
+     colours and dividers; only normal-flow spacing is shared on mobile. */
+  #viewport .screen:not(.screen--s05) > :is(.e01__breadcrumb,.e02__breadcrumb,.f02__breadcrumb,.c-ref__label,.s01__label,.story__label) { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+  #viewport .screen:not(.screen--s05) > :is(.e01__breadcrumb,.e02__breadcrumb,.f02__breadcrumb,.c-ref__label,.s01__label,.story__label) > p { margin: 0; }
   #viewport :is(.e02__sample-title,.e02__dragon-title,.f02__fortune-title,.story__guardian h3) { font-size: 24px; line-height: 1.5; }
   #viewport :is(.e02__sample-hanja,.e02__dragon-desc,.f02__subtitle,.story__direction,.story__guardian-hanja) { font-size: 14px; line-height: 1.6; }
   #viewport :is(.s00__image-ph,.c00__image-ph,.s01__image-ph,.story__ph,.f01__image-ph,.f02__image-ph,.f02__fortune-ph,.c-ref__ph) { min-height: 180px; aspect-ratio: 4 / 3; }
@@ -196,7 +200,7 @@
   #S-03 > [data-guardian='현무'] { order: 2; }
   #S-03 > [data-guardian='백호'] { order: 3; }
   #S-03 > [data-guardian='주작'] { order: 4; }
-  #S-03 > .story__label { order: 5; }
+  #S-03 > .story__label { order: -1; }
 
   /* S-05 keeps the same pinned outer screen and engine-driven middle track.
      Each column pairs the existing image and paragraph; long copy pans vertically. */
