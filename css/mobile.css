@@ -75,8 +75,10 @@
   .rail__zone--dot { flex: 1 0 24px; }
   .rail__vertical-text { font-size: 12px; }
   .rail__logo-text { font-size: 19px; }
-  .rail__navlist { gap: 0; justify-content: space-around; }
-  .rail__navitem { width: 100%; flex: 1 0 44px; transform: none; }
+  /* Compact only the four items inside the unchanged navigation zone.
+     Keep each link's 44px hit area; centre the freed space above and below. */
+  .rail__navlist { gap: 0; justify-content: center; }
+  .rail__navitem { width: 100%; flex: 0 0 max(44px, calc(25% - 4px)); transform: none; }
   .rail__navitem a { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: var(--mobile-rail-w); height: var(--mobile-rail-w); font-size: 12px; }
   .rail__progress-track { width: 2px; }
   .rail__dot { width: 6px; height: 6px; }
@@ -216,10 +218,11 @@
   .o01__soundui-menu button { min-height: 44px; font-size: 16px; }
   .o01__railing { height: 12dvh; }
 
-  /* Centre the same logo/subtitle pair within the content area, not the page. */
+  /* Shift the logo/subtitle pair together without touching their transforms. */
+  #M-00 { --mobile-m00-logo-shift: 16px; }
   .m00-bg-layer { width: 100%; height: 100%; }
-  .m00__wordmark { top: 24px; left: 50%; right: auto; transform: translateX(-50%); width: min(32vw, 150px, 28dvh); }
-  .m00__tagline { top: calc(24px + min(32vw, 150px, 28dvh) * .525); right: calc(50% + min(32vw, 150px, 28dvh) * .28); font-size: 12px; }
+  .m00__wordmark { top: 24px; left: calc(50% + var(--mobile-m00-logo-shift)); right: auto; transform: translateX(-50%); width: min(32vw, 150px, 28dvh); }
+  .m00__tagline { top: calc(24px + min(32vw, 150px, 28dvh) * .525); right: calc(50% + min(32vw, 150px, 28dvh) * .28 - var(--mobile-m00-logo-shift)); font-size: 12px; }
   .m00__chart-mount,.m00__trails-mount { top: calc(24px + min(32vw, 150px, 28dvh) * 1.0983); left: 50%; }
   .m00__chart-mount { width: 145vmax; height: 145vmax; }
   .m00__trails-mount { width: 240vmax; height: 240vmax; }
