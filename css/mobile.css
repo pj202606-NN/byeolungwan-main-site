@@ -135,6 +135,15 @@
   #viewport .screen:not(.screen--s05) > :is(.e01__breadcrumb,.e02__breadcrumb,.f02__breadcrumb,.c-ref__label,.s01__label,.story__label) > p { margin: 0; }
   #viewport :is(.e02__sample-title,.e02__dragon-title,.f02__fortune-title,.story__guardian h3) { font-size: 24px; line-height: 1.5; }
   #viewport :is(.e02__sample-hanja,.e02__dragon-desc,.f02__subtitle,.story__direction,.story__guardian-hanja) { font-size: 14px; line-height: 1.6; }
+  /* E-02 only: the image is decorative (empty alt), so visual reordering
+     keeps the existing text reading order and leaves desktop DOM untouched. */
+  #viewport #E-02 > .e02__breadcrumb { order: -2; }
+  #viewport #E-02 > .e02__headline { order: -1; }
+  #viewport #E-02 > .e02__photo-wrap { min-height: 0; aspect-ratio: 3 / 2; }
+  #viewport #E-02 .e02__photo-img { position: absolute; inset: 0; display: block; object-fit: contain; transform: none !important; }
+  #viewport #E-02 :is(.e02__sample-title,.e02__dragon-title) { font-family: var(--font-emphasis); font-size: 24px; font-weight: 400; line-height: 1.5; letter-spacing: var(--font-emphasis-tracking-adjust); }
+  #viewport #E-02 .e02__dragon-desc { width: 100%; max-width: none; }
+  #viewport #E-02 .e02__dragon-desc br { display: none; }
   #viewport :is(.s00__image-ph,.c00__image-ph,.s01__image-ph,.story__ph,.f01__image-ph,.f02__image-ph,.f02__fortune-ph,.c-ref__ph) { min-height: 180px; aspect-ratio: 4 / 3; }
   #viewport .story__ph { box-shadow: none; }
   #viewport .story__guardian-body { margin-top: 12px; }
