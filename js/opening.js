@@ -47,6 +47,16 @@
   const scene = document.getElementById('o01-scene');
   const center = opening.querySelector('.o01__center');
   const hint = document.getElementById('o01-hint');
+  // Reuse the visible text node so assistive technology reads the same hint.
+  // Match mobile.css (including short, coarse-pointer landscape screens).
+  const mobileHintMedia = window.matchMedia('(max-width: 767px), (max-width: 1023px) and (max-height: 500px) and (pointer: coarse)');
+  const desktopHintText = hint.textContent;
+  function syncMobileHint() {
+    const text = mobileHintMedia.matches ? '화면을 위로 올려주세요' : desktopHintText;
+    if (hint.textContent !== text) hint.textContent = text;
+  }
+  syncMobileHint();
+  mobileHintMedia.addEventListener('change', syncMobileHint);
   const lanternBtn = document.getElementById('o01-lantern-btn');
   const soundUi = document.getElementById('o01-soundui');
   const soundBtn = document.getElementById('o01-soundui-btn');

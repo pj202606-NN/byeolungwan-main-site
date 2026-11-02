@@ -198,6 +198,10 @@
 
   /* Opening: keep the original logo's ink centre shared with both sky layers. */
   .opening { height: 100dvh; --mobile-logo-width: min(42vw, 160px, 28dvh); --mobile-logo-top: 18dvh; }
+  /* Leave 16px of each door visible, clear of the controls inset by 20px.
+     Only open endpoints change; closed transforms and JS timing stay intact. */
+  .o01__door--left.is-open { transform: translateX(calc(-50vw + 16px)); }
+  .o01__door--right.is-open { transform: translateX(calc(50vw - 16px)); }
   .o01__logo { top: var(--mobile-logo-top); left: 50.235%; width: var(--mobile-logo-width); }
   .o01__subtitle { top: calc(var(--mobile-logo-top) + var(--mobile-logo-width) * .545); left: calc(50.235% + var(--mobile-logo-width) * .275); font-size: 12px; }
   .o01__chart-mount,.o01__trails-mount { top: calc(var(--mobile-logo-top) + var(--mobile-logo-width) * 1.0983); left: 50.235%; }
