@@ -171,7 +171,9 @@
   #viewport #F-01 .f01__mobile-hint { font-size: 12px; line-height: 1.6; color: var(--text-muted-on-navy); margin: 0; }
   #viewport #F-01 .f01__mobile-submit { display: inline-flex; align-items: center; justify-content: flex-end; gap: 4px; min-height: 44px; padding: 0; border: 0; background: none; color: var(--white); font-family: var(--font-sans); font-size: 14px; font-weight: 600; line-height: 1.5; white-space: nowrap; cursor: pointer; }
   #viewport #F-01 .f01__mobile-submit:focus-visible { outline: 1px solid currentColor; outline-offset: 4px; }
-  #viewport .f02__links { display: flex; flex-direction: column; gap: 12px; font-size: 16px; }
+  /* F-02: match the constellation heading and align actions to the copy. */
+  #viewport #F-02 .f02__fortune-title { font-family: var(--font-emphasis); font-size: 30px; font-weight: 600; line-height: 1.5; letter-spacing: var(--font-emphasis-tracking-adjust); }
+  #viewport .f02__links { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; font-size: 16px; }
   #viewport .f02__links a { padding: 12px 0; }
   #viewport :is(.f02__fortune-p1,.f02__fortune-p2) { font-size: 16px; line-height: 1.85; }
   #viewport :is(.c-ref__label,.story__label,.s01__label) p { font-size: 13px; }
