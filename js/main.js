@@ -43,6 +43,8 @@
 
   // 화면별 폭 배율 (지정 없으면 1 = 기준 폭 1장)
   const widthMultipliers = screens.map((s) => parseFloat(s.dataset.widthMultiplier || '1'));
+  // Retain DOM indices and desktop geometry; only this mobile connector is empty.
+  const mobileSkippedScreenIndex = screens.findIndex((s) => s.dataset.screenId === 'IMG-01');
 
   const s05ScreenIndex = screens.findIndex((s) => s.dataset.screenId === 'S-05');
   const c03ScreenIndex = screens.findIndex((s) => s.dataset.screenId === 'C-03');
@@ -438,7 +440,8 @@
     cachedRailWidth = rail.getBoundingClientRect().width;
 
     const screenWidths = widthMultipliers.map((m, i) =>
-      newWidth * (mobileLayout.matches && !screens[i].classList.contains('screen--image') ? 1 : m));
+      mobileLayout.matches && i === mobileSkippedScreenIndex ? 0 :
+        newWidth * (mobileLayout.matches && !screens[i].classList.contains('screen--image') ? 1 : m));
     let innerWidth = newWidth;
     if (s05Content) {
       // offset 치수는 부모 translateX의 영향을 받지 않는다. 측정은 resize 때만 한다.
@@ -565,9 +568,11 @@
   let dragAxis = '';
   let dragPointerId = null;
   let suppressMobileClick = false;
+  let mobileTransitionOrigin = null;
 
   function onPointerDown(e) {
     if (isNavOverlayOpen()) return;
+    mobileTransitionOrigin = null;
     if (mobileLayout.matches) {
       suppressMobileClick = false;
       if (!e.isPrimary || e.button !== 0 || e.target.closest('button,a,input,select,textarea,label,[data-mobile-native]')) return;
@@ -578,6 +583,15 @@
     isDragging = true;
     dragStartX = e.clientX;
     dragStartTarget = state.target;
+    if (mobileLayout.matches && mobileSkippedScreenIndex > 0) {
+      const before = state.screenStarts[mobileSkippedScreenIndex - 1];
+      const after = state.screenStarts[mobileSkippedScreenIndex + 1];
+      // Settle only the newly adjacent F-02/C-00 pair after a horizontal swipe.
+      if (Math.abs(state.target - state.current) < 0.05 &&
+          (Math.abs(state.target - before) < 0.05 || Math.abs(state.target - after) < 0.05)) {
+        mobileTransitionOrigin = state.target;
+      }
+    }
     track.style.cursor = 'grabbing';
   }
   function onPointerMove(e) {
@@ -602,6 +616,14 @@
     }
   }
   function onPointerUp() {
+    if (isDragging && mobileLayout.matches && dragAxis === 'x' && mobileTransitionOrigin !== null) {
+      const before = state.screenStarts[mobileSkippedScreenIndex - 1];
+      const after = state.screenStarts[mobileSkippedScreenIndex + 1];
+      if (state.target >= before && state.target <= after && Math.abs(state.target - mobileTransitionOrigin) >= 8) {
+        state.target = state.target > mobileTransitionOrigin ? after : before;
+      }
+    }
+    mobileTransitionOrigin = null;
     isDragging = false;
     track.style.cursor = 'grab';
   }
@@ -669,7 +691,12 @@
   mobileNext?.addEventListener('keydown', (event) => event.stopPropagation());
 
   function goToIndex(i) {
-    const clamped = clamp(i, 0, screens.length - 1);
+    let clamped = clamp(i, 0, screens.length - 1);
+    // A backward page step must pass the zero-width connector rather than
+    // returning to C-00, which shares its mobile start coordinate.
+    if (mobileLayout.matches && clamped === mobileSkippedScreenIndex) {
+      clamped += i < nearestIndex() ? -1 : 1;
+    }
     state.target = clamp(state.screenStarts[clamped], 0, state.max);
   }
 
