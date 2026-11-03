@@ -23,7 +23,7 @@
 
 <link rel="stylesheet" href="css/main.css?v=30">
 <link rel="stylesheet" href="css/opening.css?v=26">
-<link rel="stylesheet" href="css/mobile.css?v=9" media="(max-width: 767px), (max-width: 1023px) and (max-height: 500px) and (pointer: coarse)">
+<link rel="stylesheet" href="css/mobile.css?v=10" media="(max-width: 767px), (max-width: 1023px) and (max-height: 500px) and (pointer: coarse)">
 </head>
 <body class="is-o01-active">
 <!-- is-o01-active: 페이지 로드 시 기본으로 켜져 있다(O-01이 첫
@@ -7500,6 +7500,10 @@
          F-02로 넘어갈 구조만 마련했다(js/main.js 참고, 콘솔 출력/
          서버 전송 없음). -->
     <section class="screen screen--f01" id="F-01" data-screen-id="F-01" data-rail-theme="navy">
+      <div class="f01__mobile-label" hidden>
+        <p>운세 보기</p>
+        <p>별자리 찾기</p>
+      </div>
       <h2 class="f01__headline reveal" data-reveal-start="0" data-reveal-end="0.4">
         당신이 이 세상에<br>
         태어난 때는 언제인가요?
@@ -7550,6 +7554,10 @@
       </div>
 
       <p class="f01__hint">생년월일을 입력해 주세요.</p>
+      <div class="f01__mobile-actions" hidden>
+        <p class="f01__mobile-hint" id="f01-mobile-hint" role="status" aria-live="polite">생년월일을 입력해 주세요.</p>
+        <button type="button" class="f01__mobile-submit" id="f01-mobile-submit" aria-describedby="f01-mobile-hint">별자리 확인하기 <svg width="12" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true"><path d="M1 8h13m-5-5 5 5-5 5"/></svg></button>
+      </div>
     </section>
 
     <!-- F-02 : 별자리 출력. 레퍼런스(F-02_운세보기_별자리출력.png)의
@@ -7884,7 +7892,7 @@
   </div>
 </main>
 
-<script src="js/main.js?v=15"></script>
+<script src="js/main.js?v=16"></script>
 <script src="js/opening.js?v=9"></script>
 </body>
 </html>

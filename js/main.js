@@ -654,6 +654,10 @@
     // before its start. Use the same 0.05px tolerance as the mobile rail.
     const index = findScreenIndexAtPosition(loopPosition(state.target) + 0.05, state.screenStarts, state.screenWidths);
     if (index === c03ScreenIndex) return;
+    if (screens[index]?.id === 'F-01') {
+      advanceF01Mobile();
+      return;
+    }
     const internalEnd = s05Pin.start + s05Pin.range;
     const next = index === s05ScreenIndex
       ? (state.target < internalEnd - 0.05 ? Math.min(state.target + state.unitWidth, internalEnd) : loop.span)
@@ -1001,6 +1005,9 @@
   const f01Year = document.getElementById('f01-year');
   const f01Month = document.getElementById('f01-month');
   const f01Day = document.getElementById('f01-day');
+  function daysInMonth(year, month) {
+    return new Date(year, month, 0).getDate(); // month: 1~12
+  }
   if (f01Year && f01Month && f01Day) {
     const now = new Date();
     const thisYear = now.getFullYear();
@@ -1015,9 +1022,6 @@
       opt.value = String(m);
       opt.textContent = String(m);
       f01Month.appendChild(opt);
-    }
-    function daysInMonth(year, month) {
-      return new Date(year, month, 0).getDate(); // month: 1~12
     }
     function refreshDayOptions() {
       const year = parseInt(f01Year.value, 10);
@@ -1039,6 +1043,66 @@
   }
 
   const f01Submit = document.getElementById('f01-submit');
+  const f01MobileLabel = document.querySelector('.f01__mobile-label');
+  const f01MobileActions = document.querySelector('.f01__mobile-actions');
+  const f01MobileHint = document.getElementById('f01-mobile-hint');
+  const f01MobileSubmit = document.getElementById('f01-mobile-submit');
+  function advanceF01Mobile() {
+    if (!mobileLayout.matches) return;
+    // An explicit control action must not inherit an earlier drag's click guard.
+    suppressMobileClick = false;
+    f01Submit?.click();
+  }
+  function syncF01MobileControls() {
+    if (f01MobileLabel) f01MobileLabel.hidden = !mobileLayout.matches;
+    if (f01MobileActions) f01MobileActions.hidden = !mobileLayout.matches;
+    if (!mobileLayout.matches) {
+      [f01Year, f01Month, f01Day].forEach((field) => field?.removeAttribute('aria-invalid'));
+      const result = document.getElementById('F-02');
+      result?.removeAttribute('data-birthdate');
+      result?.removeAttribute('aria-description');
+    }
+  }
+  syncF01MobileControls();
+  mobileLayout.addEventListener('change', syncF01MobileControls);
+  if (f01Submit && f01Year && f01Month && f01Day) {
+    let lastMobileAdvance = -Infinity;
+    // Capture precedes the existing data-target listener; desktop bypasses it.
+    f01Submit.addEventListener('click', (event) => {
+      if (!mobileLayout.matches) return;
+      const year = Number(f01Year.value), month = Number(f01Month.value), day = Number(f01Day.value);
+      const valid = [
+        Number.isInteger(year) && [...f01Year.options].some((option) => option.value === f01Year.value),
+        Number.isInteger(month) && month >= 1 && month <= 12,
+        Number.isInteger(day) && day >= 1 && day <= daysInMonth(year, month),
+      ];
+      if (!valid.every(Boolean)) {
+        event.preventDefault(); event.stopImmediatePropagation();
+        f01MobileHint.textContent = '생년월일을 확인해 주세요.';
+        [f01Year, f01Month, f01Day].forEach((field, index) => field.setAttribute('aria-invalid', String(!valid[index])));
+        [f01Year, f01Month, f01Day][valid.indexOf(false)].focus();
+        return;
+      }
+      if (performance.now() - lastMobileAdvance < 800) {
+        event.preventDefault(); event.stopImmediatePropagation(); return;
+      }
+      lastMobileAdvance = performance.now();
+      [f01Year, f01Month, f01Day].forEach((field) => field.removeAttribute('aria-invalid'));
+      f01MobileHint.textContent = '생년월일을 입력해 주세요.';
+      const birthdate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const result = document.getElementById('F-02');
+      result.dataset.birthdate = birthdate;
+      result.setAttribute('aria-description', `선택한 생년월일 ${year}년 ${month}월 ${day}일. 별자리와 운세는 기존 고정 예시입니다.`);
+    }, true);
+    f01MobileSubmit?.addEventListener('click', advanceF01Mobile);
+    f01MobileSubmit?.addEventListener('keydown', (event) => {
+      event.stopPropagation();
+      if (event.key === 'Enter' || event.key === ' ') suppressMobileClick = false;
+    });
+    f01Year.closest('form')?.addEventListener('submit', (event) => {
+      if (mobileLayout.matches) { event.preventDefault(); advanceF01Mobile(); }
+    });
+  }
   if (f01Submit && f01Year && f01Month && f01Day) {
     f01Submit.addEventListener('click', () => {
       try {

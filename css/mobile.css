@@ -157,6 +157,20 @@
   #viewport .f01__date-field select { width: 100%; min-height: 48px; font-size: 20px; }
   #viewport .f01__submit-label { font-size: 16px; }
   #viewport .f01__submit { display: flex; align-items: center; justify-content: center; min-height: 48px; width: 100%; margin-top: 12px; font-size: 18px; }
+  /* F-01 mobile controls reuse the existing selects and progression link. */
+  #viewport #F-01 > .f01__mobile-label { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; order: -3; font-size: 13px; line-height: 1.65; color: var(--text-muted-on-navy); }
+  #viewport #F-01 > .f01__mobile-label p { margin: 0; }
+  #viewport #F-01 > .f01__mobile-label p + p { color: var(--white); font-weight: 600; }
+  #viewport #F-01 > .f01__headline { order: -2; }
+  #viewport #F-01 > .f01__image-ph { order: -1; min-height: 0; aspect-ratio: 3 / 2; }
+  #viewport #F-01 .f01__date-card { transform: none; display: grid; grid-template-columns: minmax(0,1.4fr) repeat(2,minmax(0,1fr)); gap: 8px; padding: 16px 12px; }
+  #viewport #F-01 .f01__date-field { min-width: 0; gap: 3px; font-size: 16px; }
+  #viewport #F-01 .f01__date-field select { min-width: 0; font-size: 16px; }
+  #viewport #F-01 > :is(.f01__submit-wrap,.f01__hint) { display: none; }
+  #viewport #F-01 > .f01__mobile-actions { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px; align-items: center; margin-top: -12px; }
+  #viewport #F-01 .f01__mobile-hint { font-size: 12px; line-height: 1.6; color: var(--text-muted-on-navy); margin: 0; }
+  #viewport #F-01 .f01__mobile-submit { display: inline-flex; align-items: center; justify-content: flex-end; gap: 4px; min-height: 44px; padding: 0; border: 0; background: none; color: var(--white); font-family: var(--font-sans); font-size: 14px; font-weight: 600; line-height: 1.5; white-space: nowrap; cursor: pointer; }
+  #viewport #F-01 .f01__mobile-submit:focus-visible { outline: 1px solid currentColor; outline-offset: 4px; }
   #viewport .f02__links { display: flex; flex-direction: column; gap: 12px; font-size: 16px; }
   #viewport .f02__links a { padding: 12px 0; }
   #viewport :is(.f02__fortune-p1,.f02__fortune-p2) { font-size: 16px; line-height: 1.85; }
