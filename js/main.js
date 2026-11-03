@@ -43,8 +43,10 @@
 
   // 화면별 폭 배율 (지정 없으면 1 = 기준 폭 1장)
   const widthMultipliers = screens.map((s) => parseFloat(s.dataset.widthMultiplier || '1'));
-  // Retain DOM indices and desktop geometry; only this mobile connector is empty.
-  const mobileSkippedScreenIndex = screens.findIndex((s) => s.dataset.screenId === 'IMG-01');
+  // Retain DOM indices and desktop geometry; only these mobile connectors are empty.
+  const mobileSkippedScreenIndices = ['IMG-01', 'IMG-02']
+    .map((id) => screens.findIndex((s) => s.dataset.screenId === id))
+    .filter((index) => index > 0 && index < screens.length - 1);
 
   const s05ScreenIndex = screens.findIndex((s) => s.dataset.screenId === 'S-05');
   const c03ScreenIndex = screens.findIndex((s) => s.dataset.screenId === 'C-03');
@@ -440,7 +442,7 @@
     cachedRailWidth = rail.getBoundingClientRect().width;
 
     const screenWidths = widthMultipliers.map((m, i) =>
-      mobileLayout.matches && i === mobileSkippedScreenIndex ? 0 :
+      mobileLayout.matches && mobileSkippedScreenIndices.includes(i) ? 0 :
         newWidth * (mobileLayout.matches && !screens[i].classList.contains('screen--image') ? 1 : m));
     let innerWidth = newWidth;
     if (s05Content) {
@@ -583,14 +585,12 @@
     isDragging = true;
     dragStartX = e.clientX;
     dragStartTarget = state.target;
-    if (mobileLayout.matches && mobileSkippedScreenIndex > 0) {
-      const before = state.screenStarts[mobileSkippedScreenIndex - 1];
-      const after = state.screenStarts[mobileSkippedScreenIndex + 1];
-      // Settle only the newly adjacent F-02/C-00 pair after a horizontal swipe.
-      if (Math.abs(state.target - state.current) < 0.05 &&
-          (Math.abs(state.target - before) < 0.05 || Math.abs(state.target - after) < 0.05)) {
-        mobileTransitionOrigin = state.target;
-      }
+    if (mobileLayout.matches && Math.abs(state.target - state.current) < 0.05) {
+      // Reuse the same swipe settlement for each pair beside an empty connector.
+      const index = mobileSkippedScreenIndices.find((i) =>
+        Math.abs(state.target - state.screenStarts[i - 1]) < 0.05 ||
+        Math.abs(state.target - state.screenStarts[i + 1]) < 0.05);
+      if (index !== undefined) mobileTransitionOrigin = { position: state.target, index };
     }
     track.style.cursor = 'grabbing';
   }
@@ -617,10 +617,11 @@
   }
   function onPointerUp() {
     if (isDragging && mobileLayout.matches && dragAxis === 'x' && mobileTransitionOrigin !== null) {
-      const before = state.screenStarts[mobileSkippedScreenIndex - 1];
-      const after = state.screenStarts[mobileSkippedScreenIndex + 1];
-      if (state.target >= before && state.target <= after && Math.abs(state.target - mobileTransitionOrigin) >= 8) {
-        state.target = state.target > mobileTransitionOrigin ? after : before;
+      const { position, index } = mobileTransitionOrigin;
+      const before = state.screenStarts[index - 1];
+      const after = state.screenStarts[index + 1];
+      if (state.target >= before && state.target <= after && Math.abs(state.target - position) >= 8) {
+        state.target = state.target > position ? after : before;
       }
     }
     mobileTransitionOrigin = null;
@@ -693,8 +694,8 @@
   function goToIndex(i) {
     let clamped = clamp(i, 0, screens.length - 1);
     // A backward page step must pass the zero-width connector rather than
-    // returning to C-00, which shares its mobile start coordinate.
-    if (mobileLayout.matches && clamped === mobileSkippedScreenIndex) {
+    // returning to the following screen, which shares its mobile start coordinate.
+    if (mobileLayout.matches && mobileSkippedScreenIndices.includes(clamped)) {
       clamped += i < nearestIndex() ? -1 : 1;
     }
     state.target = clamp(state.screenStarts[clamped], 0, state.max);
