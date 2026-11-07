@@ -406,7 +406,7 @@
   .o07 .o07__rotor { animation-play-state: paused !important; }
 }
 /* Opening-only responsive layout. The mobile main track and O-01 stay untouched. */
-@media (max-width: 767px), (max-width: 1023px) and (pointer: coarse) {
+@media (max-width: 767px), (max-width: 1280px) and (pointer: coarse) {
   .opening.is-opening-handoff { pointer-events: auto; touch-action: none; }
   .opening-pc { height: 100dvh; }
   .opening-pc .opening-pc__scene { height: 100%; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y pinch-zoom; scrollbar-width: none; scroll-padding-top: 136px; scroll-padding-bottom: 24px; }
@@ -470,4 +470,10 @@
   .opening-pc .o07__doors .o01__door { height: 100dvh; }
   .opening-pc .o07__doors .o01__door--left.is-open { transform: translateX(calc(-50vw + 16px)); }
   .opening-pc .o07__doors .o01__door--right.is-open { transform: translateX(calc(50vw - 16px)); }
+}
+@media (min-width: 768px) and (max-width: 1280px) and (pointer: coarse) {
+  .opening-pc .opening-pc__layout, .opening-pc .o06__layout, .opening-pc .exploration[data-mode="selected"] .exploration__selected-copy { width: min(100%, 720px); margin-left: auto; margin-right: auto; }
+  .opening-pc .exploration[data-mode="selected"] .exploration__stars { width: min(calc(100% - 48px), 672px); margin-left: auto; margin-right: auto; }
+  .opening-pc .opening-pc__progress { left: 50%; }
+  .opening-pc .o07 { --orbit-radius: min(44vw, 54dvh); --card-width: clamp(52px, 6vw, 76px); }
 }

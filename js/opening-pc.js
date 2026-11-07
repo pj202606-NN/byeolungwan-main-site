@@ -6,7 +6,7 @@
   if (!root) return;
   const opening = document.getElementById('opening');
   const o01 = document.getElementById('o01-scene');
-  const mobile = matchMedia('(max-width: 767px), (max-width: 1023px) and (pointer: coarse)');
+  const mobile = matchMedia('(max-width: 767px), (max-width: 1280px) and (pointer: coarse)');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const surface = root.querySelector('.o02__tilt-surface');
   const image = root.querySelector('.o02__image');
