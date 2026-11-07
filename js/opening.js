@@ -284,6 +284,7 @@
     e.preventDefault();
     e.stopPropagation();
 
+    if (window.openingPC?.handleWheel(e)) return;
     if (stage !== 'open') return; // 문 여닫는 중/트랜지션 중엔 입력 무시 — 중복 트리거 방지
     if (e.deltaY <= 0) return; // 아래로 내리는 입력만 "다음 장면" 신호로 취급
 
@@ -302,6 +303,7 @@
     // 키보드 입력(화살표/PageUp/PageDown 등)을 그대로 통과시킨다.
     if (stage === 'hidden') return;
 
+    window.openingPC?.handleKey(e);
     if (stage === 'blackout' && e.key === '0') {
       // 개발자 전용 리셋 단축키 — 콘솔에서 window.o01DevReset()으로도
       // 호출 가능. 암전이 안정되면 곧 자동으로 goToNextScene()이
@@ -337,6 +339,10 @@
   // --------------------------------------------------------------
   function playTransitionOut() {
     if (stage !== 'open') return;
+    // All viewports keep the already-open doors and crossfade into O-02.
+    if (window.openingPC?.enter()) {
+      return;
+    }
     stage = 'closing';
     // 기존 1150ms 대기와 겹쳐 재생하므로 문·장면 전환 시점은 그대로다.
     opening.classList.add('is-exiting');
@@ -401,8 +407,12 @@
   // 바꾸면 된다 — 문 열림/닫힘, 블랙아웃, 스크롤 트리거 등 나머지
   // 상태 머신은 그대로 재사용 가능하다.
   // --------------------------------------------------------------
-  function goToNextScene() {
-    stage = 'hidden';
+  function goToNextScene(onHidden) {
+    // PC O-07 calls this only after both doors close. Keep capture input locked
+    // during the overlay fade, so wheel momentum cannot move the hidden main.
+    const pcExit = typeof onHidden === 'function';
+    stage = pcExit ? 'pc-exit' : 'hidden';
+    if (pcExit) opening.classList.add('is-opening-handoff');
     if (window.m00Enter) window.m00Enter();
     document.body.classList.remove('is-o01-active');
     opening.classList.add('is-hidden');
@@ -419,8 +429,14 @@
     // 방금 다시 보이기 시작한 #opening을 실수로 숨기지 않기 위함.
     opening.addEventListener('transitionend', function onFadeOutDone(e) {
       if (e.propertyName !== 'opacity') return;
+      if (pcExit && e.target !== opening) return;
       opening.removeEventListener('transitionend', onFadeOutDone);
-      if (stage === 'hidden') opening.style.display = 'none';
+      if (stage === 'hidden' || stage === 'pc-exit') {
+        opening.style.display = 'none';
+        opening.classList.remove('is-opening-handoff');
+        stage = 'hidden';
+        if (pcExit) onHidden();
+      }
     });
   }
 
@@ -486,4 +502,14 @@
     window.setTimeout(playDoorOpen, TIMING.openingFadeMs + TIMING.doorHoldMs);
   }
   window.o01Enter = enterFromMainSite;
+  window.openingPC?.connect({
+    canEnter() { return stage === 'open'; },
+    onEnter() { stage = 'pc'; resetWheelAccum(); closeSoundMenu(); },
+    onReturn() { stage = 'open'; resetWheelAccum(); },
+    finish(onHidden) {
+      if (stage !== 'pc') return false;
+      goToNextScene(onHidden);
+      return true;
+    },
+  });
 })();

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_별자리_작업" data-name="별자리 작업" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 250">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fef8e9;
+      }
+
+      .cls-2 {
+        fill: none;
+        stroke: #577392;
+        stroke-miterlimit: 10;
+      }
+    </style>
+  </defs>
+  <line class="cls-2" x1="152.52" y1="113.5" x2="130.22" y2="99.87"/>
+  <polyline class="cls-2" points="127.48 142 152.52 113.5 190.92 104.87"/>
+  <polyline class="cls-2" points="125.3 165.91 127.48 142 112.06 114.5"/>
+  <polyline class="cls-2" points="73.05 168.85 106.76 181.18 125.3 165.91 161.52 185.18"/>
+  <polyline class="cls-2" points="34.81 199.66 64.03 212.78 92.5 213.82 125.85 210.24 161.52 184.54 209.59 180.18"/>
+  <polyline class="cls-2" points="150.52 82.12 130.22 99.87 112.06 114.5 80.78 119.78"/>
+  <line class="cls-2" x1="89.55" y1="79.44" x2="125.3" y2="72.76"/>
+  <polyline class="cls-2" points="66 43.67 104.76 49.53 125.3 72.76 150.52 82.12 190.92 76.76 226.41 82.27"/>
+  <circle class="cls-1" cx="125.3" cy="72.76" r="4"/>
+  <circle class="cls-1" cx="130.22" cy="99.87" r="4"/>
+  <circle class="cls-1" cx="125.3" cy="165.91" r="4"/>
+  <circle class="cls-1" cx="161.52" cy="184.54" r="4"/>
+  <circle class="cls-1" cx="104.76" cy="49.53" r="3.2"/>
+  <circle class="cls-1" cx="66" cy="43.67" r="2.4"/>
+  <circle class="cls-1" cx="150.52" cy="82.12" r="2.4"/>
+  <circle class="cls-1" cx="226.41" cy="82.27" r="2.4"/>
+  <circle class="cls-1" cx="209.59" cy="180.18" r="2.4"/>
+  <circle class="cls-1" cx="73.05" cy="168.85" r="2.4"/>
+  <circle class="cls-1" cx="190.92" cy="76.76" r="3.2"/>
+  <circle class="cls-1" cx="89.55" cy="79.44" r="3.2"/>
+  <circle class="cls-1" cx="112.06" cy="114.5" r="3.2"/>
+  <circle class="cls-1" cx="152.52" cy="113.5" r="3.2"/>
+  <circle class="cls-1" cx="106.76" cy="181.18" r="3.2"/>
+  <circle class="cls-1" cx="125.3" cy="210.24" r="3.2"/>
+  <circle class="cls-1" cx="92.5" cy="213.82" r="3.2"/>
+  <circle class="cls-1" cx="64.03" cy="212.78" r="3.2"/>
+  <circle class="cls-1" cx="34.81" cy="199.66" r="3.2"/>
+  <circle class="cls-1" cx="127.48" cy="142" r="3.2"/>
+  <circle class="cls-1" cx="80.78" cy="119.78" r="3.2"/>
+  <circle class="cls-1" cx="190.92" cy="104.87" r="3.2"/>
+</svg>

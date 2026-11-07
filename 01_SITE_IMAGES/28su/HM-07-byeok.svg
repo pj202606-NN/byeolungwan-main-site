@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_별자리_작업" data-name="별자리 작업" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 250">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fef8e9;
+      }
+
+      .cls-2 {
+        fill: none;
+        stroke: #577392;
+        stroke-miterlimit: 10;
+      }
+    </style>
+  </defs>
+  <polyline class="cls-2" points="53.94 91.62 88.55 123.64 120.89 123.64 148.93 148.73 197.22 162.13"/>
+  <circle class="cls-1" cx="148.93" cy="148.73" r="4"/>
+  <circle class="cls-1" cx="120.89" cy="123.64" r="3.2"/>
+  <circle class="cls-1" cx="197.22" cy="162.13" r="3.2"/>
+  <circle class="cls-1" cx="88.55" cy="123.64" r="3.2"/>
+  <circle class="cls-1" cx="54.76" cy="92.37" r="2.4"/>
+</svg>

@@ -23,6 +23,7 @@
 
 <link rel="stylesheet" href="css/main.css?v=30">
 <link rel="stylesheet" href="css/opening.css?v=26">
+<link rel="stylesheet" href="css/opening-pc.css?v=22">
 <link rel="stylesheet" href="css/mobile.css?v=10" media="(max-width: 767px), (max-width: 1023px) and (max-height: 500px) and (pointer: coarse)">
 </head>
 <body class="is-o01-active">
@@ -3503,6 +3504,128 @@
     <div class="o01__blackout" id="o01-blackout" aria-hidden="true"></div>
 
   </section>
+
+  <!-- Shared opening scenes stay outside #track and are activated after O-01. -->
+  <div class="opening-pc" id="opening-pc" hidden inert aria-hidden="true">
+    <section class="opening-pc__scene" id="o02-scene" data-opening-scene="O-02" aria-label="천상열차분야지도 소개" tabindex="-1">
+      <div class="opening-pc__background" aria-hidden="true"></div>
+      <div class="opening-pc__grain" aria-hidden="true"></div>
+      <div class="opening-pc__shade" aria-hidden="true"></div>
+      <div class="opening-pc__layout">
+        <figure class="o02__figure">
+          <div class="o02__tilt-surface" aria-label="마우스로 기울여 볼 수 있는 천상열차분야지도 이미지">
+            <img class="o02__image" src="01_SITE_IMAGES/O-02-img.webp" width="2000" height="1439" alt="천상열차분야지도 석각과 옛 조사 사진" draggable="false" decoding="async">
+          </div>
+          <figcaption class="o02__caption">천상열차분야지도<br>각석</figcaption>
+        </figure>
+        <p class="o02__copy">3원 28수에 대한 설명, 정의, 사용처, 처음 발견한 사람, 어느 나라에 영향을 받았고 어느 시기에 우리나라에서 가장 활발히 연구되었는지, 어느 때에 '실제로' 쓰이기 시작했는지 등의 내용</p>
+      </div>
+    </section>
+    <section class="opening-pc__scene exploration" id="opening-exploration" data-mode="overview" aria-label="사신수와 28수 탐색" tabindex="-1" hidden inert>
+      <div class="exploration__paper" aria-hidden="true"></div>
+      <div class="exploration__orbit">
+        <div class="exploration__motion">
+          <div class="exploration__underlay" aria-hidden="true">
+            <div class="exploration__ink-direction" data-ink="cheongryong" style="--ink-angle:180deg"><div class="exploration__ink"></div></div>
+            <div class="exploration__ink-direction" data-ink="hyeonmu" style="--ink-angle:270deg"><div class="exploration__ink"></div></div>
+            <div class="exploration__ink-direction" data-ink="baekho" style="--ink-angle:0deg"><div class="exploration__ink"></div></div>
+            <div class="exploration__ink-direction" data-ink="jujak" style="--ink-angle:90deg"><div class="exploration__ink"></div></div>
+          </div>
+          <img class="exploration__disc" data-src="01_SITE_IMAGES/star-disc.svg" width="885" height="894" alt="천상열차분야지도 원판" decoding="async">
+          <div class="exploration__guardians" role="group" aria-label="사신수 선택"></div>
+          <img class="exploration__active" alt="" width="1500" height="1500" decoding="async">
+        </div>
+      </div>
+      <p class="exploration__intro exploration__intro--left">4마리의 신수</p>
+      <p class="exploration__intro exploration__intro--right">7개의 별자리</p>
+      <p class="exploration__hover-copy" aria-live="polite"></p>
+      <p class="exploration__touch-hint">사신수를 한 번 눌러 살펴보고,<br>다시 눌러 선택하세요.</p>
+      <div class="exploration__selected-copy" aria-live="polite">
+        <h2 class="exploration__name"></h2>
+        <p class="exploration__description"></p>
+      </div>
+      <div class="exploration__stars" role="group" aria-label="선택한 사신수의 일곱 별자리" inert></div>
+    </section>
+    <section class="opening-pc__scene o06" id="o06-scene" data-opening-scene="O-06" aria-labelledby="o06-title" tabindex="-1" hidden inert>
+      <div class="opening-pc__background" aria-hidden="true"></div>
+      <div class="opening-pc__grain" aria-hidden="true"></div>
+      <div class="opening-pc__shade" aria-hidden="true"></div>
+      <div class="o06__layout">
+        <div class="o06__copy">
+          <p class="o06__lead">3원 28수를 현대적인 ‘별자리 운세’로 재해석한</p>
+          <h2 class="o06__title" id="o06-title">별운관</h2>
+          <!-- Existing E-01 introduction; the reference's editorial notes are not final copy. -->
+          <div class="o06__body" data-copy-source="E-01">
+            <p>프로젝트 별운관은 이러한 전통 천문 체계인 3원 28수를 오늘날 사람들이 흔히 즐기는 별자리 운세로 다시 엮어 새로운 28개의 별자리와 함께 매일의 운세를 만나는 한국형 별자리 운세 서비스로 재해석합니다.</p>
+            <p>이 웹사이트는 프로젝트 별운관을 소개하고, 잊혀졌던 3원 28수와 그에 얽힌 옛이야기를 알아가며 여러분의 새로운 별자리를 미리 만나볼 수 있는 공간입니다.</p>
+          </div>
+        </div>
+        <figure class="o06__visual" aria-label="별운관 프로젝트 이미지 영역">
+          <div class="o06__image-frame">
+            <!-- Add src to replace the CSS placeholder; geometry stays on the frame. -->
+            <img class="o06__image" alt="" decoding="async">
+          </div>
+        </figure>
+      </div>
+    </section>
+    <section class="opening-pc__scene o07" id="o07-scene" data-opening-scene="O-07" aria-label="스물여덟 별자리와 만나는 마지막 오프닝" tabindex="-1" hidden inert>
+      <div class="o01__bg" aria-hidden="true"></div>
+      <div class="o07__sky" aria-hidden="true"></div>
+      <div class="o07__card-window" aria-hidden="true">
+        <div class="o07__orbit"><div class="o07__rotor"></div></div>
+      </div>
+      <p class="o07__caption">당신의 별자리는 어떤 길을 비추고 있을까요?</p>
+      <!-- O-01's eave and railing are copied once, behind the separate door layer. -->
+      <div class="o07__architecture" aria-hidden="true"></div>
+    </section>
+    <!-- Doors cover the lantern and railing, while the modal stays above them. -->
+    <div class="o07__doors" aria-hidden="true" hidden></div>
+    <!-- A single pointer light is shared by the active night scene. -->
+    <div class="opening-pc__light" aria-hidden="true"></div>
+    <svg class="opening-pc__progress" viewBox="0 0 230 78" role="img" aria-label="오프닝 진행 1 / 6">
+      <defs>
+        <filter id="opening-pc-star-tint" color-interpolation-filters="sRGB">
+          <feFlood class="opening-pc__star-tint" result="tint"/>
+          <feComposite in="tint" in2="SourceAlpha" operator="in"/>
+        </filter>
+        <filter id="opening-pc-star-hover-tint" color-interpolation-filters="sRGB">
+          <feFlood flood-color="#77716b" result="tint"/>
+          <feComposite in="tint" in2="SourceAlpha" operator="in"/>
+        </filter>
+      </defs>
+      <g class="opening-pc__progress-base">
+        <path d="M10 14 34 45 96 8 120 27 134 59 171 67 182 24 218 7 M120 27 182 24"/>
+        <circle cx="10" cy="14" r="2.8"/><circle cx="34" cy="45" r="2.4"/><circle cx="96" cy="8" r="2.4"/>
+        <circle cx="120" cy="27" r="2.4"/><circle cx="134" cy="59" r="2.4"/><circle cx="171" cy="67" r="2.4"/>
+        <circle cx="182" cy="24" r="2.4"/><circle cx="218" cy="7" r="2.4"/>
+      </g>
+      <g aria-hidden="true">
+        <path class="opening-pc__progress-segment" data-progress-segment pathLength="1" d="M10 14 34 45"/>
+        <path class="opening-pc__progress-segment" data-progress-segment pathLength="1" d="M34 45 96 8"/>
+        <path class="opening-pc__progress-segment" data-progress-segment pathLength="1" d="M96 8 120 27"/>
+        <path class="opening-pc__progress-segment" data-progress-segment pathLength="1" d="M120 27 134 59"/>
+        <path class="opening-pc__progress-segment" data-progress-segment pathLength="1" d="M134 59 171 67 182 24"/>
+        <path class="opening-pc__progress-segment" data-progress-segment pathLength="1" d="M182 24 218 7 M120 27 182 24"/>
+        <circle class="opening-pc__progress-dot" data-progress-dot cx="10" cy="14" r="2.8"/>
+        <circle class="opening-pc__progress-dot" data-progress-dot cx="34" cy="45" r="2.4"/>
+        <circle class="opening-pc__progress-dot" data-progress-dot cx="96" cy="8" r="2.4"/>
+        <circle class="opening-pc__progress-dot" data-progress-dot cx="120" cy="27" r="2.4"/>
+        <circle class="opening-pc__progress-dot" data-progress-dot cx="134" cy="59" r="2.4"/>
+        <circle class="opening-pc__progress-dot" data-progress-dot cx="171" cy="67" r="2.4"/>
+        <circle class="opening-pc__progress-dot" data-progress-dot cx="182" cy="24" r="2.4"/>
+        <circle class="opening-pc__progress-dot" data-progress-dot cx="218" cy="7" r="2.4"/>
+      </g>
+    </svg>
+    <button type="button" class="opening-pc__lantern" aria-label="초롱 보조 설명 열기 및 닫기" aria-pressed="false" aria-expanded="false" aria-controls="opening-pc-help"></button>
+    <div class="opening-pc__help-backdrop" hidden aria-hidden="true"></div>
+    <aside class="opening-pc__help" id="opening-pc-help" role="dialog" aria-modal="true" aria-label="보조 설명" hidden>
+      <button type="button" class="opening-pc__help-close" aria-label="보조 설명 닫기">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m2 2 12 12M14 2 2 14" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>
+      </button>
+      <!-- Page-specific help copy will be supplied separately. -->
+      <div class="opening-pc__help-content"></div>
+    </aside>
+  </div>
 
 </div>
 
@@ -7893,6 +8016,7 @@
 </main>
 
 <script src="js/main.js?v=16"></script>
-<script src="js/opening.js?v=9"></script>
+<script src="js/opening-pc.js?v=11"></script>
+<script src="js/opening.js?v=14"></script>
 </body>
 </html>
