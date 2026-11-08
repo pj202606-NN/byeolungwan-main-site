@@ -422,9 +422,7 @@
   .opening-pc .opening-pc__chart { position: fixed; }
   .opening-pc .opening-pc__lantern { top: max(20px, env(safe-area-inset-top)); left: 20px; width: 52px; }
   .opening-pc .opening-pc__lantern svg { pointer-events: none; }
-  .opening-pc .opening-pc__progress { top: max(28px, env(safe-area-inset-top)); left: 61%; width: 140px; pointer-events: none; }
-  .opening-pc[data-theme="paper"] .opening-pc__progress-segment { stroke: #f1f4f5; }
-  .opening-pc[data-theme="paper"] .opening-pc__progress-dot { fill: #f1f4f5; }
+  .opening-pc .opening-pc__progress { top: max(28px, env(safe-area-inset-top)); left: 50%; width: 140px; pointer-events: none; }
   .opening-pc .opening-pc__light { width: min(100vw, 500px); }
   .opening-pc .opening-pc__layout { display: flex; flex-direction: column; align-items: stretch; height: auto; min-height: 100%; gap: 28px; padding: 148px 24px 48px; }
   .opening-pc .o02__figure { width: 100%; max-width: 420px; align-self: center; transform: none; }
