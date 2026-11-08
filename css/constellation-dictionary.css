@@ -1,0 +1,25 @@
+.c01__image { overflow: hidden; }
+.c01__sky-group { position: absolute; inset: 0; opacity: 0; pointer-events: none; transition: opacity 1000ms ease; }
+.c01__sky-group.is-visible { opacity: 1; }
+.c01__sky-star { position: absolute; width: 17%; height: 40%; padding: 0; border: 0; background: none; transform: translate(-50%, -50%); opacity: .76; transition: opacity 350ms ease; pointer-events: auto; cursor: pointer; touch-action: manipulation; }
+.c01__sky-star img { width: 100%; height: 100%; object-fit: contain; display: block; pointer-events: none; filter: brightness(0) invert(1) drop-shadow(0 0 2px rgb(255 255 255 / 35%)); transition: filter 350ms ease; }
+.c01__sky-caption { position: absolute; top: calc(100% - 16px); left: 50%; transform: translateX(-50%); color: rgb(255 255 255 / 68%); font-family: var(--font-sans); font-size: clamp(10px, .85vw, 14px); font-weight: 400; line-height: 1.4; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 200ms ease; }
+.c01__sky-caption span { display: block; }
+.c01__sky-star.is-hovered .c01__sky-caption { opacity: 1; }
+.c01__sky-star:focus-visible { outline: 1px solid white; outline-offset: 4px; }
+.c01__sky-group.has-selection .c01__sky-star { opacity: .27; }
+.c01__sky-group.has-selection .c01__sky-star.is-selected { opacity: 1; }
+.c01__sky-group.has-selection .c01__sky-star.is-selected img { filter: brightness(0) invert(1) drop-shadow(0 0 3px rgb(255 255 255 / 65%)); }
+.c01__sky-group.has-hover .c01__sky-star { opacity: .27; }
+.c01__sky-group.has-hover .c01__sky-star.is-selected { opacity: .27; }
+.c01__sky-group.has-hover .c01__sky-star.is-hovered { opacity: 1; }
+.c01__sky-group.has-hover .c01__sky-star.is-hovered img { filter: brightness(0) invert(1) drop-shadow(0 0 3px rgb(255 255 255 / 65%)); }
+.c01__sky-preview { position: absolute; inset: 15%; width: 70%; height: 70%; object-fit: contain; filter: brightness(0) invert(1) drop-shadow(0 0 2px rgb(255 255 255 / 55%)); }
+#C-01 :is(.c01__preview-name, .c01__preview-hanja) { top: calc(var(--y) * 100vh / 1024 - var(--c01-info-lift) - .8vh); }
+#C-01 .c01__search-status { font-size: .68vw; color: rgb(6 81 130 / 48%); }
+@media (max-width: 767px), (max-width: 1023px) and (max-height: 500px) and (pointer: coarse) {
+  #viewport #C-01 .c01__search-status { font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .c01__sky-group, .c01__sky-star, .c01__sky-star img, .c01__sky-caption { transition: none; }
+}

@@ -52,8 +52,15 @@
    파일 원본·출처·라이선스: fonts/SourceHanSerif-README.md 참고. */
 @font-face {
   font-family: 'Source Han Serif KR';
-  src: url('../fonts/SourceHanSerifKR-VF.otf.woff2') format('woff2');
+  src: url('../fonts/SourceHanSerifKR-Web.woff2') format('woff2');
   font-weight: 250 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Pretendard';
+  src: url('../fonts/PretendardVariable-Web.woff2') format('woff2');
+  font-weight: 100 900;
   font-style: normal;
   font-display: swap;
 }
@@ -251,7 +258,7 @@ h1, h2, h3, p { margin: 0; }
 /* 메뉴가 열리면 위/아래 선은 사라지고 가운데 선만 남아 'ㅡ' 모양이
    되도록 — margin도 같이 0으로 줄여서 사라진 자리에 빈 공간이 남지
    않게 한다(가운데 선은 flex 중앙 정렬이라 자동으로 다시 가운데로 옴). */
-.rail__burger.is-active span:first-child,
+.rail__burger.is-active span:first-of-type,
 .rail__burger.is-active span:last-child {
   opacity: 0;
   margin: 0;
@@ -274,6 +281,10 @@ h1, h2, h3, p { margin: 0; }
 .rail__zone--logo    { flex: 0 0 31.0547vh; } /* 318 / 1024 */
 .rail__zone--nav      { flex: 0 0 28.125vh; } /* 288 / 1024 */
 .rail__zone--dot      { flex: 1 1 auto; border-bottom: none; }
+
+button.rail__zone--dot { width: 100%; min-height: 44px; cursor: pointer; pointer-events: auto; }
+.rail__burger:focus-visible,
+button.rail__zone--dot:focus-visible { outline: 2px solid currentColor; outline-offset: -4px; }
 
 .rail__vertical-text {
   display: inline-block;
@@ -366,10 +377,15 @@ h1, h2, h3, p { margin: 0; }
   height: 0.5vw;
   min-width: 6px;
   min-height: 6px;
+  box-sizing: border-box;
+  border: 1px solid var(--rail-dot, var(--rail-fg));
   border-radius: 50%;
   background: var(--rail-dot, var(--rail-fg));
   display: block;
-  transition: background-color 0.35s ease;
+  transition: background-color 0.35s ease, border-color 0.35s ease;
+}
+.rail__zone--dot[aria-expanded="true"] .rail__dot {
+  background-color: transparent;
 }
 
 /* 좌측 상단부터 스크롤 진행도만큼 차오르는 세로 진행 바.
@@ -477,10 +493,11 @@ h1, h2, h3, p { margin: 0; }
    (is-disabled)와는 별개의 상태라 혼동하지 않는다. */
 .nav-overlay__col--menu {
   cursor: pointer;
+}
+:is(.nav-overlay__col--menu, .other-panel, .nav-overlay__col--toc) {
   transition: background-color 0.2s ease;
 }
-.nav-overlay__col--menu:hover,
-.nav-overlay__col--menu:focus-within {
+:is(.nav-overlay__col--menu, .other-panel, .nav-overlay__col--toc):is(:hover, :focus-within) {
   background: var(--cream);
 }
 .nav-overlay__col--toc {
@@ -500,8 +517,7 @@ h1, h2, h3, p { margin: 0; }
   color: var(--text-muted-on-navy);
   transition: color 0.2s ease;
 }
-.nav-overlay__col--menu:hover .nav-overlay__label,
-.nav-overlay__col--menu:focus-within .nav-overlay__label {
+:is(.nav-overlay__col--menu, .other-panel):is(:hover, :focus-within) .nav-overlay__label {
   color: var(--text-body-on-cream);
 }
 
@@ -522,8 +538,7 @@ h1, h2, h3, p { margin: 0; }
   color: var(--white);
   transition: color 0.2s ease;
 }
-.nav-overlay__col--menu:hover .nav-overlay__glyph,
-.nav-overlay__col--menu:focus-within .nav-overlay__glyph {
+:is(.nav-overlay__col--menu, .other-panel):is(:hover, :focus-within) .nav-overlay__glyph {
   color: var(--navy-brand);
 }
 
@@ -538,8 +553,7 @@ h1, h2, h3, p { margin: 0; }
   color: var(--text-muted-on-navy);
   transition: color 0.2s ease;
 }
-.nav-overlay__col--menu:hover .nav-overlay__sublist,
-.nav-overlay__col--menu:focus-within .nav-overlay__sublist {
+:is(.nav-overlay__col--menu, .other-panel):is(:hover, :focus-within) .nav-overlay__sublist {
   color: var(--text-body-on-cream);
 }
 .nav-overlay__sublist a:hover {
@@ -561,7 +575,9 @@ h1, h2, h3, p { margin: 0; }
   text-align: start;
   cursor: pointer;
 }
-.nav-overlay__toc-label:focus-visible { outline: 1px solid var(--white); outline-offset: 6px; }
+.nav-overlay__toc-label { transition: color 0.2s ease; }
+.nav-overlay__col--toc:is(:hover, :focus-within) .nav-overlay__toc-label { color: var(--navy-brand); }
+.nav-overlay__toc-label:focus-visible { outline: 1px solid currentColor; outline-offset: 6px; }
 
 /* ============================================================
    가로 진행 뷰포트 / 트랙
@@ -585,11 +601,12 @@ h1, h2, h3, p { margin: 0; }
    문제가 있었다 — 배경 레이어는 어떤 창 비율에서도 빈틈없이 화면을
    덮는 게 우선이라 object-fit: cover로 바꿨다(비율 왜곡은 없음,
    넘치는 부분만 잘림). */
-.e00-bg-layer {
+.e00-bg-layer,
+.cover-bg-layer {
   position: absolute;
   top: 0;
   left: 0;
-  /* e-00-cover-background-wide.png는 원본(1440px) 오른쪽에 패럴랙스로
+  /* e-00-cover-background-wide.webp는 원본(1440px) 오른쪽에 패럴랙스로
      밀려나는 동안 보여줄 여유분을 이어 붙인 2.5배 폭(3600px) 이미지다.
      레이어도 같은 비율(250vw)로 잡아야 처음 1440px 구간이 원본과
      픽셀 단위로 동일하게 보인다. */
@@ -599,13 +616,23 @@ h1, h2, h3, p { margin: 0; }
   pointer-events: none;
   overflow: hidden;
 }
-.e00-bg-layer img {
+.e00-bg-layer img,
+.cover-bg-layer img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center center;
 }
+.cover-bg-layer { visibility: hidden; }
+/* F-00's shorter artwork only needs to fill the visible parallax corridor.
+   The opaque cover panel and following page hide the remaining canvas.
+   32.5vw + 87.5vw still covers the full reveal at 40% scroll progress. */
+.cover-bg-layer[data-cover-background="F-00"] { left: 32.5vw; width: 87.5vw; }
+/* Keep the new portrait at its natural 3:4 ratio and reduce the image area. */
+.cover-bg-layer[data-cover-background="C-00"] { left: calc(100vw - 75vh); width: 75vh; }
+.cover-bg-layer[data-cover-background="S-00"] { left: 32.5vw; width: 87.5vw; }
+.cover-mobile-image { display: none; }
 
 /* M-00 표지 배경 — .track과 분리된 독립 레이어(위 HTML 주석 참고).
    E-00과 달리 폭을 늘릴 필요가 없어 1장 폭(100vw)이면 충분하고,
@@ -632,7 +659,7 @@ h1, h2, h3, p { margin: 0; }
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
-  background-image: url('../01_SITE_IMAGES/m-00-cover-background-base.png');
+  background-image: url('../01_SITE_IMAGES/m-00-cover-background-base-optimized.webp');
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
@@ -1274,7 +1301,8 @@ h1, h2, h3, p { margin: 0; }
   height: 100%; /* 파란 배경의 상·하단 경계까지 확장. */
   overflow: hidden;
 }
-.e02__photo-img {
+.e02__photo-img,
+.e02__twinkles {
   /* 원본(1440x1024)의 비율을 유지하면서 확대된 프레임을 채운다.
      가로·세로를 따로 늘리지 않고 캔버스 폭 하나로 높이를 유도한다.
      정착 상태의 크롭은 유지하고, 패럴랙스는 transform의 가로 이동만 사용한다. */
@@ -1413,14 +1441,8 @@ h1, h2, h3, p { margin: 0; }
    지정한다. E-00은 손대지 않았으므로 아래 그룹 선택자에 .e00__*를
    추가해도 E-00의 렌더링 결과는 동일하다.
 
-   F-00만 레퍼런스에 우측 이미지 영역이 없어 패널이 전체 폭을
-   차지한다(F-00_운세보기표지.png 실측 — 캔버스 전체가 크림 단색).
-   C-00/S-00은 E-00과 동일하게 우측 34.86vw에 이미지 자리가 있으나
-   아직 실제 이미지가 없어 #D9D9D9 placeholder로 채운다(나중에
-   실제 이미지로 교체할 때는 .c00__image-ph/.s00__image-ph에
-   background-image만 추가하면 된다). 폭 배수(data-width-multiplier)
-   는 E-00의 1.4배가 독립 패럴랙스 배경 전용 여유 공간이라 이번
-   placeholder 구조에는 필요 없어 추가하지 않았다(기본 1배).
+   네 표지는 65.14vw 패널, 독립 이미지 배경, 1.4배 진행 거리를 공유한다.
+   표지별 이미지는 index.html의 data-cover-background 레이어에서 교체한다.
    ============================================================ */
 .screen--f00,
 .screen--c00,
@@ -1437,19 +1459,9 @@ h1, h2, h3, p { margin: 0; }
   left: 0;
   height: 100%;
 }
-.f00__panel { width: 100%; background: var(--cream); }
+.f00__panel { width: 65.14vw; background: var(--cream); }
 .c00__panel { width: 65.14vw; background: var(--black-brand); }
 .s00__panel { width: 65.14vw; background: var(--cream); }
-
-.c00__image-ph,
-.s00__image-ph {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 34.86vw; /* 100 - 65.14, E-00 패널 분할과 동일 비율 */
-  height: 100%;
-  background: #D9D9D9;
-}
 
 .e00__eyebrow,
 .f00__eyebrow,
@@ -1536,7 +1548,7 @@ h1, h2, h3, p { margin: 0; }
 .c00__hint { color: var(--text-muted-on-black); }
 
 /* 긴 소개문과 목차 5개의 균형만 S-00에서 보정. 공통 표지 서체/간격 유지. */
-.s00__intro { top: 45.898438vh; }
+.s00__intro { top: 44.6vh; }
 .s00__toc { top: 68.359375vh; }
 
 /* ============================================================
@@ -1559,7 +1571,9 @@ h1, h2, h3, p { margin: 0; }
   width: 83.333333vw; /* 1200 */
   height: 30.078125vh; /* 308 */
   background: #D9D9D9;
+  overflow: hidden;
 }
+.s01__image { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
 .s01__title {
   position: absolute;
   left: 13.75vw; /* 198 — 서체의 좌측 여백 1px 포함 시 199 */
@@ -1730,35 +1744,39 @@ h1, h2, h3, p { margin: 0; }
 .f01__body {
   position: absolute;
   left: 14.583vw;
-  top: 31.84vh; /* 326 / 1024 */
-  width: 20vw;
+  top: 29.84vh;
+  width: 26vw;
   font-size: 1vw;
   line-height: 1.7;
   color: var(--text-muted-on-navy);
+  word-break: keep-all;
+  overflow-wrap: normal;
 }
 .f01__body p { margin: 0 0 3.2vh 0; }
 .f01__body p:last-child { margin-bottom: 0; }
 
 .f01__image-ph {
   position: absolute;
-  left: 57.5vw;  /* 828 / 1440 */
+  left: 51.25vw;
   top: 8.2vh;    /* 84 / 1024 */
-  width: 38.75vw; /* (1386-828) / 1440 */
+  width: 45vw; /* Restore the original right edge at 96.25vw. */
   height: 65.33vh; /* (753-84) / 1024 */
   background: #D9D9D9;
+  overflow: hidden;
 }
+.f01__image { display: block; width: 100%; height: 100%; object-fit: cover; }
 
 .f01__date-card-wrap {
   position: absolute;
   left: 14.167vw; /* 204 / 1440 */
-  top: 60.55vh;   /* 620 / 1024 */
+  top: 56.55vh;
   width: 47.5vw;  /* 684 / 1440 */
   height: 27.64vh; /* 283 / 1024 */
 }
 .f01__date-card {
   width: 100%;
   height: 100%;
-  background: var(--cream);
+  background: url('../01_SITE_IMAGES/f-01-date-card.webp') center / 100% 100% no-repeat;
   transform: rotate(-9deg); /* 레퍼런스의 살짝 기울어진 카드(근사값) */
   display: flex;
   align-items: center;
@@ -1772,42 +1790,74 @@ h1, h2, h3, p { margin: 0; }
   align-items: baseline;
   gap: 0.4vw;
   font-family: var(--font-emphasis);
+  font-style: italic;
+  font-synthesis: style;
   font-size: 1.1vw;
   color: var(--text-body-on-cream);
 }
 .f01__date-field select {
+  appearance: none;
+  -webkit-appearance: none;
   font: inherit;
   color: inherit;
   background: transparent;
   border: none;
+  padding: 2px 0.45em;
   cursor: pointer;
 }
+.f01__date-field select option { font-style: normal; }
 
-.f01__submit-wrap {
+.f01__breadcrumb {
   position: absolute;
-  left: 67.917vw; /* 978 / 1440 */
+  right: 3.75vw;
   top: 80.47vh;   /* 824 / 1024 */
   text-align: right;
 }
-.f01__submit-label {
+.f01__breadcrumb-label {
   font-size: 0.83vw;
   color: var(--text-muted-on-navy);
   margin: 0 0 0.6vh 0;
 }
-.f01__submit {
-  display: inline-block;
-  font-size: 1.04vw;
-  font-weight: 600;
+.f01__breadcrumb-current {
+  font-size: 0.9vw;
+  font-weight: 400;
   color: var(--white);
 }
 
-.f01__hint {
+.f01__actions {
   position: absolute;
-  left: 51.94vw; /* 748 / 1440 */
-  top: 90.04vh;  /* 922 / 1024 */
+  left: 14.583vw;
+  /* Clear the rotated card's lower corner at both tall and wide viewports. */
+  top: calc(84.02vh + 3.715vw + 12px);
+  width: 40vw;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 20px;
+}
+.f01__hint {
+  margin: 0;
   font-size: 0.83vw;
+  line-height: 1.6;
   color: var(--text-muted-on-navy);
 }
+.f01__find {
+  position: relative;
+  left: 1.5vw;
+  top: -32px;
+  translate: 100% calc(-8px - 1.95vw); /* One additional line of the label's height. */
+  min-height: 44px;
+  padding: 0;
+  color: var(--white);
+  font-family: var(--font-emphasis);
+  font-size: 1.3vw;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: var(--font-emphasis-tracking-adjust);
+  white-space: nowrap;
+}
+.f01__find:hover { opacity: 0.8; }
+.f01__find:focus-visible { outline: 1px solid currentColor; outline-offset: 5px; }
 
 /* ============================================================
    F-02 — 별자리 출력 (2026-10-16 신규)
@@ -1979,6 +2029,7 @@ h1, h2, h3, p { margin: 0; }
 /* C-01 전용: 이미지 하단과 그 아래 콘텐츠는 고정하고 상단만 확장한다. */
 .screen--c01 { --c01-image-lift: 2.9296875vh; /* 30 / 1024 */ }
 .screen--c01 .c01__image {
+  background: url('../01_SITE_IMAGES/e-02-constellation.webp') center / cover no-repeat;
   top: auto;
   bottom: calc((1024 - var(--y) - var(--h)) * 100vh / 1024);
   height: calc(var(--h) * 100vh / 1024 + var(--c01-image-lift));
@@ -2276,7 +2327,7 @@ h1, h2, h3, p { margin: 0; }
 .screen--c04.is-constellation-playing .c04__after-constellation { animation: c04-copy 0.7s ease 3.6s both; }
 .screen--c04.is-constellation-playing :is(.c04__lit-lines, .c04__points circle:not(:first-child), .c04__after-constellation) { animation-play-state: paused; }
 .screen--c04.is-constellation-playing.is-result-active :is(.c04__lit-lines, .c04__points circle:not(:first-child), .c04__after-constellation) { animation-play-state: running; }
-@keyframes c04-connect { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes c04-connect { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 var(--c04-unfilled, 0%) 0 0); } }
 @keyframes c04-point { from { opacity: 0.12; } to { opacity: 1; } }
 @keyframes c04-copy { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) {

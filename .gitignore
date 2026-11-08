@@ -34,3 +34,13 @@ _*.png
 # OS/에디터 잡동사니
 .DS_Store
 Thumbs.db
+
+# Retain large design/print originals locally; publish only the web assets.
+01_SITE_IMAGES/cheonsang-map.svg
+01_SITE_IMAGES/28su/*-card.jpg
+validation/
+preview_server.py
+*_REPORT.md
+LOCAL_PREVIEW.md
+MOBILE_IMPLEMENTATION.md
+fonts/PretendardVariable-original.woff2

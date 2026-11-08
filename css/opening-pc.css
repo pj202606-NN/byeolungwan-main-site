@@ -28,7 +28,7 @@
 .opening-pc__shade { position: absolute; inset: 0; pointer-events: none; }
 .opening-pc__background {
   z-index: 0;
-  background: url('../01_SITE_IMAGES/o-01-background.png') center / cover no-repeat;
+  background: url('../01_SITE_IMAGES/o-01-background-optimized.webp') center / cover no-repeat;
 }
 .opening-pc__grain {
   z-index: 1;
@@ -236,7 +236,7 @@
   color: #464744;
 }
 .exploration.is-visible { opacity: 1; }
-.exploration__paper { position: absolute; inset: 0; background: #eeece5 url('../01_SITE_IMAGES/opening-bg.webp') center / cover no-repeat; }
+.exploration__paper { position: absolute; inset: 0; background: #eeece5 url('../01_SITE_IMAGES/opening-bg-optimized.webp') center / cover no-repeat; }
 .exploration__orbit { position: absolute; top: 50%; left: 50%; width: var(--disc-size); height: var(--disc-size); transform: translate(-50%, -50%); }
 .exploration__motion { position: absolute; inset: 0; }
 .exploration.is-entering .exploration__motion { animation: exploration-arrive 2000ms cubic-bezier(.22, .61, .26, 1) both; }
@@ -359,9 +359,14 @@
 .o06__body { font-family: var(--font-sans); font-size: clamp(14px, .95vw, 18px); line-height: 1.75; color: #c4c9cc; word-break: keep-all; overflow-wrap: break-word; }
 .o06__body p { margin: 0; }
 .o06__body p + p { margin-top: 1.2em; }
-.o06__visual { position: absolute; left: 55vw; top: -28vh; width: 62vw; height: 129vh; margin: 0; opacity: 0; transform: translateX(28px); transition: opacity 850ms ease 100ms, transform 1000ms cubic-bezier(.22,.61,.26,1) 100ms; pointer-events: none; }
-.o06__image-frame { width: 100%; height: 100%; background: #858585; transform: perspective(1600px) rotateY(-8deg) rotateZ(18deg); transform-origin: center; overflow: hidden; }
-.o06__image { display: block; width: 100%; height: 100%; object-fit: cover; }
+.o06__visual { position: absolute; left: 48vw; top: 24vh; width: 46vw; height: auto; margin: 0; opacity: 0; transform: translateX(28px); transition: opacity 850ms ease 100ms, transform 1000ms cubic-bezier(.22,.61,.26,1) 100ms; pointer-events: none; }
+.o06__image-frame { width: 100%; box-sizing: border-box; padding: clamp(10px, 1.1vw, 22px); padding-bottom: clamp(18px, 2vw, 36px); background-color: #f1efe7; background-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27160%27 height=%27160%27%3E%3Cfilter id=%27paper%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%27.65 .18%27 numOctaves=%273%27 stitchTiles=%27stitch%27/%3E%3C/filter%3E%3Cpath fill=%27%238b816c%27 opacity=%27.14%27 filter=%27url(%23paper)%27 d=%27M0 0h160v160H0z%27/%3E%3C/svg%3E"); box-shadow: 0 10px 32px rgb(0 0 0 / 20%); overflow: hidden; }
+.o06__visual { left: 50vw; top: 26.5vh; width: 40vw; perspective: 1100px; pointer-events: auto; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
+.o06__visual.is-dragging { cursor: grabbing; }
+.o06__image-frame { padding: clamp(6px, .65vw, 13px); padding-bottom: clamp(11px, 1.2vw, 22px); background-color: #d0cec6; transform: rotateZ(3deg); transform-origin: center; clip-path: none; }
+.o06__photo { position: relative; overflow: hidden; }
+.o06__photo::after { content: ''; position: absolute; inset: 0; background: rgba(1, 9, 17, .28); pointer-events: none; }
+.o06__image { display: block; width: 100%; height: auto; filter: contrast(.72) brightness(1.25) saturate(.65); pointer-events: none; }
 .o06__image:not([src]) { display: none; }
 .o06.is-visible :is(.o06__copy, .o06__visual) { opacity: 1; transform: none; }
 .opening[data-stage="O-06"] .opening-pc__help { background: rgba(10,15,21,.55); backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none; }
@@ -371,11 +376,12 @@
 .o07.is-visible { opacity: 1; }
 .o07__sky { position: absolute; inset: 0; background: url('../01_SITE_IMAGES/o-01-star-trails.svg') center / 150vmax no-repeat; opacity: .16; pointer-events: none; }
 .o07__card-window { position: absolute; z-index: 2; top: 24vh; bottom: 0; left: 0; right: 0; overflow: hidden; pointer-events: none; }
-.o07__orbit { position: absolute; left: 50%; top: calc(17vh + var(--orbit-radius)); width: calc(var(--orbit-radius) * 2); height: calc(var(--orbit-radius) * 2); transform: translate(-50%, -50%); }
+.o07__orbit { position: absolute; left: 50%; top: calc(22vh + var(--orbit-radius)); width: calc(var(--orbit-radius) * 2); height: calc(var(--orbit-radius) * 2); transform: translate(-50%, -50%); }
 .o07__rotor { position: absolute; inset: 0; animation: o07-orbit var(--orbit-duration) linear infinite paused; }
 .o07__slot { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform: rotate(var(--card-angle)) translateY(calc(-1 * var(--orbit-radius))); }
-.o07__card { position: absolute; width: var(--card-width); aspect-ratio: 1 / 1.52; background: #d6d6d4; border: 0; border-radius: 5px; box-shadow: none; overflow: hidden; transform: translate(-50%, -50%); }
-.o07__card-image { display: block; width: 100%; height: 100%; object-fit: contain; }
+.o07__card { position: absolute; width: var(--card-width); aspect-ratio: 7 / 15; background: #d6d6d4; border: 0; border-radius: 5px; box-shadow: none; overflow: hidden; transform: translate(-50%, -50%); }
+.o07__card-image { display: block; width: 100%; height: 100%; object-fit: cover; transform: scale(1.04); filter: saturate(.86); }
+.o07__card::after { content: ''; position: absolute; inset: 0; background: rgba(1, 9, 17, .10); pointer-events: none; }
 .o07__card-image:not([src]) { display: none; }
 .o07.is-playing .o07__rotor { animation-play-state: running; }
 @keyframes o07-orbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -460,12 +466,11 @@
   .opening-pc .o06__lead { font-size: 13px; }
   .opening-pc .o06__title { margin-bottom: 28px; font-size: 34px; }
   .opening-pc .o06__body { font-size: 16px; line-height: 1.8; }
-  .opening-pc .o06__visual { position: relative; left: auto; top: auto; align-self: center; width: 88%; height: 320px; margin: 14px 0; flex-shrink: 0; }
-  .opening-pc .o06__image-frame { transform: perspective(900px) rotateY(-8deg) rotateZ(10deg); }
+  .opening-pc .o06__visual { position: relative; left: auto; top: auto; align-self: center; width: 88%; height: auto; margin: 24px 0 14px; flex-shrink: 0; }
 
   .opening-pc .o07 { --orbit-radius: min(68vw, 340px); --card-width: clamp(40px, 10vw, 52px); }
-  .opening-pc .o07__card-window { top: 24dvh; bottom: auto; height: min(calc(24dvh + var(--orbit-radius) + var(--card-width) * .76), 76dvh); }
-  .opening-pc .o07__orbit { top: calc(24dvh + var(--orbit-radius)); }
+  .opening-pc .o07__card-window { top: 24dvh; bottom: auto; height: min(calc(24dvh + var(--orbit-radius) + var(--card-width) * 1.07143), 76dvh); }
+  .opening-pc .o07__orbit { top: calc(29dvh + var(--orbit-radius)); }
   .opening-pc .o07__caption { top: 30dvh; left: 28px; right: 28px; font-size: 13px; }
   .opening-pc .o07__doors .o01__door { height: 100dvh; }
   .opening-pc .o07__doors .o01__door--left.is-open { transform: translateX(calc(-50vw + 16px)); }

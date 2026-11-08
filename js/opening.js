@@ -134,7 +134,7 @@
   function initChartAnimations(mount, prefix) {
     if (!mount) return;
     const stars = Array.from(mount.querySelectorAll('circle.st1'));
-    shuffleSample(stars, Math.min(70, stars.length)).forEach((el) => {
+    shuffleSample(stars, Math.min(36, stars.length)).forEach((el) => {
       const dur = (5 + Math.random() * 4).toFixed(1);
       const delay = (Math.random() * dur).toFixed(1);
       el.style.animation = `${prefix}-star-flare ${dur}s ease-in-out infinite`;
@@ -152,7 +152,7 @@
     // 아예 명시적 id로 바꾸는 대신 최소 수정으로 맞춤 — SVG 내부
     // 구조 자체는 더 건드리지 않기 위함).
     const groups = Array.from(mount.querySelectorAll('#o01-chart-spin > g:nth-of-type(2) > g'));
-    shuffleSample(groups, Math.round(groups.length / 3)).forEach((el) => {
+    shuffleSample(groups, Math.min(18, groups.length)).forEach((el) => {
       const dur = (8 + Math.random() * 5).toFixed(1);
       const delay = (Math.random() * dur).toFixed(1);
       el.style.animation = `${prefix}-chart-breathe ${dur}s ease-in-out infinite`;
@@ -160,7 +160,7 @@
     });
 
     const lines = Array.from(mount.querySelectorAll('#o01-chart-spin > g:nth-of-type(3) > line'));
-    shuffleSample(lines, Math.round(lines.length / 3)).forEach((el) => {
+    shuffleSample(lines, Math.min(24, lines.length)).forEach((el) => {
       const dur = (9 + Math.random() * 5).toFixed(1);
       const delay = (Math.random() * dur).toFixed(1);
       el.style.animation = `${prefix}-chart-breathe-line ${dur}s ease-in-out infinite`;

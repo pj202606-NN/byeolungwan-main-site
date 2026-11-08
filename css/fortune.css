@@ -1,0 +1,20 @@
+.f02__image-ph { overflow: hidden; }
+.f02__sky { display: block; width: 100%; height: 100%; object-fit: cover; }
+.f02__star { position: absolute; left: 50%; top: 48%; width: 60%; max-width: 400px; aspect-ratio: 1; object-fit: contain; transform: translate(-50%, -50%); filter: brightness(0) invert(1) drop-shadow(0 0 2px rgb(255 255 255 / 65%)); opacity: 0.88; }
+.f02__fortune-ph { --card-frame-color: #f5f4f0; --card-frame-thickness: clamp(5px, .55vw, 9px); top: 39.2vh; width: 14.2vw; height: 39.5vh; max-height: 45vh; aspect-ratio: auto; overflow: visible; background: transparent; }
+.f02__card-crop { width: 100%; height: 100%; overflow: hidden; }
+.f02__fortune-ph::after { content: ''; position: absolute; inset: calc(-1 * var(--card-frame-thickness)) 0; border: var(--card-frame-thickness) solid var(--card-frame-color); box-sizing: border-box; z-index: 1; pointer-events: none; }
+.f02__card { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; transform: scale(1.10); }
+.f02__fortune { left: 74vw; width: 20vw; }
+.f02__title { top: 9.54vh; }
+.f02__subtitle { top: 17.94vh; }
+.f02__desc { top: 23.2vh; }
+.f02__fortune-title { font-family: var(--font-emphasis); font-weight: 400; }
+.f02__desc, .f02__fortune-p1, .f02__fortune-p2 { word-break: keep-all; overflow-wrap: normal; }
+@media (max-width: 767px), (max-width: 1023px) and (max-height: 500px) and (pointer: coarse) {
+  #viewport #F-02 .f02__image-ph { min-height: 0; aspect-ratio: 3 / 2; }
+  #viewport #F-02 .f02__sky { position: absolute; inset: 0; }
+  #viewport #F-02 :is(.f02__title, .f02__subtitle, .f02__desc) { top: -8px; }
+  #viewport #F-02 .f02__fortune-ph { width: min(63%, 270px); min-height: 0; height: auto; max-height: none; aspect-ratio: 7 / 14.5; align-self: flex-start; margin-left: max(23%, calc((100% - 230px) / 2)); margin-top: 8px; }
+  #viewport #F-02 .f02__fortune { width: calc(100% - 12px); margin-left: 12px; }
+}

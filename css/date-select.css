@@ -1,0 +1,55 @@
+/* Keep the native values and calendar logic; use a simple shared list UI. */
+#F-01 .f01__date-field .f01__native-select {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  pointer-events: none;
+}
+.f01__date-trigger {
+  flex: 0 0 auto;
+  min-width: 3.4ch;
+  min-height: 44px;
+  padding: 4px 0.55em 4px 0.25em;
+  color: inherit;
+  font: inherit;
+  line-height: 1.7;
+  white-space: nowrap;
+  text-align: left;
+  overflow: visible;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.f01__date-trigger[data-select="f01-year"] { min-width: 5.6ch; }
+.f01__date-trigger:focus-visible { outline: 1px solid currentColor; outline-offset: 2px; }
+.f01__date-trigger[aria-invalid="true"] { outline: 1px solid #a45446; outline-offset: 2px; }
+.f01__date-menu {
+  position: fixed;
+  z-index: 500;
+  padding: 4px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  border: 1px solid #d5cdbf;
+  border-radius: 4px;
+  background: #faf8f3;
+  color: var(--text-body-on-cream);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 14%);
+  font: 400 14px/1.5 var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  scrollbar-width: thin;
+  scrollbar-color: #c9c0b0 transparent;
+}
+.f01__date-menu[hidden] { display: none; }
+.f01__date-option { display: flex; align-items: center; min-height: 36px; padding: 6px 12px; border-radius: 2px; cursor: pointer; }
+.f01__date-option[aria-selected="true"] { font-weight: 600; }
+.f01__date-option.is-highlighted { background: rgb(6 84 134 / 9%); color: var(--navy-brand); }
+@media (pointer: coarse) {
+  .f01__date-option { min-height: 44px; }
+}

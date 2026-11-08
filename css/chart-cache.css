@@ -1,0 +1,9 @@
+#o01-chart-mount.is-chart-cached > svg, #m00-chart-mount.is-chart-cached > svg { display: none; }
+.chart-cache__rotor { position: absolute; inset: 0; animation: chart-cache-spin 205s linear infinite; animation-play-state: paused; }
+.chart-cache__image { display: block; width: 100%; height: 100%; }
+.chart-cache__dot { position: absolute; display: block; min-width: 1px; min-height: 1px; max-width: 4px; max-height: 4px; border-radius: 50%; background: #e4f1ff; box-shadow: 0 0 3px rgb(226 239 255 / 65%); transform: translate(-50%, -50%); opacity: 0; animation: chart-cache-flare 12s ease-in-out infinite; animation-play-state: paused; }
+body.is-o01-active #opening:not(.has-pc-scene) #o01-chart-mount :is(.chart-cache__rotor, .chart-cache__dot),
+body:not(.is-o01-active):not(.m00-offscreen) #m00-chart-mount :is(.chart-cache__rotor, .chart-cache__dot) { animation-play-state: running; }
+@keyframes chart-cache-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes chart-cache-flare { 0%, 70%, 100% { opacity: 0; } 80%, 92% { opacity: .8; } }
+@media (prefers-reduced-motion: reduce) { .chart-cache__rotor, .chart-cache__dot { animation: none; } }

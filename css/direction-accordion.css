@@ -1,0 +1,14 @@
+/* Use physical horizontal marks below vertical text in all three selectors. */
+#viewport :is(.c01__star, .c03__acc-star),
+#viewport :is(.c01__star, .c03__acc-star):hover,
+#viewport :is(.c01__star, .c03__acc-star)[aria-pressed="true"] { position: relative; text-decoration: none; }
+#viewport :is(.c01__direction-toggle, .c03__acc-head) span { position: relative; text-decoration: none; }
+#viewport :is(.c01__star, .c03__acc-star)::after,
+#viewport :is(.c01__direction-toggle, .c03__acc-head) span::after {
+  content: ''; position: absolute; left: 50%; top: calc(100% + 5px); width: .7em; height: 1px; background: currentColor; transform: translateX(-50%); opacity: 0; pointer-events: none;
+}
+#viewport :is(.c01__star, .c03__acc-star)[aria-pressed="true"]::after,
+#viewport :is(.c01__direction-toggle, .c03__acc-head)[aria-expanded="true"] span::after { opacity: 1; }
+@media (max-width: 767px), (max-width: 1023px) and (max-height: 500px) and (pointer: coarse) {
+  #viewport :is(.c01__star, .c03__acc-star)::after { top: auto; bottom: 4px; }
+}

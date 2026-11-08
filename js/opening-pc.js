@@ -8,8 +8,8 @@
   const o01 = document.getElementById('o01-scene');
   const mobile = matchMedia('(max-width: 767px), (max-width: 1280px) and (pointer: coarse)');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  const surface = root.querySelector('.o02__tilt-surface');
-  const image = root.querySelector('.o02__image');
+  let surface = root.querySelector('.o02__tilt-surface');
+  let image = root.querySelector('.o02__image');
   const light = root.querySelector('.opening-pc__light');
   const lantern = root.querySelector('.opening-pc__lantern');
   const help = root.querySelector('.opening-pc__help');
@@ -38,7 +38,7 @@
   const guardians = {
     cheongryong: {
       name: '청룡', direction: '동쪽', color: '#9bafb5',
-      images: { default: '01_SITE_IMAGES/sasin-cheongryong-default.webp', hover: '01_SITE_IMAGES/sasin-cheongryong-hover.webp', active: '01_SITE_IMAGES/sasin-cheongryong-active.webp' },
+      images: { default: '01_SITE_IMAGES/sasin-cheongryong-default-optimized.webp', hover: '01_SITE_IMAGES/sasin-cheongryong-hover-optimized.webp', active: '01_SITE_IMAGES/sasin-cheongryong-active-optimized.webp' },
       stars: [
         { id: 'CD-01', file: 'CD-01-gak.svg', name: '각수' }, { id: 'CD-02', file: 'CD-02-hang.svg', name: '항수' },
         { id: 'CD-03', file: 'CD-03-jeo.svg', name: '저수', animal: '너구리자리' }, { id: 'CD-04', file: 'CD-04-bang.svg', name: '방수' },
@@ -47,7 +47,7 @@
     },
     hyeonmu: {
       name: '현무', direction: '북쪽', color: '#87979f',
-      images: { default: '01_SITE_IMAGES/sasin-hyeonmu-default.webp', hover: '01_SITE_IMAGES/sasin-hyeonmu-hover.webp', active: '01_SITE_IMAGES/sasin-hyeonmu-active.webp' },
+      images: { default: '01_SITE_IMAGES/sasin-hyeonmu-default-optimized.webp', hover: '01_SITE_IMAGES/sasin-hyeonmu-hover-optimized.webp', active: '01_SITE_IMAGES/sasin-hyeonmu-active-optimized.webp' },
       stars: [
         { id: 'HM-01', file: 'HM-01-du.svg', name: '두수' }, { id: 'HM-02', file: 'HM-02-u.svg', name: '우수' },
         { id: 'HM-03', file: 'HM-03-yeo.svg', name: '여수' }, { id: 'HM-04', file: 'HM-04-heo.svg', name: '허수' },
@@ -56,7 +56,7 @@
     },
     baekho: {
       name: '백호', direction: '서쪽', color: '#ffffff',
-      images: { default: '01_SITE_IMAGES/sasin-baekho-default.webp', hover: '01_SITE_IMAGES/sasin-baekho-hover.webp', active: '01_SITE_IMAGES/sasin-baekho-active.webp' },
+      images: { default: '01_SITE_IMAGES/sasin-baekho-default-optimized.webp', hover: '01_SITE_IMAGES/sasin-baekho-hover-optimized.webp', active: '01_SITE_IMAGES/sasin-baekho-active-optimized.webp' },
       stars: [
         { id: 'BH-01', file: 'BH-01-gyu.svg', name: '규수' }, { id: 'BH-02', file: 'BH-02-ru.svg', name: '루수', animal: '개자리' },
         { id: 'BH-03', file: 'BH-03-wi.svg', name: '위수' }, { id: 'BH-04', file: 'BH-04-myo.svg', name: '묘수' },
@@ -65,7 +65,7 @@
     },
     jujak: {
       name: '주작', direction: '남쪽', color: '#c3a4a1',
-      images: { default: '01_SITE_IMAGES/sasin-jujak-default.webp', hover: '01_SITE_IMAGES/sasin-jujak-hover.webp', active: '01_SITE_IMAGES/sasin-jujak-active.webp' },
+      images: { default: '01_SITE_IMAGES/sasin-jujak-default-optimized.webp', hover: '01_SITE_IMAGES/sasin-jujak-hover-optimized.webp', active: '01_SITE_IMAGES/sasin-jujak-active-optimized.webp' },
       stars: [
         { id: 'JJ-01', file: 'JJ-01-jeong.svg', name: '정수' }, { id: 'JJ-02', file: 'JJ-02-gwi.svg', name: '귀수' },
         { id: 'JJ-03', file: 'JJ-03-ryu.svg', name: '류수' }, { id: 'JJ-04', file: 'JJ-04-seong.svg', name: '성수' },
@@ -75,7 +75,7 @@
   };
   let assetsReady;
   const finalCards = Object.entries(guardians).flatMap(([guardian, data]) => data.stars.map(star => ({
-    id: star.id, name: star.name, guardian, svg: `01_SITE_IMAGES/28su/${star.file}`, image: '',
+    id: star.id, name: star.name, guardian, svg: `01_SITE_IMAGES/28su/${star.file}`, image: `01_SITE_IMAGES/28su/${star.file.replace('.svg', '-card.webp')}`,
   }))).map((card, index) => ({ ...card, angle: index * 360 / 28 }));
   let finalPrepared = false;
   let exitController;
@@ -219,7 +219,7 @@
     if (state.scene !== 'O-02' || state.transitioning) return false;
     state.transitioning = true;
     const generation = ++sceneGeneration;
-    setHelp(false);
+    resetLantern();
     try { await prepareExploration(); }
     catch (error) {
       if (generation === sceneGeneration) state.transitioning = false;
@@ -307,7 +307,7 @@
     if (state.transitioning || !['O-03', 'O-04'].includes(state.scene)) return false;
     ++sceneGeneration;
     state.transitioning = true;
-    setHelp(false);
+    resetLantern();
     stopActivity();
     const o02 = scenes['O-02'].element;
     o02.hidden = false;
@@ -340,7 +340,7 @@
     if (!((state.scene === 'O-05' && id === 'O-06') || (state.scene === 'O-06' && id === 'O-05'))) return false;
     ++sceneGeneration;
     state.transitioning = true;
-    setHelp(false);
+    resetLantern();
     stopActivity();
     const previous = scenes[state.scene].element;
     const next = scenes[id].element;
@@ -463,7 +463,7 @@
     if (id === 'O-07') prepareFinalScene();
     ++sceneGeneration;
     state.transitioning = true;
-    setHelp(false);
+    resetLantern();
     stopActivity();
     const previous = scenes[state.scene].element, next = scenes[id].element;
     next.hidden = false;
@@ -533,7 +533,7 @@
     if (state.scene !== 'O-07' || state.transitioning || !bridge?.finish) return false;
     const generation = ++sceneGeneration;
     state.transitioning = true;
-    setHelp(false);
+    resetLantern();
     stopActivity();
     finalScene.classList.add('is-closing');
     finalScene.inert = true;
@@ -610,6 +610,15 @@
     else if (restoreFocus) lantern.focus({ preventScroll: true });
   }
 
+  // O-03/O-04/O-05 share exploration. Reset only when leaving that page
+  // or moving between O-02, O-06 and O-07; keep in-page light toggling.
+  function resetLantern() {
+    setHelp(false);
+    lanternLit = false;
+    lantern.classList.remove('is-lit', 'is-swinging');
+    lantern.setAttribute('aria-pressed', 'false');
+  }
+
   function onLanternClick() {
     if (state.transitioning) return;
     lantern.getAnimations({ subtree: true }).filter(a => a.animationName === 'o01-lantern-swing').forEach(a => { a.currentTime = 0; });
@@ -642,7 +651,7 @@
       else unsettled = true;
     }
     light.style.transform = `translate3d(${current.x}px, ${current.y}px, 0) translate(-50%, -50%)`;
-    if (state.scene === 'O-02') image.style.transform = `rotateX(${current.rx}deg) rotateY(${current.ry}deg)`;
+    image.style.transform = `rotateX(${current.rx}deg) rotateY(${current.ry}deg) rotateZ(${state.scene === 'O-06' ? 3 : 0}deg)`;
     if (unsettled) requestFrame();
   }
 
@@ -688,6 +697,8 @@
   }
 
   function startNightActivity(options) {
+    surface = root.querySelector(state.scene === 'O-06' ? '.o06__visual' : '.o02__tilt-surface');
+    image = root.querySelector(state.scene === 'O-06' ? '.o06__image-frame' : '.o02__image');
     ensureChart();
     current.x = target.x = innerWidth / 2;
     current.y = target.y = innerHeight / 2;
@@ -728,8 +739,7 @@
       }
       lastFrame = 0;
     }, options);
-    // O-06 uses the same light but never binds tilt or drag listeners.
-    if (state.scene === 'O-02') startTiltActivity(options);
+    startTiltActivity(options);
   }
 
   function startTiltActivity(options) {
@@ -797,7 +807,7 @@
 
   function bindTouchNavigation(options) {
     let gesture;
-    const interactive = 'button,a,input,textarea,select,label,.o02__tilt-surface';
+    const interactive = 'button,a,input,textarea,select,label,.o02__tilt-surface,.o06__visual';
     root.addEventListener('touchstart', e => {
       gesture = null;
       if (!mobile.matches || state.transitioning || !help.hidden || e.touches.length !== 1 || performance.now() - lastWheel < 300) return;
@@ -870,7 +880,7 @@
     root.inert = false;
     root.setAttribute('aria-hidden', 'false');
     helpContent.textContent = scenes[state.scene].help;
-    setHelp(false);
+    resetLantern();
     progress.querySelectorAll('.is-complete').forEach(el => el.classList.remove('is-complete'));
     // Commit the transparent starting frame once, not in the pointer loop.
     void root.offsetWidth;
@@ -895,8 +905,7 @@
     exitController?.abort();
     exitController = null;
     clearTimeout(transitionTimer);
-    setHelp(false);
-    lantern.classList.remove('is-swinging');
+    resetLantern();
     stopActivity();
     finalScene.hidden = true;
     resetFinalScene();

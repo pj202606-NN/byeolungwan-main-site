@@ -53,7 +53,7 @@
 .o01__bg {
   position: absolute;
   inset: 0;
-  background-image: url('../01_SITE_IMAGES/o-01-background.png');
+  background-image: url('../01_SITE_IMAGES/o-01-background-optimized.webp');
   background-size: cover;
   background-position: center;
   z-index: 0;

@@ -44,12 +44,13 @@
   // 화면별 폭 배율 (지정 없으면 1 = 기준 폭 1장)
   const widthMultipliers = screens.map((s) => parseFloat(s.dataset.widthMultiplier || '1'));
   // Retain DOM indices and desktop geometry; only these mobile connectors are empty.
-  const mobileSkippedScreenIndices = ['IMG-01', 'IMG-02']
+  const mobileSkippedScreenIndices = ['IMG-01']
     .map((id) => screens.findIndex((s) => s.dataset.screenId === id))
     .filter((index) => index > 0 && index < screens.length - 1);
 
   const s05ScreenIndex = screens.findIndex((s) => s.dataset.screenId === 'S-05');
   const c03ScreenIndex = screens.findIndex((s) => s.dataset.screenId === 'C-03');
+  const f01ScreenIndex = screens.findIndex((s) => s.dataset.screenId === 'F-01');
   const s05Content = s05ScreenIndex >= 0 ? screens[s05ScreenIndex].querySelector('.s05__content') : null;
   const s05Pin = { start: 0, range: 0 };
 
@@ -144,6 +145,10 @@
     if (c03ScreenIndex >= 0 && nextTarget > state.target && state.target <= c03Start && state.current <= c03Start + 0.05) {
       nextTarget = Math.min(nextTarget, c03Start);
     }
+    const f01Start = state.screenStarts[f01ScreenIndex];
+    if (f01ScreenIndex >= 0 && nextTarget > state.target && state.target <= f01Start && state.current <= f01Start + 0.05) {
+      nextTarget = Math.min(nextTarget, f01Start);
+    }
     return clamp(nextTarget, loop.enabled ? -state.unitWidth : 0, loop.enabled ? loop.span : state.max);
   }
 
@@ -196,6 +201,7 @@
     // 안 맞는 화면에서는 네 메뉴 전부 옅게 보인다(기존 '입구'의 M-00
     // 처리 규칙을 네 메뉴 공통 규칙으로 일반화).
     const currentScreenId = screens[idx].dataset.screenId || '';
+    state.activeScreenId = currentScreenId;
     if (mobileLayout.matches) {
       if (!mobileM00Backdrop) {
         mobileM00Backdrop = document.createElement('div');
@@ -206,7 +212,7 @@
       }
       mobileM00Backdrop.classList.toggle('is-active', currentScreenId === 'M-00');
       if (mobileNext) {
-        const blocked = currentScreenId === 'C-03';
+        const blocked = currentScreenId === 'C-03' || currentScreenId === 'F-01';
         if (mobileNext.disabled !== blocked) mobileNext.disabled = blocked;
         const internal = String(currentScreenId === 'S-05');
         if (mobileNext.dataset.internalScroll !== internal) mobileNext.dataset.internalScroll = internal;
@@ -307,10 +313,11 @@
   // 바꿔서 "이미지가 안쪽에서 줌되는" 느낌을 낸다.
   const e01PhotoImg = document.querySelector('.e01__photo-img');
   const e02PhotoImg = document.querySelector('.e02__photo-img');
+  const e02Twinkles = document.querySelector('.e02__twinkles');
   const e02PhotoWrap = document.querySelector('.e02__photo-wrap');
   const e01ScreenIndex = screens.findIndex((s) => s.dataset.screenId === 'E-01');
   const e02ScreenIndex = screens.findIndex((s) => s.dataset.screenId === 'E-02');
-  const e02Parallax = { exit: 0, lastX: null };
+  const e02Parallax = { exit: 0, lastX: null, arrived: null };
 
   // E-01은 사진 자체가 가로로 완만한 톤의 실내 사진이라, E-02(별자리
   // 점·선이라 축척 변화가 눈에 선명하게 드러남)와 같은 배율·같은
@@ -352,13 +359,13 @@
   // 밤하늘 이미지(.e00-bg-layer)는 .track(전경 — 표지 패널, 본문 등)과
   // 같은 트랙에 묶이지 않고 완전히 독립된 레이어다. .track은 스크롤
   // 그대로(배속 1.0) 움직이지만, 이 배경 레이어는 그보다 느린 배속
-  // (E00_PARALLAX_FACTOR)으로만 움직인다.
+  // (COVER_PARALLAX_FACTOR)으로만 움직인다.
   //
   // E-00 화면 자체를 data-width-multiplier="3"으로 기준폭의 3배까지
   // 넓혀뒀다(실제 콘텐츠는 그 중 앞 1장 분량에만 있고 나머지는 빈
   // 투명 공간). 그래서 패널이 화면을 빠져나간 뒤에도 배경이 "뒤이어
   // 오는 E-01에 도착하기까지" 훨씬 더 긴 구간 동안 크게 남아있다가
-  // 서서히 덮인다 — 배속(E00_PARALLAX_FACTOR) 자체는 그대로 두고
+  // 서서히 덮인다 — 배속(COVER_PARALLAX_FACTOR) 자체는 그대로 두고
   // 화면 폭만 늘렸을 뿐인데도 효과가 보이는 구간이 그만큼 길어진다.
   //
   // 기준점: E-00이 화면에 정확히 다 들어왔을 때(스크롤 진행이 E-00
@@ -366,15 +373,48 @@
   // 이때는 왼쪽 65.14%가 불투명한 패널에 가려져 있어서 오른쪽
   // 34.86%만 자연스럽게 드러나 보인다 — 지금까지의 고정 크롭과
   // 시각적으로 동일한 시작 상태.
-  const e00BgLayer = document.getElementById('e00-bg-layer');
-  const e00ScreenIndex = screens.findIndex((s) => s.dataset.screenId === 'E-00');
-  const E00_PARALLAX_FACTOR = 0.5; // 1.0 = 전경과 같은 속도, 작을수록 더 느리게(더 오래 남음)
+  const coverBackgrounds = Array.from(document.querySelectorAll('[data-cover-background]')).map((layer) => {
+    const index = screens.findIndex((screen) => screen.dataset.screenId === layer.dataset.coverBackground);
+    const preview = screens[index]?.querySelector('.cover-mobile-image img');
+    if (preview) preview.src = layer.querySelector('img').getAttribute('src');
+    return { layer, index, lastX: null, lastClip: '', left: 0, width: 0, panelEnd: 0, visible: null };
+  });
+  const COVER_PARALLAX_FACTOR = 0.5; // 1.0 = 전경과 같은 속도, 작을수록 더 느리게(더 오래 남음)
 
-  function updateE00ParallaxBg() {
-    if (!e00BgLayer || state.unitWidth <= 0 || e00ScreenIndex < 0) return;
-    const e00Start = state.screenStarts[e00ScreenIndex];
-    const x = e00Start * E00_PARALLAX_FACTOR - state.current * E00_PARALLAX_FACTOR;
-    e00BgLayer.style.transform = `translate3d(${x}px, 0, 0)`;
+  function updateCoverParallaxBackgrounds() {
+    if (state.unitWidth <= 0) return;
+    coverBackgrounds.forEach((background) => {
+      if (background.index < 0) return;
+      const start = state.screenStarts[background.index];
+      const local = state.current - start;
+      const visible = !mobileLayout.matches && local >= -state.unitWidth && local <= state.screenWidths[background.index];
+      if (visible !== background.visible) {
+        background.layer.style.visibility = visible ? 'visible' : 'hidden';
+        background.visible = visible;
+      }
+      if (!visible) return;
+      // Move the portrait at half speed until its left edge meets the panel.
+      // Then carry both at the same speed, keeping their edges joined.
+      let x = background.layer.dataset.coverBackground === 'C-00'
+        ? Math.min(-local * COVER_PARALLAX_FACTOR, background.panelEnd - background.left - local)
+        : -local * COVER_PARALLAX_FACTOR;
+      if (background.layer.dataset.coverBackground === 'IMG-05') {
+        x = Math.max(x, state.screenWidths[background.index] - local - background.left - background.width);
+      }
+      if (x !== background.lastX) {
+        background.layer.style.transform = `translate3d(${x}px, 0, 0)`;
+        background.lastX = x;
+      }
+      // Each fixed image belongs only to its own moving screen. Without this,
+      // the preceding sky bridge can cover the next transparent cover panel.
+      const leftClip = clamp(-local - background.left - x, 0, background.width);
+      const rightClip = clamp(background.left + background.width + x - (state.screenWidths[background.index] - local), 0, background.width);
+      const clip = `inset(0 ${rightClip}px 0 ${leftClip}px)`;
+      if (clip !== background.lastClip) {
+        background.layer.style.clipPath = clip;
+        background.lastClip = clip;
+      }
+    });
   }
 
   // E-02도 E-00과 동일하게 전경 1.0 / 배경 0.5의 속도 차이를 사용한다.
@@ -383,11 +423,19 @@
   // E-02 시작점에서 보상값은 0이어서 기존 정착 크롭을 유지한다.
   function updateE02ParallaxImage() {
     if (!e02PhotoImg || state.unitWidth <= 0 || e02ScreenIndex < 0) return;
+    const start = state.screenStarts[e02ScreenIndex];
+    const lead = state.unitWidth * (mobileLayout.matches ? 0.15 : 0.08);
+    const arrived = state.activeScreenId === 'E-02' || (state.current >= start - lead && state.current < start);
+    if (arrived !== e02Parallax.arrived) {
+      screens[e02ScreenIndex].classList.toggle('is-arrived', arrived);
+      e02Parallax.arrived = arrived;
+    }
     const local = clamp(state.current - state.screenStarts[e02ScreenIndex], -state.unitWidth, e02Parallax.exit);
-    const x = local * (1 - E00_PARALLAX_FACTOR);
+    const x = local * (1 - COVER_PARALLAX_FACTOR);
     // 진입 전/프레임 퇴장 후에는 경계값을 유지하며 DOM 쓰기도 건너뛴다.
     if (x === e02Parallax.lastX) return;
     e02PhotoImg.style.transform = `translate3d(${x}px, 0, 0)`;
+    if (e02Twinkles) e02Twinkles.style.transform = `translate3d(${x}px, 0, 0)`;
     e02Parallax.lastX = x;
   }
 
@@ -440,6 +488,13 @@
     // 더 발생하지 않게 한다 — 두 getBoundingClientRect 호출 모두
     // "쓰기 전"이라 같은 레이아웃 패스에서 한 번에 처리된다.
     cachedRailWidth = rail.getBoundingClientRect().width;
+    coverBackgrounds.forEach(background => {
+      const geometry = getComputedStyle(background.layer);
+      background.left = parseFloat(geometry.left) || 0;
+      background.width = parseFloat(geometry.width) || 0;
+      const panel = screens[background.index]?.querySelector('.c00__panel');
+      background.panelEnd = panel ? panel.offsetLeft + panel.getBoundingClientRect().width : 0;
+    });
 
     const screenWidths = widthMultipliers.map((m, i) =>
       mobileLayout.matches && mobileSkippedScreenIndices.includes(i) ? 0 :
@@ -448,8 +503,13 @@
     if (s05Content) {
       // offset 치수는 부모 translateX의 영향을 받지 않는다. 측정은 resize 때만 한다.
       const contentRight = Array.from(s05Content.children).reduce((right, el) => Math.max(right, el.offsetLeft + el.offsetWidth), 0);
-      innerWidth = Math.max(screenWidths[s05ScreenIndex], contentRight);
-      s05Pin.range = contentRight > newWidth + 0.5 ? Math.max(0, innerWidth - newWidth) : 0;
+      const lastImage = Array.from(s05Content.querySelectorAll(':scope > .story__ph')).at(-1);
+      const heading = document.getElementById('s05-title');
+      // Keep the final pair reachable until its image aligns with the fixed
+      // chapter heading, rather than ending as soon as its body fits on screen.
+      const alignedRange = lastImage && heading ? Math.max(0, lastImage.offsetLeft - heading.offsetLeft) : 0;
+      s05Pin.range = Math.max(0, contentRight - newWidth, alignedRange);
+      innerWidth = Math.max(screenWidths[s05ScreenIndex], newWidth + s05Pin.range);
       screenWidths[s05ScreenIndex] = newWidth + s05Pin.range;
     }
     const screenStarts = [];
@@ -492,7 +552,7 @@
     cacheRevealEntrances();
     updateRailChrome();
     updateReveals();
-    updateE00ParallaxBg();
+    updateCoverParallaxBackgrounds();
     updateE02ParallaxImage();
     updateM00ParallaxBg();
     updateImageZooms();
@@ -508,44 +568,59 @@
   // 닫을 때 화면이 갑자기 튀어 보인다.
   const navOverlay = document.getElementById('nav-overlay');
   const railBurger = document.getElementById('rail-burger');
+  const otherOverlay = document.getElementById('other-overlay');
+  const railOther = document.getElementById('rail-other');
+  const overlayControls = [[navOverlay, railBurger], [otherOverlay, railOther]];
+  let activeOverlayControl = null;
 
   function isNavOverlayOpen() {
-    return navOverlay.classList.contains('is-open');
+    return activeOverlayControl !== null;
   }
-  function openNavOverlay() {
-    navOverlay.classList.add('is-open');
-    navOverlay.setAttribute('aria-hidden', 'false');
-    railBurger.setAttribute('aria-expanded', 'true');
-    railBurger.classList.add('is-active');
+  function openNavOverlay(control) {
+    if (isNavOverlayOpen()) closeNavOverlay();
+    const [overlay, trigger] = control;
+    activeOverlayControl = control;
+    overlay.inert = false;
+    overlay.classList.add('is-open');
+    overlay.setAttribute('aria-hidden', 'false');
+    trigger.setAttribute('aria-expanded', 'true');
+    trigger.classList.add('is-active');
     if (mobileLayout.matches) {
-      navOverlay.querySelector('a,button')?.focus({ preventScroll: true });
+      overlay.querySelector('a,button')?.focus({ preventScroll: true });
     }
   }
   function closeNavOverlay() {
-    navOverlay.classList.remove('is-open');
-    navOverlay.setAttribute('aria-hidden', 'true');
-    railBurger.setAttribute('aria-expanded', 'false');
-    railBurger.classList.remove('is-active');
-    if (mobileLayout.matches && navOverlay.contains(document.activeElement)) railBurger.focus({ preventScroll: true });
+    if (!activeOverlayControl) return;
+    const [overlay, trigger] = activeOverlayControl;
+    if (overlay.contains(document.activeElement)) trigger.focus({ preventScroll: true });
+    overlay.classList.remove('is-open');
+    overlay.setAttribute('aria-hidden', 'true');
+    overlay.inert = true;
+    trigger.setAttribute('aria-expanded', 'false');
+    trigger.classList.remove('is-active');
+    activeOverlayControl = null;
   }
-  railBurger.addEventListener('click', () => {
-    if (isNavOverlayOpen()) closeNavOverlay(); else openNavOverlay();
+  overlayControls.forEach((control) => {
+    const [overlay, trigger] = control;
+    trigger.addEventListener('click', () => {
+      if (activeOverlayControl === control) closeNavOverlay(); else openNavOverlay(control);
+    });
+    overlay.querySelector('.nav-overlay__bg').addEventListener('click', closeNavOverlay);
   });
   // 배경(칼럼이 아닌 빈 영역)을 눌러도 닫히게 — 흔한 오버레이 UX 관례
-  navOverlay.querySelector('.nav-overlay__bg').addEventListener('click', closeNavOverlay);
   window.addEventListener('keydown', (e) => {
+    if (document.getElementById('map-viewer')?.open) return;
     if (e.key === 'Escape' && isNavOverlayOpen()) closeNavOverlay();
   });
 
   // '처음으로'는 기존 오프닝 초기화·복귀 함수를 그대로 사용한다.
-  const navOpeningReturn = document.getElementById('nav-opening-return');
-  if (navOpeningReturn) {
+  document.querySelectorAll('#nav-opening-return, #other-opening-return').forEach((navOpeningReturn) => {
     navOpeningReturn.addEventListener('click', (e) => {
       e.stopPropagation();
       closeNavOverlay();
       if (window.o01Enter) window.o01Enter();
     });
-  }
+  });
 
   // ------------------------------------------------------------
   // 입력 1: 마우스 휠 / 트랙패드
@@ -652,6 +727,10 @@
   // ------------------------------------------------------------
   window.addEventListener('keydown', (e) => {
     if (isNavOverlayOpen()) return;
+    if (nearestIndex() === f01ScreenIndex && ['ArrowRight', 'ArrowDown', 'PageDown'].includes(e.key)) {
+      e.preventDefault();
+      return;
+    }
     if (mobileLayout.matches && e.target.closest('input,select,textarea')) return;
     if (e.key === 'ArrowRight' || e.key === 'PageDown') {
       if (loop.enabled && (state.target < 0 || state.target >= state.max)) scrollByInput(state.unitWidth);
@@ -678,7 +757,6 @@
     const index = findScreenIndexAtPosition(loopPosition(state.target) + 0.05, state.screenStarts, state.screenWidths);
     if (index === c03ScreenIndex) return;
     if (screens[index]?.id === 'F-01') {
-      advanceF01Mobile();
       return;
     }
     const internalEnd = s05Pin.start + s05Pin.range;
@@ -702,6 +780,7 @@
   }
 
   function goToScreenId(id) {
+    if (id === 'F-02' && !document.getElementById('F-02').dataset.birthdate) id = 'F-01';
     const i = screens.findIndex((s) => s.dataset.screenId === id);
     if (i >= 0) goToIndex(i);
   }
@@ -722,7 +801,7 @@
     renderScrollPosition();
     updateRailChrome();
     updateReveals();
-    updateE00ParallaxBg();
+    updateCoverParallaxBackgrounds();
     updateE02ParallaxImage();
     updateM00ParallaxBg();
     updateImageZooms();
@@ -847,21 +926,21 @@
     const mount = document.getElementById('m00-chart-mount');
     if (!mount) return;
     const stars = Array.from(mount.querySelectorAll('circle.st0'));
-    shuffleSample(stars, Math.min(55, stars.length)).forEach((el) => {
+    shuffleSample(stars, Math.min(32, stars.length)).forEach((el) => {
       const dur = (9 + Math.random() * 6).toFixed(1);
       const delay = `-${(Math.random() * dur).toFixed(1)}s`;
       m00AnimEntries.push({ el, anim: `m00-star-flare ${dur}s ease-in-out infinite`, delay });
     });
 
     const groups = Array.from(mount.querySelectorAll('#m00-chart-stars > g'));
-    shuffleSample(groups, Math.round(groups.length / 4)).forEach((el) => {
+    shuffleSample(groups, Math.min(18, groups.length)).forEach((el) => {
       const dur = (13 + Math.random() * 7).toFixed(1);
       const delay = `-${(Math.random() * dur).toFixed(1)}s`;
       m00AnimEntries.push({ el, anim: `m00-chart-breathe ${dur}s ease-in-out infinite`, delay });
     });
 
     const connectors = Array.from(mount.querySelectorAll('#m00-chart-stars polygon.st0, #m00-chart-stars path.st0'));
-    shuffleSample(connectors, Math.round(connectors.length / 4)).forEach((el) => {
+    shuffleSample(connectors, Math.min(24, connectors.length)).forEach((el) => {
       const dur = (14 + Math.random() * 7).toFixed(1);
       const delay = `-${(Math.random() * dur).toFixed(1)}s`;
       m00AnimEntries.push({ el, anim: `m00-chart-breathe-line ${dur}s ease-in-out infinite`, delay });
@@ -988,6 +1067,7 @@
     { hanja:'軫', name:'진수', group:'주작', groupLabel:'주작 · 남방7수', desc:'마지막에서 처음을 준비하는 이. 끝을 새로운 시작으로 바꿉니다.' },
   ];
   const STAR_GROUPS = ['청룡', '현무', '백호', '주작'];
+  window.ByeolStars = Object.freeze(STARS.map(star => Object.freeze({ ...star })));
   const STAR_GROUP_LABEL = { 청룡:'청룡 · 동방', 현무:'현무 · 북방', 백호:'백호 · 서방', 주작:'주작 · 남방' };
   const STAR_GROUP_COLOR = { 청룡:'#0BA295', 현무:'#285C6B', 백호:'#DFCD9D', 주작:'#B15456' };
   const STAR_GROUP_RANGE = { 청룡:[0,6], 현무:[7,13], 백호:[14,20], 주작:[21,27] };
@@ -1010,6 +1090,7 @@
     rels.push({ idx: ngs + offset, type: '주의', color: '#B15456', reason: '기질의 결이 달라 마찰이 생기기 쉬우니 배려가 필요한 관계입니다.' });
     return rels;
   }
+  window.ByeolRelations = Object.freeze({ of: relationsOfStar });
   // A·B가 서로의 relationsOfStar() 목록에 있는지(대칭적이지 않을 수
   // 있어 양쪽 다 확인) — 있으면 그 관계를, 없으면 null을 돌려준다.
   // C-04에서 "정의되지 않은 궁합은 지어내지 않는다" 원칙을 지키는 데 쓴다.
@@ -1017,6 +1098,15 @@
     const found = relationsOfStar(idxA).find((r) => r.idx === idxB);
     if (found) return found;
     return relationsOfStar(idxB).find((r) => r.idx === idxA) || null;
+  }
+  // Exhibition demo scores; replace with the project's final pair data later.
+  function compatibilityOf(pair) {
+    if (!Array.isArray(pair) || pair.length !== 2 || !pair.every(index => Number.isInteger(index) && index >= 0 && index < STARS.length)) return null;
+    const [a, b] = pair;
+    const relation = relationBetween(a, b);
+    const seed = Math.min(a, b) * 37 + Math.max(a, b) * 13;
+    const score = !relation ? null : relation.type === '천생연분' ? 100 : relation.type === '보완' ? 76 + seed % 10 : 20 + seed % 31;
+    return { pair: pair.slice(), relation, score };
   }
   function starLabel(s) {
     return s.animal ? (s.hanja + '宿 · ' + s.animal) : (s.hanja + '宿');
@@ -1070,79 +1160,67 @@
     f01Month.addEventListener('change', refreshDayOptions);
   }
 
-  const f01Submit = document.getElementById('f01-submit');
   const f01MobileLabel = document.querySelector('.f01__mobile-label');
   const f01MobileActions = document.querySelector('.f01__mobile-actions');
   const f01MobileHint = document.getElementById('f01-mobile-hint');
   const f01MobileSubmit = document.getElementById('f01-mobile-submit');
+  const f01Find = document.getElementById('f01-find');
+  const f01Hint = document.getElementById('f01-hint');
+  let lastF01Advance = -Infinity;
   function advanceF01Mobile() {
-    if (!mobileLayout.matches) return;
-    // An explicit control action must not inherit an earlier drag's click guard.
+    if (mobileLayout.matches) advanceF01();
+  }
+  function advanceF01() {
+    if (!f01Year || !f01Month || !f01Day) return;
+    const hint = mobileLayout.matches ? f01MobileHint : f01Hint;
     suppressMobileClick = false;
-    f01Submit?.click();
+    const year = Number(f01Year.value), month = Number(f01Month.value), day = Number(f01Day.value);
+    const valid = [
+      Number.isInteger(year) && [...f01Year.options].some(option => option.value === f01Year.value),
+      Number.isInteger(month) && month >= 1 && month <= 12,
+      Number.isInteger(day) && day >= 1 && day <= daysInMonth(year, month),
+    ];
+    if (!valid.every(Boolean)) {
+      hint.textContent = '생년월일을 확인해 주세요.';
+      [f01Year, f01Month, f01Day].forEach((field, index) => field.setAttribute('aria-invalid', String(!valid[index])));
+      [f01Year, f01Month, f01Day][valid.indexOf(false)].focus();
+      return;
+    }
+    if (performance.now() - lastF01Advance < 800) return;
+    lastF01Advance = performance.now();
+    [f01Year, f01Month, f01Day].forEach(field => field.removeAttribute('aria-invalid'));
+    hint.textContent = '생년월일을 입력해 주세요.';
+    const birthdate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const result = document.getElementById('F-02');
+    result.dataset.birthdate = birthdate;
+    result.setAttribute('aria-description', `선택한 생년월일 ${year}년 ${month}월 ${day}일의 체험 결과입니다.`);
+    window.dispatchEvent(new CustomEvent('byeol:birthdate', { detail: { year, month, day } }));
+    try {
+      sessionStorage.setItem('byeolungwan-f01-birthdate', JSON.stringify({
+        year: f01Year.value, month: f01Month.value, day: f01Day.value,
+      }));
+    } catch {}
+    goToScreenId('F-02');
   }
   function syncF01MobileControls() {
     if (f01MobileLabel) f01MobileLabel.hidden = !mobileLayout.matches;
     if (f01MobileActions) f01MobileActions.hidden = !mobileLayout.matches;
     if (!mobileLayout.matches) {
       [f01Year, f01Month, f01Day].forEach((field) => field?.removeAttribute('aria-invalid'));
-      const result = document.getElementById('F-02');
-      result?.removeAttribute('data-birthdate');
-      result?.removeAttribute('aria-description');
     }
   }
   syncF01MobileControls();
   mobileLayout.addEventListener('change', syncF01MobileControls);
-  if (f01Submit && f01Year && f01Month && f01Day) {
-    let lastMobileAdvance = -Infinity;
-    // Capture precedes the existing data-target listener; desktop bypasses it.
-    f01Submit.addEventListener('click', (event) => {
-      if (!mobileLayout.matches) return;
-      const year = Number(f01Year.value), month = Number(f01Month.value), day = Number(f01Day.value);
-      const valid = [
-        Number.isInteger(year) && [...f01Year.options].some((option) => option.value === f01Year.value),
-        Number.isInteger(month) && month >= 1 && month <= 12,
-        Number.isInteger(day) && day >= 1 && day <= daysInMonth(year, month),
-      ];
-      if (!valid.every(Boolean)) {
-        event.preventDefault(); event.stopImmediatePropagation();
-        f01MobileHint.textContent = '생년월일을 확인해 주세요.';
-        [f01Year, f01Month, f01Day].forEach((field, index) => field.setAttribute('aria-invalid', String(!valid[index])));
-        [f01Year, f01Month, f01Day][valid.indexOf(false)].focus();
-        return;
-      }
-      if (performance.now() - lastMobileAdvance < 800) {
-        event.preventDefault(); event.stopImmediatePropagation(); return;
-      }
-      lastMobileAdvance = performance.now();
-      [f01Year, f01Month, f01Day].forEach((field) => field.removeAttribute('aria-invalid'));
-      f01MobileHint.textContent = '생년월일을 입력해 주세요.';
-      const birthdate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-      const result = document.getElementById('F-02');
-      result.dataset.birthdate = birthdate;
-      result.setAttribute('aria-description', `선택한 생년월일 ${year}년 ${month}월 ${day}일. 별자리와 운세는 기존 고정 예시입니다.`);
-    }, true);
+  if (f01Year && f01Month && f01Day) {
+    f01Find?.addEventListener('click', advanceF01);
     f01MobileSubmit?.addEventListener('click', advanceF01Mobile);
-    f01MobileSubmit?.addEventListener('keydown', (event) => {
+    f01MobileSubmit?.addEventListener('keydown', event => {
       event.stopPropagation();
       if (event.key === 'Enter' || event.key === ' ') suppressMobileClick = false;
     });
-    f01Year.closest('form')?.addEventListener('submit', (event) => {
-      if (mobileLayout.matches) { event.preventDefault(); advanceF01Mobile(); }
-    });
-  }
-  if (f01Submit && f01Year && f01Month && f01Day) {
-    f01Submit.addEventListener('click', () => {
-      try {
-        sessionStorage.setItem('byeolungwan-f01-birthdate', JSON.stringify({
-          year: f01Year.value,
-          month: f01Month.value,
-          day: f01Day.value,
-        }));
-      } catch (err) {
-        // sessionStorage 접근 불가(프라이빗 모드 등)해도 페이지 이동 자체는
-        // [data-target] 리스너가 그대로 처리하므로 조용히 무시한다.
-      }
+    f01Year.closest('form')?.addEventListener('submit', event => {
+      event.preventDefault();
+      advanceF01();
     });
   }
 
@@ -1196,6 +1274,9 @@
           setDirectionPanel(other, document.getElementById(other.getAttribute('aria-controls')), expanded);
         });
         directions.classList.toggle('is-expanded', open);
+        if (open && directions.id === 'c01-directions') {
+          window.dispatchEvent(new CustomEvent('byeol:c01-group', { detail: { group: toggle.dataset.group } }));
+        }
       });
     });
   }
@@ -1235,7 +1316,7 @@
         button.setAttribute('aria-pressed', String(selected));
       });
     }
-    function selectStar(index) {
+    function selectStar(index, { automatic = false } = {}) {
       const star = STARS[index];
       if (!star) return;
       selectedIndex = index;
@@ -1244,7 +1325,9 @@
       descEl.textContent = star.desc || '';
       syncSelection();
       searchStatus.textContent = '';
+      window.dispatchEvent(new CustomEvent('byeol:c01-change', { detail: { index, automatic } }));
     }
+    window.addEventListener('byeol:c01-select', (event) => selectStar(event.detail.index, { automatic: !!event.detail.automatic }));
 
     // 입력 커서 조작과 텍스트 선택은 C-01 안에서만 가로 탐색과 분리한다.
     search.addEventListener('pointerdown', (e) => e.stopPropagation());
@@ -1280,8 +1363,7 @@
     });
     // 기본 선택: 레퍼런스와 동일한 저수
     const defaultStar = STARS.findIndex((s) => s.name === '저수');
-    if (descEl.dataset.referenceCopy !== 'true') descEl.textContent = STARS[defaultStar].desc;
-    syncSelection();
+    selectStar(defaultStar, { automatic: true });
 
     c01Tabs.querySelectorAll('.c01__tab').forEach((tab) => {
       tab.addEventListener('click', () => {
@@ -1309,7 +1391,7 @@
         button.setAttribute('aria-pressed', String(selected));
       });
     }
-    initDirectionAccordion(c02Directions, (index) => {
+    function selectC02(index) {
       const star = STARS[index];
       document.getElementById('c02-selected-name').textContent = star.name;
       document.getElementById('c02-selected-hanja').textContent = starLabel(star);
@@ -1323,9 +1405,12 @@
         paragraphs[1].textContent = relation.reason;
       });
       syncC02Selection(index);
-    });
+      window.dispatchEvent(new CustomEvent('byeol:c02-change', { detail: { index } }));
+    }
+    initDirectionAccordion(c02Directions, selectC02);
+    window.addEventListener('byeol:c02-select', event => selectC02(event.detail.index));
     // 초기 레퍼런스 문구는 유지하고 선택 표시만 저수에 맞춘다.
-    syncC02Selection(STARS.findIndex((star) => star.name === '저수'));
+    selectC02(STARS.findIndex((star) => star.name === '저수'));
   }
 
   // 이전 그래프 구현 보관: 현재 화면에는 마운트가 없어 실행되지 않는다.
@@ -1409,6 +1494,7 @@
   let c04ProgressComplete = false;
   let c04LastProgress = -1;
   let c04LastPercent = -1;
+  let c04TargetScore = 100;
   const c04Progress = c04Screen?.querySelector('.c04__progress');
   const c04ProgressFill = c04Progress?.querySelector('.c04__progress-fill');
   const c04ProgressValue = document.getElementById('c04-progress-value');
@@ -1431,7 +1517,7 @@
       syncC04LabelPlayback();
       await c04LabelAnimation.finished;
       if (generation !== c04LabelGeneration) return;
-      c04ProgressTitle.textContent = '궁합도';
+      c04ProgressTitle.textContent = c04TargetScore === null ? '궁합 미정' : '궁합도';
       c04LabelAnimation.cancel();
       c04LabelAnimation = c04ProgressLabel.animate([{ opacity: 0 }, { opacity: 1 }],
         { duration, easing: 'ease', fill: 'both' });
@@ -1451,7 +1537,7 @@
     const percent = Math.floor(progress * 100 + 1e-7);
     if (percent !== c04LastPercent) {
       c04LastPercent = percent;
-      c04ProgressValue.textContent = String(percent);
+      c04ProgressValue.textContent = c04TargetScore === null ? '—' : String(percent);
       c04Progress.setAttribute('aria-valuenow', String(percent));
     }
   }
@@ -1461,7 +1547,7 @@
     // Read the existing CSS animation clock, not layout or a second timer.
     const progress = c04ConnectionAnimation.effect.getComputedTiming().progress;
     if (progress === null) return;
-    setC04Progress(clamp(progress, 0, 1));
+    setC04Progress(clamp(progress, 0, 1) * (c04TargetScore || 0) / 100);
     c04ProgressComplete = progress >= 1;
     if (c04ProgressComplete) finishC04Label();
   }
@@ -1484,7 +1570,9 @@
     c04LabelGeneration++;
     c04LabelAnimation?.cancel();
     c04LabelAnimation = null;
-    c04ProgressTitle.textContent = '연결 진행';
+    c04ProgressTitle.textContent = c04TargetScore === null ? '궁합 미정' : '궁합도';
+    c04LastProgress = -1;
+    c04LastPercent = -1;
     setC04Progress(0);
     c04Screen.classList.remove('is-constellation-playing', 'is-result-active');
   }
@@ -1553,10 +1641,14 @@
       btn.addEventListener('click', () => {
         const idx = parseInt(btn.dataset.idx, 10);
         picked[activeSlot] = idx;
+        c03Accordion.querySelectorAll('.c03__acc-star').forEach((button) => {
+          button.setAttribute('aria-pressed', String(picked.includes(Number(button.dataset.idx))));
+        });
         const s = STARS[idx];
         document.getElementById('c03-picked-name-' + activeSlot).textContent = s.name;
         document.getElementById('c03-picked-hanja-' + activeSlot).textContent = starLabel(s);
         pickers[activeSlot].querySelector('.c03__picker-label').textContent = s.name;
+        window.dispatchEvent(new CustomEvent('byeol:c03-change', { detail: { pair: picked.slice() } }));
         // 다음 빈 슬롯으로 자동 이동(둘 다 찼으면 유지)
         if (picked[0] === null) setActiveSlot(0);
         else if (picked[1] === null) setActiveSlot(1);
@@ -1597,6 +1689,23 @@
   function renderC04(pair) {
     const c04Headline = document.getElementById('c04-headline');
     if (!c04Headline) return;
+    const result = compatibilityOf(pair);
+    if (!result) return;
+    c04TargetScore = result.score;
+    c04Screen.dataset.pair = JSON.stringify(pair);
+    c04Screen.dataset.relationship = result.relation?.type || '';
+    c04Screen.dataset.score = result.score === null ? '' : result.score;
+    c04Screen.style.setProperty('--c04-unfilled', `${100 - (result.score || 0)}%`);
+    c04Progress.setAttribute('aria-description', '현재 전시 체험용 관계 규칙과 점수입니다.');
+    c04Progress.setAttribute('aria-label', '별자리 궁합도');
+    c04Progress.setAttribute('title', '현재 전시 체험용 관계 규칙과 점수입니다.');
+    c04Progress.querySelector('.c04__progress-unit').hidden = result.score === null;
+    c04Screen.querySelectorAll('.c04__points circle').forEach(point => {
+      const graphic = c04Screen.querySelector('.c04__constellation');
+      const position = clamp((point.cx.baseVal.value - graphic.viewBox.baseVal.x) / graphic.viewBox.baseVal.width, 0, 1);
+      point.classList.toggle('is-unreached', result.score === null || position > result.score / 100);
+      point.style.setProperty('--point-delay', `${result.score ? position / (result.score / 100) * 3.2 : 0}s`);
+    });
     resetC04Sequence(pair.join(':'), true);
     const [a, b] = pair;
     const sa = STARS[a], sb = STARS[b];
@@ -1606,21 +1715,30 @@
     document.getElementById('c04-hanja-1').textContent = starLabel(sb);
     document.getElementById('c04-result-title').textContent = sa.name + ' & ' + sb.name;
 
-    const rel = relationBetween(a, b);
-    // PNG의 저수·루수 전용 해설은 다른 선택의 실제 결과로 노출하지 않는다.
-    document.getElementById('c04-result-body').textContent = '';
-    document.getElementById('c04-note-body').textContent = '';
-    document.getElementById('c04-note-title').textContent = '관계 안내';
+    const rel = result.relation;
+    const copy = {
+      '천생연분': { headline: '서로의 빈틈을 채우는', summary: '서로 다른 강점이 만나 균형을 이루는 관계입니다.', body: '서로에게 없는 시각과 힘을 보태며 함께할 때 가능성이 더 넓어집니다. 같은 목표를 세우고 각자가 잘하는 역할을 나누면 든든한 동반자가 될 수 있습니다.', lead: '익숙함 속에서도 고마움을 표현해 주세요.', advice: '잘 맞는 사이라고 마음을 모두 짐작할 수는 없습니다. 작은 배려를 당연하게 여기지 말고, 각자의 시간과 선택도 존중해 주세요. 서로의 변화에 관심을 기울이는 태도가 좋은 관계를 오래 이어줍니다.' },
+      '보완': { headline: '다른 결이 만나 힘이 되는', summary: '서로의 장점을 보태며 함께 성장하는 관계입니다.', body: '닮은 방향을 바라보면서도 서로 다른 방식으로 힘을 보탭니다. 함께하는 속도와 역할을 조율할수록 혼자서는 놓치던 기회를 발견할 수 있습니다.', lead: '차이를 고치기보다 함께 쓰는 방법을 찾아보세요.', advice: '상대의 방식이 낯설 때에는 결론보다 이유를 먼저 물어보세요. 기대하는 도움과 혼자 해결하고 싶은 일을 미리 나누면 부담이 줄어듭니다. 작은 약속을 지키며 쌓은 신뢰가 두 별의 강점을 이어줍니다.' },
+      '주의': { headline: '가까워질수록 배려가 필요한', summary: '서로의 속도와 표현 방식에 주의가 필요한 관계입니다.', body: '같은 상황에서도 중요하게 여기는 것과 반응하는 속도가 다를 수 있습니다. 차이를 잘못으로 판단하기보다 각자의 기준을 설명하고, 함께 지킬 경계를 정하는 과정이 필요합니다.', lead: '감정이 앞설 때에는 잠시 쉬어가도 괜찮습니다.', advice: '서운한 마음을 쌓아두거나 상대의 의도를 단정하지 말고, 구체적인 상황과 바라는 변화를 차분히 전해 주세요. 당장 합의하기 어려운 문제는 시간을 두고 다시 이야기하세요. 서로의 거리를 존중하는 것도 관계를 지키는 방법입니다.' },
+    };
+    document.getElementById('c04-note-title').textContent = '조언';
     if (rel) {
-      c04Headline.replaceChildren(document.createTextNode('우리의 별은'), document.createElement('br'), document.createTextNode(rel.reason));
-      document.getElementById('c04-result-desc').textContent = rel.reason;
-      document.getElementById('c04-result-note').textContent = '두 별자리 사이의 "' + rel.type + '" 관계입니다.';
+      const text = copy[rel.type];
+      c04Headline.replaceChildren(document.createTextNode(text.headline), document.createElement('br'), document.createTextNode(`${rel.type}의 관계입니다.`));
+      document.getElementById('c04-result-desc').textContent = text.summary;
+      document.getElementById('c04-result-body').textContent = `${sa.name}와 ${sb.name}는 ${text.body}`;
+      document.getElementById('c04-result-note').textContent = text.lead;
+      document.getElementById('c04-note-body').textContent = text.advice;
     } else {
       c04Headline.textContent = '아직 두 별자리 사이에 정의된 궁합 관계가 없습니다.';
-      document.getElementById('c04-result-desc').textContent = '모든 별자리 쌍에 관계가 정의되어 있지는 않습니다 — 임의의 결과를 만들어내지 않습니다.';
+      document.getElementById('c04-result-desc').textContent = '이 조합의 관계 데이터는 아직 준비되지 않았습니다.';
       document.getElementById('c04-result-note').textContent = '두 별자리 사이에 정의된 관계가 없습니다.';
+      document.getElementById('c04-result-body').textContent = '이 조합의 궁합 점수와 요약은 추후 별자리 관계 데이터가 마련되면 표시됩니다.';
+      document.getElementById('c04-note-body').textContent = '정해진 해석보다 서로가 실제로 느끼는 편안함과 대화에 귀를 기울여 보세요. 각자의 기대와 경계를 솔직하게 나누는 것부터 시작할 수 있습니다.';
     }
+    window.dispatchEvent(new CustomEvent('byeol:c04-change', { detail: result }));
   }
+  window.ByeolCompatibility = Object.freeze({ calculate: compatibilityOf, show: renderC04 });
   (function initC04FromSession() {
     if (!document.getElementById('c04-headline')) return;
     try {
@@ -1633,8 +1751,7 @@
         }
       }
     } catch (err) { /* 접근 불가 시 예시로 대체 */ }
-    // sessionStorage에 선택이 없으면(C-04로 바로 진입) 마크업에 적어둔
-    // 레퍼런스 정적 예시(저수·루수)를 그대로 유지한다.
+    renderC04([2, 15]);
   })();
 
   // ------------------------------------------------------------
@@ -1643,7 +1760,7 @@
   // 가 실제로 변하는지와 무관하게 매 프레임(최초 로드부터 페이지를
   // 닫을 때까지, M-00이 보이든 E-00/E-01/E-02가 보이든, 스크롤 중이든
   // 완전히 멈춰 있든) 무조건 돌며 아래 5개 함수를 전부 호출했다.
-  // 이 함수들(updateRailChrome/updateReveals/updateE00ParallaxBg/
+  // 이 함수들(updateRailChrome/updateReveals/updateCoverParallaxBackgrounds/
   // updateM00ParallaxBg/updateImageZooms)은 전부 state.current "만의"
   // 함수라서, state.current가 이전 프레임과 같으면 결과도 100% 같다
   // — 즉 "아무것도 안 바뀌었는데도 매 프레임 style을 다시 쓰고 있던"
@@ -1673,7 +1790,7 @@
       renderScrollPosition();
       updateRailChrome();
       updateReveals();
-      updateE00ParallaxBg();
+      updateCoverParallaxBackgrounds();
       updateE02ParallaxImage();
       updateM00ParallaxBg();
       updateImageZooms();
