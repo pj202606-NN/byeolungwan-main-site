@@ -15,6 +15,6 @@
   #viewport #F-02 .f02__image-ph { min-height: 0; aspect-ratio: 3 / 2; }
   #viewport #F-02 .f02__sky { position: absolute; inset: 0; }
   #viewport #F-02 :is(.f02__title, .f02__subtitle, .f02__desc) { top: -8px; }
-  #viewport #F-02 .f02__fortune-ph { width: min(63%, 270px); min-height: 0; height: auto; max-height: none; aspect-ratio: 7 / 14.5; align-self: flex-start; margin-left: max(23%, calc((100% - 230px) / 2)); margin-top: 8px; }
-  #viewport #F-02 .f02__fortune { width: calc(100% - 12px); margin-left: 12px; }
+  #viewport #F-02 .f02__fortune-ph { width: min(63%, 270px); min-height: 0; height: auto; max-height: none; aspect-ratio: 7 / 14.5; align-self: center; margin-left: 0; margin-top: 24px; }
+  #viewport #F-02 .f02__fortune { width: 100%; margin-left: 0; margin-top: 12px; }
 }

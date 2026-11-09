@@ -44,7 +44,7 @@
   // 화면별 폭 배율 (지정 없으면 1 = 기준 폭 1장)
   const widthMultipliers = screens.map((s) => parseFloat(s.dataset.widthMultiplier || '1'));
   // Retain DOM indices and desktop geometry; only these mobile connectors are empty.
-  const mobileSkippedScreenIndices = ['IMG-01']
+  const mobileSkippedScreenIndices = ['IMG-01', 'IMG-02']
     .map((id) => screens.findIndex((s) => s.dataset.screenId === id))
     .filter((index) => index > 0 && index < screens.length - 1);
 
@@ -1401,7 +1401,12 @@
         const block = relationBlocks[i];
         block.querySelector(':scope > p').textContent = relation.type;
         const paragraphs = block.querySelectorAll('.c02__relation-copy p');
-        paragraphs[0].textContent = target.name + ' (' + target.groupLabel + ')';
+        if (mobileLayout.matches) {
+          const meta = document.createElement('span');
+          meta.className = 'c02__relation-meta';
+          meta.textContent = target.groupLabel;
+          paragraphs[0].replaceChildren(document.createTextNode(target.name + ' '), meta);
+        } else paragraphs[0].textContent = target.name + ' (' + target.groupLabel + ')';
         paragraphs[1].textContent = relation.reason;
       });
       syncC02Selection(index);
@@ -1409,6 +1414,10 @@
     }
     initDirectionAccordion(c02Directions, selectC02);
     window.addEventListener('byeol:c02-select', event => selectC02(event.detail.index));
+    mobileLayout.addEventListener('change', () => {
+      const index = Number(c02Screen.dataset.starIndex);
+      if (Number.isInteger(index) && STARS[index]) selectC02(index);
+    });
     // 초기 레퍼런스 문구는 유지하고 선택 표시만 저수에 맞춘다.
     selectC02(STARS.findIndex((star) => star.name === '저수'));
   }

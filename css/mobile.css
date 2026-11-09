@@ -162,11 +162,14 @@
   #viewport #F-01 > .f01__mobile-label p + p { color: var(--white); font-weight: 400; }
   #viewport #F-01 > .f01__headline { order: -2; }
   #viewport #F-01 > .f01__image-ph { order: -1; min-height: 0; aspect-ratio: 3 / 2; }
-  #viewport #F-01 .f01__date-card { transform: none; display: grid; grid-template-columns: minmax(0,1.4fr) repeat(2,minmax(0,1fr)); gap: 8px; padding: 16px 12px; }
+  #viewport #F-01 .f01__date-card-wrap { margin-top: 32px; }
+  #viewport #F-01 .f01__date-card { transform: none; display: grid; grid-template-columns: minmax(0,1.4fr) repeat(2,minmax(0,1fr)); gap: 8px; padding: 28px 12px; }
   #viewport #F-01 .f01__date-field { min-width: 0; gap: 3px; font-size: 16px; }
+  #viewport #F-01 .f01__date-field:first-child { padding-left: 8px; }
   #viewport #F-01 .f01__date-field select { min-width: 0; font-size: 16px; }
   #viewport #F-01 > :is(.f01__breadcrumb,.f01__actions) { display: none; }
   #viewport #F-01 .f01__body { word-break: keep-all; overflow-wrap: normal; }
+  #viewport #F-01 .f01__body p:not(:last-child) { margin-bottom: 16px; }
   #viewport #F-01 .f01__body p:last-child br { display: initial; }
   #viewport #F-01 > .f01__mobile-actions { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px; align-items: center; margin-top: -12px; }
   #viewport #F-01 .f01__mobile-hint { font-size: 12px; line-height: 1.6; color: var(--text-muted-on-navy); margin: 0; }
@@ -176,6 +179,7 @@
   #viewport #F-02 .f02__fortune-title { font-family: var(--font-emphasis); font-size: 30px; font-weight: 600; line-height: 1.5; letter-spacing: var(--font-emphasis-tracking-adjust); }
   #viewport .f02__links { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; font-size: 16px; }
   #viewport .f02__links a { padding: 12px 0; }
+  #viewport #F-02 .f02__links { margin-left: 0; width: 100%; align-items: flex-start; }
   #viewport :is(.f02__fortune-p1,.f02__fortune-p2) { font-size: 16px; line-height: 1.85; }
   #viewport :is(.c-ref__label,.story__label,.s01__label) p { font-size: 13px; }
   #viewport :is(h2,h3) { word-break: keep-all; overflow-wrap: break-word; }
@@ -202,16 +206,19 @@
   #viewport :is(.c01__star,.c03__acc-star) { writing-mode: horizontal-tb; min-width: 52px; min-height: 44px; padding: 8px; font-size: 16px; border: 1px solid currentColor; }
   /* C-01 only: four vertical headings share a row; the existing active panel
      spans the row below without moving or duplicating its buttons. */
-  #viewport #C-01 .c01__directions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: start; gap: 16px 8px; }
-  #viewport #C-01 .c01__direction { display: contents; }
-  #viewport #C-01 .c01__direction-toggle { grid-row: 1; display: flex; align-items: flex-start; justify-content: center; min-width: 44px; min-height: 128px; padding: 12px 0; text-align: center; }
-  #viewport #C-01 .c01__direction-toggle span { writing-mode: vertical-rl; text-orientation: upright; white-space: nowrap; }
-  #viewport #C-01 .c01__stars { grid-column: 1 / -1; grid-row: 2; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; width: 100%; padding: 0; animation: c01-mobile-panel-in 300ms ease; }
-  #viewport #C-01 .c01__stars[hidden] { display: none; }
-  #viewport #C-01 .c01__star { writing-mode: vertical-rl; text-orientation: upright; display: grid; place-items: center; width: 100%; min-width: 0; min-height: 72px; padding: 12px 0; }
+  #viewport :is(#C-01,#C-02) :is(.c01__directions,.c02__directions) { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: start; gap: 16px 8px; }
+  #viewport :is(#C-01,#C-02) .c01__direction { display: contents; }
+  #viewport :is(#C-01,#C-02) .c01__direction-toggle { grid-row: 1; display: flex; align-items: flex-start; justify-content: center; min-width: 44px; min-height: 128px; padding: 12px 0; text-align: center; }
+  #viewport :is(#C-01,#C-02) .c01__direction-toggle span { writing-mode: vertical-rl; text-orientation: upright; white-space: nowrap; }
+  #viewport :is(#C-01,#C-02) .c01__stars { grid-column: 1 / -1; grid-row: 2; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; width: 100%; padding: 0; animation: c01-mobile-panel-in 300ms ease; }
+  #viewport :is(#C-01,#C-02) .c01__stars[hidden] { display: none; }
+  #viewport :is(#C-01,#C-02) .c01__star { writing-mode: vertical-rl; text-orientation: upright; display: grid; place-items: center; width: 100%; min-width: 0; min-height: 72px; padding: 12px 0; }
+  #viewport #C-01 .c01__sky-star { width: 21%; height: 46%; }
   #viewport #C-01 > .c01__image ~ .c01__image { margin-top: 40px; }
   @keyframes c01-mobile-panel-in { from { opacity: 0; } to { opacity: 1; } }
-  @media (prefers-reduced-motion: reduce) { #viewport #C-01 .c01__stars { animation: none; } }
+  @media (prefers-reduced-motion: reduce) { #viewport :is(#C-01,#C-02) .c01__stars { animation: none; } }
+  #viewport #IMG-02 { display: none; }
+  #viewport #C-02 > .c-ref__ph.c02__left { min-height: 0; aspect-ratio: 1 / 1; }
   #viewport .c02__legend { flex-wrap: wrap; gap: 16px; font-size: 14px; white-space: normal; }
   #viewport .c02__legend span::before { width: 8px; height: 8px; margin-right: 6px; }
   #viewport .c02__selection { display: flex; flex-direction: column; gap: 24px; }
@@ -220,6 +227,11 @@
   #viewport .c02__relation-image { width: 48px; min-height: 48px; aspect-ratio: 1; }
   #viewport .c02__relation-copy { position: static; font-size: 16px; white-space: normal; }
   #viewport .c02__relation-copy p { white-space: normal; }
+  #viewport #C-02 .c02__relation { display: grid; grid-template-columns: 48px minmax(0, 1fr); grid-template-rows: auto auto; gap: 8px 16px; }
+  #viewport #C-02 .c02__relation > p { grid-column: 1 / -1; grid-row: 1; }
+  #viewport #C-02 .c02__relation-image { grid-column: 1; grid-row: 2; width: 48px; height: 48px; min-height: 48px; align-self: start; }
+  #viewport #C-02 .c02__relation-copy { grid-column: 2; grid-row: 2; min-width: 0; }
+  #viewport #C-02 .c02__relation-meta { color: #8b8b8b; }
   #viewport .c03__question { font-size: 22px; }
   #viewport .c03__picker { display: flex; flex-wrap: wrap; gap: 12px; min-height: 64px; padding: 12px; border: 1px solid currentColor; }
   #viewport .c03__picker.is-active { outline: 2px solid currentColor; outline-offset: 2px; }

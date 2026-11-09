@@ -84,7 +84,7 @@
   #viewport #E-02 > .e02__photo-wrap { aspect-ratio: 45 / 32; }
   #viewport #E-02 .e02__photo-img { height: 100%; object-fit: contain; object-position: center; }
   #viewport #E-02 .e02__twinkles { position: absolute; inset: 0; width: 100%; height: 100%; transform: none !important; }
-  #viewport #E-02 .e02__constellation-art { position: absolute; left: 44%; top: 56%; width: 46%; height: auto; }
+  #viewport #E-02 .e02__constellation-art { position: absolute; left: 50%; top: 50%; width: 46%; height: auto; }
   #viewport #E-02 .e02__guardian-nav { flex-direction: row; gap: 4px; justify-content: space-between; margin-top: -16px; translate: none; }
   #viewport #E-02 .e02__guardian-nav button:first-child { text-align: left; padding-left: 0; }
   #viewport #E-02 .e02__dragon-wrap { --guardian-frame-height: max(160px, calc((100vw - var(--mobile-rail-w) - 56px) / 2 + 24px)); --guardian-image-width: calc(100vw - var(--mobile-rail-w) - 56px); --guardian-image-height: calc(var(--guardian-frame-height) - 24px); width: 100%; margin-left: 0; margin-top: 24px; aspect-ratio: auto; height: var(--guardian-frame-height); min-height: 160px; }
