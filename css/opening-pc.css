@@ -450,28 +450,68 @@
   .opening-pc .exploration[data-mode="selected"] .exploration__orbit { grid-column: 1 / -1; grid-row: 3; order: 0; justify-self: center; margin: 0; }
   .opening-pc .exploration[data-mode="selected"] .exploration__active { left: 13%; top: calc(6% + 18px); width: 74%; height: 74%; }
   .opening-pc .exploration[data-mode="selected"] .exploration__selected-copy { display: grid; position: relative; grid-column: 1 / -1; grid-row: 1 / 6; grid-template-columns: subgrid; grid-template-rows: subgrid; width: auto; margin: 0; padding: 0; }
-  .opening-pc .exploration[data-mode="selected"] .exploration__name { position: relative; inset: auto; grid-column: 1 / -1; grid-row: 1; justify-self: start; width: max-content; height: max-content; margin-left: 8px; padding: 10px 14px; writing-mode: vertical-rl; text-orientation: upright; white-space: nowrap; font-size: 28px; }
+  .opening-pc .exploration[data-mode="selected"] .exploration__name { position: relative; inset: auto; grid-column: 1 / -1; grid-row: 1; justify-self: start; width: max-content; height: max-content; margin-left: 24px; padding: 22px 14px; writing-mode: vertical-rl; text-orientation: upright; white-space: nowrap; font-size: 28px; }
   .opening-pc .exploration[data-mode="selected"] .exploration__description { position: relative; inset: auto; grid-column: 1 / -1; grid-row: 5; justify-self: center; width: 100%; max-width: 450px; margin: 0; padding: 0 8px; white-space: normal; font-size: 15px; line-height: 1.8; text-align: center; }
   .opening-pc .exploration[data-mode="selected"] .exploration__stars { display: grid; position: relative; inset: auto; grid-column: 1 / -1; grid-row: 2 / 5; grid-template-columns: subgrid; grid-template-rows: subgrid; width: auto; margin: 0; }
   .opening-pc .exploration[data-mode="selected"] .exploration__star:nth-child(n) { position: relative; inset: auto; grid-column: span 3; grid-row: 1; justify-self: center; width: 100%; max-width: 96px; height: 112px; min-height: 44px; aspect-ratio: auto; padding: 0 0 40px; transform: none; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
   .opening-pc .exploration[data-mode="selected"] .exploration__star:nth-child(n+5) { grid-column: span 4; grid-row: 3; max-width: min(96px, calc((100vw - 56px) / 4)); }
+  .opening-pc .opening-pc__star-tint { flood-color: #68625b; }
   .opening-pc .exploration .exploration__star-art { width: 100%; height: 72px; opacity: 1; filter: url('#opening-pc-star-tint'); }
-  .opening-pc .exploration__stars:has(.is-active) .exploration__star-art { opacity: .45; }
-  .opening-pc .exploration__stars .exploration__star.is-active .exploration__star-art { opacity: 1; filter: url('#opening-pc-star-hover-tint') drop-shadow(0 0 2.5px rgba(0,0,0,.22)); }
+  .opening-pc .exploration__stars:has(.is-active) .exploration__star-art { opacity: .8; }
+  .opening-pc .exploration__stars .exploration__star.is-active .exploration__star-art { opacity: 1; filter: url('#opening-pc-star-hover-tint') brightness(.75) drop-shadow(0 0 2.5px rgba(0,0,0,.22)); }
   .opening-pc .exploration .exploration__star-label { top: auto; bottom: 0; width: 100%; max-width: none; opacity: 0; font-size: 13px; line-height: 1.4; overflow-wrap: anywhere; }
   .opening-pc .exploration .exploration__star.is-active .exploration__star-label { opacity: 1; }
 
   .opening-pc .o06__layout { display: flex; flex-direction: column; height: auto; min-height: 100%; padding: 148px 24px 64px; gap: 44px; }
   .opening-pc .o06__copy { position: static; width: 100%; }
   .opening-pc .o06__lead { font-size: 13px; }
+  .opening-pc .o06__lead-tail { display: block; }
   .opening-pc .o06__title { margin-bottom: 28px; font-size: 34px; }
   .opening-pc .o06__body { font-size: 16px; line-height: 1.8; }
   .opening-pc .o06__visual { position: relative; left: auto; top: auto; align-self: center; width: 88%; height: auto; margin: 24px 0 14px; flex-shrink: 0; }
 
-  .opening-pc .o07 { --orbit-radius: min(68vw, 340px); --card-width: clamp(40px, 10vw, 52px); }
-  .opening-pc .o07__card-window { top: 24dvh; bottom: auto; height: min(calc(24dvh + var(--orbit-radius) + var(--card-width) * 1.07143), 76dvh); }
-  .opening-pc .o07__orbit { top: calc(29dvh + var(--orbit-radius)); }
-  .opening-pc .o07__caption { top: 30dvh; left: 28px; right: 28px; font-size: 13px; }
+  /* Keep the original 28 cards: staggered slots wrap outside the viewport.
+     The shared is-playing state still pauses motion for help/exit/hidden tabs. */
+  .opening-pc .o07 { --card-width: clamp(120px, 30vw, 156px); --mobile-card-pitch: calc(var(--card-width) + 24px); }
+  .opening-pc .o07__card-window { top: 40dvh; bottom: auto; height: calc(var(--card-width) * 15 / 7 + 32px); }
+  .opening-pc .o07__orbit { top: 16px; left: 0; width: 100%; height: calc(var(--card-width) * 15 / 7); transform: none; }
+  .opening-pc .o07__rotor { animation: none; }
+  .opening-pc .o07__slot { top: 0; left: 0; width: var(--card-width); height: 100%; transform: none; animation: o07-mobile-stream 84s linear infinite paused; animation-delay: calc(var(--mobile-card-index) * 3s - 84s); }
+  .opening-pc .o07.is-playing .o07__slot { animation-play-state: running; }
+  .opening-pc .o07__card { top: 0; left: 0; transform: none; }
+  .opening-pc .o07__caption { top: 28dvh; left: 28px; right: 28px; font-size: 13px; }
+  .opening-pc .o07__slot:nth-child(1) { --mobile-card-index: 0; }
+  .opening-pc .o07__slot:nth-child(2) { --mobile-card-index: 1; }
+  .opening-pc .o07__slot:nth-child(3) { --mobile-card-index: 2; }
+  .opening-pc .o07__slot:nth-child(4) { --mobile-card-index: 3; }
+  .opening-pc .o07__slot:nth-child(5) { --mobile-card-index: 4; }
+  .opening-pc .o07__slot:nth-child(6) { --mobile-card-index: 5; }
+  .opening-pc .o07__slot:nth-child(7) { --mobile-card-index: 6; }
+  .opening-pc .o07__slot:nth-child(8) { --mobile-card-index: 7; }
+  .opening-pc .o07__slot:nth-child(9) { --mobile-card-index: 8; }
+  .opening-pc .o07__slot:nth-child(10) { --mobile-card-index: 9; }
+  .opening-pc .o07__slot:nth-child(11) { --mobile-card-index: 10; }
+  .opening-pc .o07__slot:nth-child(12) { --mobile-card-index: 11; }
+  .opening-pc .o07__slot:nth-child(13) { --mobile-card-index: 12; }
+  .opening-pc .o07__slot:nth-child(14) { --mobile-card-index: 13; }
+  .opening-pc .o07__slot:nth-child(15) { --mobile-card-index: 14; }
+  .opening-pc .o07__slot:nth-child(16) { --mobile-card-index: 15; }
+  .opening-pc .o07__slot:nth-child(17) { --mobile-card-index: 16; }
+  .opening-pc .o07__slot:nth-child(18) { --mobile-card-index: 17; }
+  .opening-pc .o07__slot:nth-child(19) { --mobile-card-index: 18; }
+  .opening-pc .o07__slot:nth-child(20) { --mobile-card-index: 19; }
+  .opening-pc .o07__slot:nth-child(21) { --mobile-card-index: 20; }
+  .opening-pc .o07__slot:nth-child(22) { --mobile-card-index: 21; }
+  .opening-pc .o07__slot:nth-child(23) { --mobile-card-index: 22; }
+  .opening-pc .o07__slot:nth-child(24) { --mobile-card-index: 23; }
+  .opening-pc .o07__slot:nth-child(25) { --mobile-card-index: 24; }
+  .opening-pc .o07__slot:nth-child(26) { --mobile-card-index: 25; }
+  .opening-pc .o07__slot:nth-child(27) { --mobile-card-index: 26; }
+  .opening-pc .o07__slot:nth-child(28) { --mobile-card-index: 27; }
+  @keyframes o07-mobile-stream {
+    from { transform: translateX(calc(-1 * var(--mobile-card-pitch))); }
+    to { transform: translateX(calc(27 * var(--mobile-card-pitch))); }
+  }
   .opening-pc .o07__doors .o01__door { height: 100dvh; }
   .opening-pc .o07__doors .o01__door--left.is-open { transform: translateX(calc(-50vw + 16px)); }
   .opening-pc .o07__doors .o01__door--right.is-open { transform: translateX(calc(50vw - 16px)); }
@@ -480,5 +520,5 @@
   .opening-pc .opening-pc__layout, .opening-pc .o06__layout, .opening-pc .exploration[data-mode="selected"] .exploration__selected-copy { width: min(100%, 720px); margin-left: auto; margin-right: auto; }
   .opening-pc .exploration[data-mode="selected"] .exploration__stars { width: min(calc(100% - 48px), 672px); margin-left: auto; margin-right: auto; }
   .opening-pc .opening-pc__progress { left: 50%; }
-  .opening-pc .o07 { --orbit-radius: min(44vw, 54dvh); --card-width: clamp(52px, 6vw, 76px); }
+  .opening-pc .o07 { --card-width: clamp(156px, 18vw, 228px); }
 }
