@@ -165,7 +165,7 @@
   #viewport #F-01 .f01__date-card-wrap { margin-top: 32px; }
   #viewport #F-01 .f01__date-card { transform: none; display: grid; grid-template-columns: minmax(0,1.4fr) repeat(2,minmax(0,1fr)); gap: 8px; padding: 28px 12px; }
   #viewport #F-01 .f01__date-field { min-width: 0; gap: 3px; font-size: 16px; }
-  #viewport #F-01 .f01__date-field:first-child { padding-left: 8px; }
+  #viewport #F-01 .f01__date-field:first-child { padding-left: 24px; }
   #viewport #F-01 .f01__date-field select { min-width: 0; font-size: 16px; }
   #viewport #F-01 > :is(.f01__breadcrumb,.f01__actions) { display: none; }
   #viewport #F-01 .f01__body { word-break: keep-all; overflow-wrap: normal; }
@@ -217,7 +217,7 @@
   #viewport #C-01 > .c01__image ~ .c01__image { margin-top: 40px; }
   @keyframes c01-mobile-panel-in { from { opacity: 0; } to { opacity: 1; } }
   @media (prefers-reduced-motion: reduce) { #viewport :is(#C-01,#C-02) .c01__stars { animation: none; } }
-  #viewport #IMG-02 { display: none; }
+  #viewport :is(#IMG-02,#IMG-03) { display: none; }
   #viewport #C-02 > .c-ref__ph.c02__left { min-height: 0; aspect-ratio: 1 / 1; }
   #viewport .c02__legend { flex-wrap: wrap; gap: 16px; font-size: 14px; white-space: normal; }
   #viewport .c02__legend span::before { width: 8px; height: 8px; margin-right: 6px; }
@@ -242,6 +242,56 @@
   #viewport .c04__constellation { min-height: 220px; aspect-ratio: 1.4; }
   #viewport .c04__progress { gap: 12px; font-size: 14px; }
   #viewport .c04__copy br { display: none; }
+
+  /* Pair selection: keep the existing controls and artwork in shared rows. */
+  #viewport #C-03.screen--c03 { display: grid; grid-template-columns: minmax(0, 1fr) 24px minmax(0, 1fr); grid-auto-rows: max-content; gap: 24px 12px; align-content: start; }
+  #viewport #C-03 > * { grid-column: 1 / -1; min-width: 0; }
+  #viewport #C-03 > .c-ref__label { grid-row: 1; }
+  #viewport #C-03 > .c-ref__title { grid-row: 2; }
+  #viewport #C-03 > .c03__question { grid-row: 3; }
+  #viewport #C-03 > .c-ref__body { grid-row: 4; }
+  #viewport #C-03 > .c-ref__ph { grid-column: 1; grid-row: 5; width: 100%; min-height: 0; aspect-ratio: 286 / 356; }
+  #viewport #C-03 > .c-ref__ph + .c-ref__ph { grid-column: 3; }
+  #viewport #C-03 .c03__cross { display: block; grid-column: 2; grid-row: 5; width: 24px; height: 24px; align-self: center; justify-self: center; transform: none; }
+  #viewport #C-03 .c03__picker.c-ref__at { grid-column: 1; grid-row: 6; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 4px; width: 100%; min-height: 44px; padding: 0; border: 0; outline: none; box-shadow: none; text-align: center; }
+  #viewport #C-03 #c03-picker-1 { grid-column: 3; }
+  #viewport #C-03 .c03__picker.is-active .c03__picker-label { text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 1px; }
+  #viewport #C-03 .c03__picker:focus-visible { outline: 1px solid currentColor; outline-offset: 4px; }
+  #viewport #C-03 .c03__picker .c-ref__hanja { width: 100%; font-size: 13px; white-space: normal; line-height: 1.6; }
+  #viewport #C-03 .c03__accordion { grid-row: 7; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px 8px; align-items: start; }
+  #viewport #C-03 .c03__acc-item { display: contents; }
+  #viewport #C-03 .c03__acc-head { grid-row: 1; display: flex; align-items: flex-start; justify-content: center; min-width: 44px; min-height: 128px; padding: 12px 0; text-align: center; }
+  #viewport #C-03 .c03__acc-head span { writing-mode: vertical-rl; text-orientation: upright; white-space: nowrap; }
+  #viewport #C-03 .c03__acc-body { grid-column: 1 / -1; grid-row: 2; display: none; width: 100%; padding: 0; gap: 4px; }
+  #viewport #C-03 .c03__acc-item.is-open .c03__acc-body { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); animation: c01-mobile-panel-in 300ms ease; }
+  #viewport #C-03 .c03__acc-body[hidden] { display: none; }
+  #viewport #C-03 .c03__acc-star { display: grid; place-items: center; writing-mode: vertical-rl; text-orientation: upright; width: 100%; min-width: 0; min-height: 72px; padding: 12px 0; }
+  #viewport #C-03 #c03-confirm-label { grid-row: 8; margin-top: 24px; text-align: center; }
+  #viewport #C-03 #c03-confirm-btn { grid-row: 9; }
+
+  /* Detail: both portraits flank the original connection and progress bar. */
+  #viewport #C-04.screen--c04 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(80px, .9fr) minmax(0, 1fr); grid-auto-rows: max-content; gap: 16px 8px; align-content: start; }
+  #viewport #C-04 > * { grid-column: 1 / -1; min-width: 0; }
+  #viewport #C-04 .c04__headline { grid-row: 1; }
+  #viewport #C-04 > .c-ref__ph { grid-column: 1; grid-row: 2 / 4; width: 100%; min-height: 0; aspect-ratio: 286 / 356; align-self: center; }
+  #viewport #C-04 > .c-ref__ph + .c-ref__ph { grid-column: 3; }
+  #viewport #C-04 .c04__constellation { grid-column: 2; grid-row: 2; width: 100%; height: auto; min-height: 0; aspect-ratio: 342 / 310; align-self: end; }
+  #viewport #C-04 .c04__progress { grid-column: 2; grid-row: 3; display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; font-size: 11px; align-self: start; }
+  #viewport #C-04 .c04__progress-track { flex: 0 0 3px; width: 100%; height: 3px; }
+  #viewport #C-04 .c04__progress-label { width: 100%; text-align: center; }
+  #viewport #C-04 .c04__progress-title { display: block; width: auto; text-align: center; }
+  #viewport #C-04 :is(#c04-name-0,#c04-name-1) { grid-row: 4; text-align: center; }
+  #viewport #C-04 :is(#c04-hanja-0,#c04-hanja-1) { grid-row: 5; margin-top: -12px; text-align: center; font-size: 13px; line-height: 1.6; }
+  #viewport #C-04 :is(#c04-name-0,#c04-hanja-0) { grid-column: 1; }
+  #viewport #C-04 :is(#c04-name-1,#c04-hanja-1) { grid-column: 3; }
+  #viewport #C-04 #c04-result-title { grid-row: 6; margin-top: 8px; }
+  #viewport #C-04 #c04-result-desc { grid-row: 7; }
+  #viewport #C-04 #c04-result-body { grid-row: 8; }
+  #viewport #C-04 #c04-note-title { grid-row: 9; margin-top: 32px; }
+  #viewport #C-04 #c04-result-note { grid-row: 10; }
+  #viewport #C-04 #c04-note-body { grid-row: 11; }
+
+  @media (prefers-reduced-motion: reduce) { #viewport #C-03 .c03__acc-body { animation: none !important; } }
 
   /* Pair each guardian's existing image with its copy without moving DOM. */
   #viewport #S-03 { display: grid; grid-template-columns: minmax(0,1fr); align-content: start; }

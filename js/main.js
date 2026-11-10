@@ -44,7 +44,7 @@
   // 화면별 폭 배율 (지정 없으면 1 = 기준 폭 1장)
   const widthMultipliers = screens.map((s) => parseFloat(s.dataset.widthMultiplier || '1'));
   // Retain DOM indices and desktop geometry; only these mobile connectors are empty.
-  const mobileSkippedScreenIndices = ['IMG-01', 'IMG-02']
+  const mobileSkippedScreenIndices = ['IMG-01', 'IMG-02', 'IMG-03']
     .map((id) => screens.findIndex((s) => s.dataset.screenId === id))
     .filter((index) => index > 0 && index < screens.length - 1);
 
