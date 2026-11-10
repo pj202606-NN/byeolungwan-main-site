@@ -217,7 +217,7 @@
   #viewport #C-01 > .c01__image ~ .c01__image { margin-top: 40px; }
   @keyframes c01-mobile-panel-in { from { opacity: 0; } to { opacity: 1; } }
   @media (prefers-reduced-motion: reduce) { #viewport :is(#C-01,#C-02) .c01__stars { animation: none; } }
-  #viewport :is(#IMG-02,#IMG-03,#IMG-04) { display: none; }
+  #viewport :is(#IMG-02,#IMG-03,#IMG-04,#IMG-05) { display: none; }
   #viewport #C-02 > .c-ref__ph.c02__left { min-height: 0; aspect-ratio: 1 / 1; }
   #viewport .c02__legend { flex-wrap: wrap; gap: 16px; font-size: 14px; white-space: normal; }
   #viewport .c02__legend span::before { width: 8px; height: 8px; margin-right: 6px; }
