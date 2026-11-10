@@ -217,7 +217,7 @@
   #viewport #C-01 > .c01__image ~ .c01__image { margin-top: 40px; }
   @keyframes c01-mobile-panel-in { from { opacity: 0; } to { opacity: 1; } }
   @media (prefers-reduced-motion: reduce) { #viewport :is(#C-01,#C-02) .c01__stars { animation: none; } }
-  #viewport :is(#IMG-02,#IMG-03) { display: none; }
+  #viewport :is(#IMG-02,#IMG-03,#IMG-04) { display: none; }
   #viewport #C-02 > .c-ref__ph.c02__left { min-height: 0; aspect-ratio: 1 / 1; }
   #viewport .c02__legend { flex-wrap: wrap; gap: 16px; font-size: 14px; white-space: normal; }
   #viewport .c02__legend span::before { width: 8px; height: 8px; margin-right: 6px; }
@@ -272,7 +272,7 @@
   /* Detail: both portraits flank the original connection and progress bar. */
   #viewport #C-04.screen--c04 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(80px, .9fr) minmax(0, 1fr); grid-auto-rows: max-content; gap: 16px 8px; align-content: start; }
   #viewport #C-04 > * { grid-column: 1 / -1; min-width: 0; }
-  #viewport #C-04 .c04__headline { grid-row: 1; }
+  #viewport #C-04 .c04__headline { grid-row: 1; margin-bottom: 24px; }
   #viewport #C-04 > .c-ref__ph { grid-column: 1; grid-row: 2 / 4; width: 100%; min-height: 0; aspect-ratio: 286 / 356; align-self: center; }
   #viewport #C-04 > .c-ref__ph + .c-ref__ph { grid-column: 3; }
   #viewport #C-04 .c04__constellation { grid-column: 2; grid-row: 2; width: 100%; height: auto; min-height: 0; aspect-ratio: 342 / 310; align-self: end; }
@@ -284,7 +284,7 @@
   #viewport #C-04 :is(#c04-hanja-0,#c04-hanja-1) { grid-row: 5; margin-top: -12px; text-align: center; font-size: 13px; line-height: 1.6; }
   #viewport #C-04 :is(#c04-name-0,#c04-hanja-0) { grid-column: 1; }
   #viewport #C-04 :is(#c04-name-1,#c04-hanja-1) { grid-column: 3; }
-  #viewport #C-04 #c04-result-title { grid-row: 6; margin-top: 8px; }
+  #viewport #C-04 #c04-result-title { grid-row: 6; margin-top: 40px; }
   #viewport #C-04 #c04-result-desc { grid-row: 7; }
   #viewport #C-04 #c04-result-body { grid-row: 8; }
   #viewport #C-04 #c04-note-title { grid-row: 9; margin-top: 32px; }
