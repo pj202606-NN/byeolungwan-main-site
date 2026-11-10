@@ -1507,6 +1507,7 @@ button.rail__zone--dot:focus-visible { outline: 2px solid currentColor; outline-
   line-height: 1.55;
 }
 .f00__intro, .s00__intro { color: var(--text-body-on-cream); }
+.s00__intro { white-space: normal; word-break: keep-all; overflow-wrap: normal; }
 .c00__intro { color: var(--white); }
 
 .e00__toc,
