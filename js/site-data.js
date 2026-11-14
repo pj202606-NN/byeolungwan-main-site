@@ -2,7 +2,16 @@ import {
   loadMansionReference,
   validateSolarBirthdate,
   resolveMansionBySolarBirthdate,
-} from './byeolungwan_28su_birthdate_resolver.js';
+} from './byeolungwan_28su_birthdate_resolver.js?v=20261115.6';
+
+// Share the entry module's release version across scripts and authored JSON.
+// Revisited pages must not mix a new HTML file with previously cached assets.
+const assetVersion = new URL(import.meta.url).searchParams.get('v') || '20261115.6';
+function assetURL(relative) {
+  const url = new URL(relative, import.meta.url);
+  url.searchParams.set('v', assetVersion);
+  return url;
+}
 
 // Keep asset filenames separate from the authored names and date ranges.
 const files = [
@@ -18,16 +27,16 @@ const groups = {
   남방주작: { guardian: 'jujak', groupName: '주작', direction: '남방' },
 };
 const [reference, fortune, compatibility, descriptionRows] = await Promise.all([
-  loadMansionReference(new URL('../data/byeolungwan_28su_birthdate_reference.json', import.meta.url)),
-  fetch(new URL('../data/byeolungwan_28su_today_WEB_20261119_25.json', import.meta.url)).then(response => {
+  loadMansionReference(assetURL('../data/byeolungwan_28su_birthdate_reference.json')),
+  fetch(assetURL('../data/byeolungwan_28su_today_WEB_20261119_25.json')).then(response => {
     if (!response.ok) throw new Error(`운세 데이터 로드 실패: HTTP ${response.status}`);
     return response.json();
   }),
-  fetch(new URL('../data/byeolungwan_28su_compatibility_v2.json', import.meta.url)).then(response => {
+  fetch(assetURL('../data/byeolungwan_28su_compatibility_v2.json')).then(response => {
     if (!response.ok) throw new Error(`궁합 데이터 로드 실패: HTTP ${response.status}`);
     return response.json();
   }),
-  fetch(new URL('../data/byeolungwan_28su_descriptions_v3.json', import.meta.url)).then(response => {
+  fetch(assetURL('../data/byeolungwan_28su_descriptions_v3.json')).then(response => {
     if (!response.ok) throw new Error(`별자리 소개 데이터 로드 실패: HTTP ${response.status}`);
     return response.json();
   }).catch(error => {
@@ -117,7 +126,7 @@ for (const file of ['main', 'date-select', 'e02', 'constellation-dictionary', 'c
   'fortune', 'map-viewer', 'opening-pc', 'opening', 'chart-cache']) {
   await new Promise((resolve, reject) => {
     const script = document.createElement('script');
-    script.src = new URL(`./${file}.js?v=20261119.1`, import.meta.url).href;
+    script.src = assetURL(`./${file}.js`).href;
     script.onload = resolve;
     script.onerror = () => reject(new Error(`스크립트 로드 실패: ${file}`));
     document.body.append(script);
