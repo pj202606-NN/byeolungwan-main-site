@@ -655,13 +655,15 @@
     if (e.key === 'Escape' && isNavOverlayOpen()) closeNavOverlay();
   });
 
-  // '처음으로'는 기존 오프닝 초기화·복귀 함수를 그대로 사용한다.
-  document.querySelectorAll('#nav-opening-return, #other-opening-return').forEach((navOpeningReturn) => {
-    navOpeningReturn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      closeNavOverlay();
-      if (window.o01Enter) window.o01Enter();
-    });
+  document.getElementById('nav-opening-return').addEventListener('click', (e) => {
+    e.stopPropagation();
+    closeNavOverlay();
+    goToScreenId('M-00');
+  });
+  document.getElementById('other-opening-return').addEventListener('click', (e) => {
+    e.stopPropagation();
+    closeNavOverlay();
+    if (window.o01Enter) window.o01Enter();
   });
 
   // ------------------------------------------------------------

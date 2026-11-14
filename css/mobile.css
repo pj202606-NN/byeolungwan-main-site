@@ -96,7 +96,9 @@
   .nav-overlay__sublist a { display: flex; align-items: center; min-height: 44px; padding: 6px 0; }
   .nav-overlay__col--spacer { display: none; }
   .nav-overlay__col--toc { display: block; margin-top: 0; }
-  .nav-overlay__toc-label { position: static; writing-mode: horizontal-tb; font-size: 18px; min-height: 44px; width: 100%; padding-left: 14px; white-space: nowrap; }
+  .nav-overlay__toc-label { position: static; writing-mode: horizontal-tb; font-size: 16px; min-height: 44px; width: 100%; padding-left: 14px; white-space: nowrap; align-items: baseline; gap: 12px; }
+  .nav-overlay__return-title, .nav-overlay__return-hint { writing-mode: horizontal-tb; }
+  .nav-overlay__return-hint { font-size: 12px; }
 
   /* Full size reading surfaces inside the shared horizontal track. */
   #viewport .screen:not(.screen--m00):not(.screen--s05):not(.screen--image) {

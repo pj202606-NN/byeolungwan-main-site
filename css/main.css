@@ -564,11 +564,14 @@ button.rail__zone--dot:focus-visible { outline: 2px solid currentColor; outline-
   position: absolute;
   left: 2.083vw;
   bottom: 8.789vh; /* 90 / 1024 */
-  writing-mode: vertical-rl;
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 10px;
+  writing-mode: horizontal-tb;
   text-orientation: upright;
   font-family: var(--font-emphasis);
   font-weight: 500; /* 본명조 Medium */
-  font-size: 3.2vw;
+  font-size: 2.7vw;
   letter-spacing: calc(0.05em + var(--font-emphasis-tracking-adjust));
   color: var(--white);
   padding: 0;
@@ -576,6 +579,8 @@ button.rail__zone--dot:focus-visible { outline: 2px solid currentColor; outline-
   cursor: pointer;
 }
 .nav-overlay__toc-label { transition: color 0.2s ease; }
+.nav-overlay__return-title, .nav-overlay__return-hint { writing-mode: vertical-rl; }
+.nav-overlay__return-hint { font-family: var(--font-emphasis); font-size: .95vw; font-weight: 400; line-height: 1.5; letter-spacing: calc(.02em + var(--font-emphasis-tracking-adjust)); opacity: .55; }
 .nav-overlay__col--toc:is(:hover, :focus-within) .nav-overlay__toc-label { color: var(--navy-brand); }
 .nav-overlay__toc-label:focus-visible { outline: 1px solid currentColor; outline-offset: 6px; }
 

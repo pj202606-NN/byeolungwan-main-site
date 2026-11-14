@@ -53,7 +53,7 @@
 .o01__bg {
   position: absolute;
   inset: 0;
-  background-image: url('../01_SITE_IMAGES/o-01-background-optimized.webp');
+  background-image: url('../01_SITE_IMAGES/o-01-background.webp?v=2');
   background-size: cover;
   background-position: center;
   z-index: 0;
@@ -64,7 +64,7 @@
    내부 두 그룹(#o01-trails-inner/outer)을 각각 다른 속도로
    회전시키기 위해 <img>가 아니라 인라인 SVG로 삽입한다.
 
-   2026-10-13: 참고 이미지(01_SITE_IMAGES/o-01-star-trails.png)를
+   2026-10-13: 참고 이미지(01_SITE_IMAGES/o-01-star-trails.webp)를
    자동 분석(엣지의 그래디언트 방향을 따라 직선을 긋고 가장 많이
    교차하는 지점을 찾는 방식)한 결과, 실제 회전 중심은 화면
    정중앙이 아니라 (895px, 297px)/(1920x1200 기준) — 가로 46.61%,
