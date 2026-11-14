@@ -1,4 +1,6 @@
 .c01__image { overflow: hidden; }
+.c01__birth-range { display: block; margin-top: 12px; color: #b2b2b2; font-size: .8em; line-height: 1.6; }
+#C-01 .c01__preview-copy { margin-top: 24px; }
 .c01__sky-group { position: absolute; inset: 0; opacity: 0; pointer-events: none; transition: opacity 1000ms ease; }
 .c01__sky-group.is-visible { opacity: 1; }
 .c01__sky-star { position: absolute; width: 17%; height: 40%; padding: 0; border: 0; background: none; transform: translate(-50%, -50%); opacity: .76; transition: opacity 350ms ease; pointer-events: auto; cursor: pointer; touch-action: manipulation; }
@@ -18,6 +20,7 @@
 #C-01 :is(.c01__preview-name, .c01__preview-hanja) { top: calc(var(--y) * 100vh / 1024 - var(--c01-info-lift) - .8vh); }
 #C-01 .c01__search-status { font-size: .68vw; color: rgb(6 81 130 / 48%); }
 @media (max-width: 767px), (max-width: 1023px) and (max-height: 500px) and (pointer: coarse) {
+  #viewport #C-01 .c01__preview-copy { margin-top: 24px; }
   #viewport #C-01 .c01__search-status { font-size: 12px; }
 }
 @media (prefers-reduced-motion: reduce) {

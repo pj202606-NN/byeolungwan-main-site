@@ -1,4 +1,6 @@
 /* E-02 shares one selection across the sky, labels and guardian portrait. */
+.e02__sample-hanja { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 16px; }
+.e02__birth-range { font-family: inherit; font-size: .8em; color: inherit; white-space: nowrap; }
 .e02__photo-img, .e02__twinkles { height: calc(var(--e02-canvas-w) * var(--e02-zoom) * 1024 / 1440); object-fit: cover; object-position: left center; }
 .e02__twinkles { pointer-events: none; }
 .e02__twinkles circle {

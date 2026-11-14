@@ -12,30 +12,15 @@
   const controls = [...nav.querySelectorAll('[data-e02-group]')];
   const autoplay = document.getElementById('e02-autoplay');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  // Keep the project's spellings (류수/루수) and supplied animal names.
-  // Other animal correspondences: https://seore.org/raw/문서:3원%2028수
   const groups = [
-    { id: 'cheongryong', name: '청룡', direction: '동방', image: 'e-02-cheongryong-optimized.webp', stars: [
-      ['CD-01-gak', '角', '각수', '이무기'], ['CD-02-hang', '亢', '항수', '용'],
-      ['CD-03-jeo', '氐', '저수', '너구리'], ['CD-04-bang', '房', '방수', '토끼'],
-      ['CD-05-sim', '心', '심수', '여우'], ['CD-06-mi', '尾', '미수', '호랑이'], ['CD-07-gi', '箕', '기수', '표범'],
-    ] },
-    { id: 'hyeonmu', name: '현무', direction: '북방', image: 'e-02-hyeonmu-optimized.webp', stars: [
-      ['HM-01-du', '斗', '두수', '해태'], ['HM-02-u', '牛', '우수', '소'],
-      ['HM-03-yeo', '女', '여수', '박쥐'], ['HM-04-heo', '虛', '허수', '쥐'],
-      ['HM-05-wi', '危', '위수', '제비'], ['HM-06-sil', '室', '실수', '돼지'], ['HM-07-byeok', '壁', '벽수', '알유'],
-    ] },
-    { id: 'baekho', name: '백호', direction: '서방', image: 'e-02-baekho-optimized.webp', stars: [
-      ['BH-01-gyu', '奎', '규수', '이리'], ['BH-02-ru', '婁', '루수', '개'],
-      ['BH-03-wi', '胃', '위수', '꿩'], ['BH-04-myo', '昴', '묘수', '닭'],
-      ['BH-05-pil', '畢', '필수', '까마귀'], ['BH-06-ja', '觜', '자수', '원숭이'], ['BH-07-sam', '參', '삼수', '유인원'],
-    ] },
-    { id: 'jujak', name: '주작', direction: '남방', image: 'e-02-jujak-optimized.webp', stars: [
-      ['JJ-01-jeong', '井', '정수', '들개'], ['JJ-02-gwi', '鬼', '귀수', '양'],
-      ['JJ-03-ryu', '柳', '류수', '노루'], ['JJ-04-seong', '星', '성수', '말'],
-      ['JJ-05-jang', '張', '장수', '사슴'], ['JJ-06-ik', '翼', '익수', '뱀'], ['JJ-07-jin', '軫', '진수', '지렁이'],
-    ] },
+    { id: 'cheongryong', name: '청룡', direction: '동방', image: 'e-02-cheongryong-optimized.webp' },
+    { id: 'hyeonmu', name: '현무', direction: '북방', image: 'e-02-hyeonmu-optimized.webp' },
+    { id: 'baekho', name: '백호', direction: '서방', image: 'e-02-baekho-optimized.webp' },
+    { id: 'jujak', name: '주작', direction: '남방', image: 'e-02-jujak-optimized.webp' },
   ];
+  groups.forEach(group => {
+    group.stars = window.ByeolData.catalog.filter(star => star.guardian === group.id);
+  });
   // Use the dedicated wide E-02 portraits, separate from the opening artwork.
   groups.forEach(group => {
     const body = document.querySelector(`.story__guardian[data-guardian="${group.name}"] .story__guardian-body`);
@@ -43,14 +28,9 @@
     group.description.querySelectorAll('br').forEach(br => br.replaceWith(' '));
     group.description = group.description.textContent.trim();
   });
-  const stars = groups.flatMap(group => group.stars.map(values => ({
-    file: values[0], hanja: values[1], name: values[2], animal: values[3], group,
-  })));
+  const stars = groups.flatMap(group => group.stars.map(star => ({ ...star, group })));
   const images = new Map();
-  window.ByeolConstellations = Object.freeze(stars.map(star => Object.freeze({
-    file: star.file, name: star.name, hanja: star.hanja, animal: star.animal,
-    guardian: star.group.id, groupName: star.group.name, direction: star.group.direction,
-  })));
+  window.ByeolConstellations = window.ByeolData.catalog;
   let index = 2, visible = false, paused = reduced.matches, hovered = false;
   let timer = 0, transitionTimer = 0, generation = 0, changing = false;
   const INTERVAL = 5500;
@@ -88,7 +68,12 @@
     art.src = `01_SITE_IMAGES/28su/${star.file}.svg`;
     art.alt = `${star.name} 별자리`;
     name.textContent = star.name;
-    hanja.textContent = `${star.hanja}宿 · ${star.animal}자리`;
+    const identity = document.createElement('span');
+    identity.textContent = `${star.hanja}宿 · ${star.constellationName}`;
+    const range = document.createElement('span');
+    range.className = 'e02__birth-range';
+    range.textContent = star.dateRange;
+    hanja.replaceChildren(identity, range);
     portrait.src = `01_SITE_IMAGES/${group.image}`;
     portrait.alt = `${group.direction} ${group.name}`;
     title.textContent = `${group.direction} ${group.name} - 7수`;

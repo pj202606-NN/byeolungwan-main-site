@@ -1,55 +1,84 @@
 (() => {
   'use strict';
   const section = document.getElementById('F-02');
-  const catalog = window.ByeolConstellations;
-  const stars = window.ByeolStars;
-  if (!section || !catalog || !stars) return;
-  // Reuse the explicitly approved exhibition-site/pages/fortune.html demo.
-  // Replace this adapter when the project's final assignment data arrives.
-  const lines = [
-    '오늘은 서두르지 않아도 좋을 하루입니다.',
-    '작은 인연 하나가 마음에 오래 남을 것입니다.',
-    '미뤄둔 말을 꺼내기에 나쁘지 않은 때입니다.',
-    '생각보다 몸이 먼저 움직이는 하루가 될 수 있습니다.',
-    '혼자만의 시간이 오늘의 답을 줄지도 모릅니다.',
-    '뜻밖의 곳에서 좋은 소식이 들려올 수 있습니다.',
-    '평소보다 조금 더 마음을 열어보세요.',
-    '오늘 내린 결정은 두고두고 도움이 될 것입니다.',
-  ];
+  const data = window.ByeolData;
+  if (!section || !data) return;
+  const daily = new Map(data.fortune.today
+    .filter(row => row['카테고리'] === '종합')
+    .map(row => [`${row['날짜']}:${row['번호']}`, row]));
+  let renderedBirthdate = null, renderedDate = null;
+
   function calculate({ year, month, day }) {
     year = Number(year); month = Number(month); day = Number(day);
-    if (![year, month, day].every(Number.isInteger)) return null;
-    const timestamp = Date.UTC(year, month - 1, day), date = new Date(timestamp);
-    if (year < 1930 || date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) return null;
-    const dayOfYear = Math.round((timestamp - Date.UTC(year, 0, 0)) / 86400000);
-    const index = dayOfYear % catalog.length;
-    const seed = index + year + month * 31 + day;
-    return { year, month, day, index, star: catalog[index], description: stars[index].desc,
-      today: lines[seed % lines.length], advice: `${lines[(seed + 3) % lines.length]} ${lines[(seed + 5) % lines.length]}` };
+    if (!data.validateSolarBirthdate(year, month, day)) return null;
+    const star = data.resolveBirthdate(year, month, day);
+    const date = data.fortuneDate;
+    const fortune = daily.get(`${date}:${star.id}`);
+    if (!fortune) return null;
+    return { year, month, day, index: data.catalog.indexOf(star), star,
+      description: star.resultDescription, date,
+      today: fortune['간략'], detail: fortune['상세'], advice: fortune['상세'] };
   }
-  function render(birthdate) {
+
+  function render(birthdate, { personal = true } = {}) {
     const result = calculate(birthdate);
     if (!result) return false;
+    renderedBirthdate = { year: result.year, month: result.month, day: result.day };
+    renderedDate = result.date;
     const { star } = result;
     section.dataset.starId = star.file;
+    section.dataset.mansionId = String(star.id);
     section.dataset.guardian = star.guardian;
     section.dataset.birthdate = `${result.year}-${String(result.month).padStart(2, '0')}-${String(result.day).padStart(2, '0')}`;
     section.querySelector('.f02__title').textContent = star.name;
-    section.querySelector('.f02__subtitle').textContent = `${star.hanja}宿 · ${star.animal}자리`;
-    section.querySelector('.f02__desc').textContent = `${star.name}의 상징 동물은 ${star.animal}입니다. ${star.direction} ${star.groupName}에 속한 일곱 별자리 중 하나로, ${result.description}`;
+    const identity = document.createElement('span');
+    identity.textContent = `${star.hanja}宿 · ${star.constellationName}`;
+    const range = document.createElement('span');
+    range.className = 'f02__birth-range';
+    range.textContent = star.dateRange;
+    section.querySelector('.f02__subtitle').replaceChildren(identity, range);
+    const description = section.querySelector('.f02__desc');
+    description.textContent = result.description ?? '별자리 소개 데이터를 불러오지 못했습니다.';
+    description.toggleAttribute('data-description-error', result.description === null);
     const art = section.querySelector('.f02__star'), card = section.querySelector('.f02__card');
     art.src = `01_SITE_IMAGES/28su/${star.file}.svg`;
-    art.alt = `${star.name} 별자리`;
+    art.alt = `${star.name} · ${star.constellationName} 별자리`;
     card.src = `01_SITE_IMAGES/28su/${star.file}-card.webp`;
-    card.alt = `${star.name} 별자리 카드`;
+    card.alt = `${star.name} · ${star.constellationName} 카드`;
     section.querySelector('.f02__fortune-p1').textContent = result.today;
-    section.querySelector('.f02__fortune-p2').textContent = result.advice;
+    section.querySelector('.f02__fortune-p2').textContent = result.detail;
+    const date = section.querySelector('.f02__fortune-date');
+    date.dateTime = result.date;
+    date.textContent = result.date.replaceAll('-', '.');
+    if (personal) data.selectPersonalStar(star.id);
     return true;
   }
-  window.ByeolFortune = Object.freeze({ calculate });
+  window.ByeolFortune = Object.freeze({ calculate, render });
   window.addEventListener('byeol:birthdate', event => render(event.detail));
+  let restored = false;
   try {
     const stored = JSON.parse(sessionStorage.getItem('byeolungwan-f01-birthdate'));
-    if (stored) render(stored);
+    if (stored) restored = render(stored);
   } catch {}
+  if (!restored) {
+    render({ year: 2002, month: 4, day: 30 }, { personal: false });
+    delete section.dataset.birthdate;
+  }
+  // Refresh an already open result at Korean midnight, or when returning to a suspended tab.
+  function refreshFortune() {
+    if (!renderedBirthdate || renderedDate === data.fortuneDate) return;
+    const hadBirthdate = section.hasAttribute('data-birthdate');
+    render(renderedBirthdate, { personal: false });
+    if (!hadBirthdate) delete section.dataset.birthdate;
+  }
+  function scheduleMidnightRefresh() {
+    const dayMs = 86400000, koreaOffsetMs = 9 * 3600000;
+    setTimeout(() => {
+      refreshFortune();
+      scheduleMidnightRefresh();
+    }, dayMs - ((Date.now() + koreaOffsetMs) % dayMs) + 50);
+  }
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshFortune(); });
+  window.addEventListener('pageshow', refreshFortune);
+  scheduleMidnightRefresh();
 })();

@@ -163,15 +163,16 @@
   #viewport #F-01 > .f01__headline { order: -2; }
   #viewport #F-01 > .f01__image-ph { order: -1; min-height: 0; aspect-ratio: 3 / 2; }
   #viewport #F-01 .f01__date-card-wrap { margin-top: 32px; }
-  #viewport #F-01 .f01__date-card { transform: none; display: grid; grid-template-columns: minmax(0,1.4fr) repeat(2,minmax(0,1fr)); gap: 8px; padding: 28px 12px; }
+  #viewport #F-01 .f01__date-card { transform: none; display: grid; grid-template-columns: minmax(0,1.4fr) repeat(2,minmax(0,1fr)); gap: 8px; padding: 44px 12px 28px; }
+  #viewport #F-01 .f01__hint { top: 14px; left: 24px; font-size: 11px; }
   #viewport #F-01 .f01__date-field { min-width: 0; gap: 3px; font-size: 16px; }
-  #viewport #F-01 .f01__date-field:first-child { padding-left: 24px; }
+  #viewport #F-01 .f01__date-field:first-of-type { padding-left: 24px; }
   #viewport #F-01 .f01__date-field select { min-width: 0; font-size: 16px; }
   #viewport #F-01 > :is(.f01__breadcrumb,.f01__actions) { display: none; }
   #viewport #F-01 .f01__body { word-break: keep-all; overflow-wrap: normal; }
   #viewport #F-01 .f01__body p:not(:last-child) { margin-bottom: 16px; }
   #viewport #F-01 .f01__body p:last-child br { display: initial; }
-  #viewport #F-01 > .f01__mobile-actions { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px; align-items: center; margin-top: -12px; }
+  #viewport #F-01 > .f01__mobile-actions { display: flex; justify-content: flex-end; align-items: center; margin-top: -12px; }
   #viewport #F-01 .f01__mobile-hint { font-size: 12px; line-height: 1.6; color: var(--text-muted-on-navy); margin: 0; }
   #viewport #F-01 .f01__mobile-submit { display: inline-flex; align-items: center; justify-content: flex-end; gap: 4px; min-height: 44px; padding: 0; border: 0; background: none; color: var(--white); font-family: var(--font-emphasis); font-size: 16px; font-weight: 400; line-height: 1.5; white-space: nowrap; cursor: pointer; }
   #viewport #F-01 .f01__mobile-submit:focus-visible { outline: 1px solid currentColor; outline-offset: 4px; }

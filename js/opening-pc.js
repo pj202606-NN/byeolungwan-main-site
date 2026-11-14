@@ -22,15 +22,34 @@
   const starsGroup = exploration.querySelector('.exploration__stars');
   const activeGuardian = exploration.querySelector('.exploration__active');
   const finalScene = document.getElementById('o07-scene');
+  const finalDetail = finalScene.querySelector('.o07-detail');
+  let selectedCardButton = null;
   const finalDoors = root.querySelector('.o07__doors');
   const stageIds = ['O-02', 'O-03', 'O-04', 'O-05', 'O-06', 'O-07'];
+  const guardianHelp = {
+    helpTitle: '하늘을 지키는 사신수와 28수',
+    help: '네 방향의 하늘을 상징하는 사신수와, 그에 속한 별자리를 소개합니다.\n각 사신수에 일곱씩 모인 별자리가 모두 합쳐 28수를 이룹니다.',
+  };
   const scenes = {
-    'O-02': { element: document.getElementById('o02-scene'), help: '' },
-    'O-03': { element: exploration, help: '' },
-    'O-04': { element: exploration, help: '' },
-    'O-05': { element: exploration, help: '' },
-    'O-06': { element: document.getElementById('o06-scene'), help: '' },
-    'O-07': { element: finalScene, help: '' },
+    'O-02': {
+      element: document.getElementById('o02-scene'),
+      helpTitle: '3원 28수와\n천상열차분야지도 각석',
+      help: '옛사람들이 하늘을 나누고 기록한 방법을 소개합니다.\n별을 새긴 이 돌은 종이에 먹을 묻혀 찍어내는 방식으로도 전해졌습니다.',
+      helpNote: '천상열차분야지도 각석은 서울 국립고궁박물관 ‘과학문화’ 전시실에서 볼 수 있습니다.',
+    },
+    'O-03': { element: exploration, ...guardianHelp },
+    'O-04': { element: exploration, ...guardianHelp },
+    'O-05': { element: exploration, ...guardianHelp },
+    'O-06': {
+      element: document.getElementById('o06-scene'),
+      helpTitle: '3원 28수를 오늘의 운세로, 별운관',
+      help: "전통 별자리를 오늘의 별자리 운세로 다시 풀어낸 프로젝트 '별운관'을 소개합니다.\n옛 하늘의 이야기를 나의 별자리와 하루의 운세로 만나볼 수 있도록 만들었습니다.",
+    },
+    'O-07': {
+      element: finalScene,
+      helpTitle: '스물여덟 별자리와의 첫 만남',
+      help: '28개의 별자리를 각자의 상징 동물이 담긴 카드로 만나봅니다.\n마음이 가는 카드를 누르면 별자리의 이름과 생일 구간을 자세히 살펴볼 수 있습니다.',
+    },
   };
   const state = { scene: null, transitioning: false, progress: 'O-02', explorationMode: null, hoveredGuardian: null, selectedGuardian: null };
   // Screen positions follow O-03.png, rather than modern map orientation.
@@ -74,9 +93,16 @@
     },
   };
   let assetsReady;
+  Object.values(guardians).forEach(group => group.stars.forEach(star => {
+    const canonical = window.ByeolData.catalog.find(item => item.openingId === star.id);
+    Object.assign(star, { name: canonical.name, animal: canonical.constellationName,
+      hanja: canonical.hanja, sashin: canonical.sashin, dateRange: canonical.dateRange });
+  }));
   const finalCards = Object.entries(guardians).flatMap(([guardian, data]) => data.stars.map(star => ({
-    id: star.id, name: star.name, guardian, svg: `01_SITE_IMAGES/28su/${star.file}`, image: `01_SITE_IMAGES/28su/${star.file.replace('.svg', '-card.webp')}`,
-  }))).map((card, index) => ({ ...card, angle: index * 360 / 28 }));
+    id: star.id, name: star.name, animal: star.animal, sashin: star.sashin, hanja: star.hanja + '宿', dateRange: star.dateRange,
+    guardian, svg: `01_SITE_IMAGES/28su/${star.file}`, image: `01_SITE_IMAGES/28su/${star.file.replace('.svg', '-card.webp')}`,
+  }))).map((card, index) => ({ ...card, angle: index * 360 / 28,
+  }));
   let finalPrepared = false;
   let exitController;
   let handingOff = false;
@@ -175,11 +201,32 @@
     }
   }
 
+  function renderHelp(id) {
+    const scene = scenes[id];
+    helpContent.replaceChildren();
+    if (scene.helpTitle) {
+      const title = document.createElement('h3');
+      title.className = 'opening-pc__help-title';
+      title.textContent = scene.helpTitle;
+      helpContent.append(title);
+    }
+    const body = document.createElement('p');
+    body.className = 'opening-pc__help-body';
+    body.textContent = scene.help;
+    helpContent.append(body);
+    if (scene.helpNote) {
+      const note = document.createElement('small');
+      note.className = 'opening-pc__help-note';
+      note.textContent = scene.helpNote;
+      helpContent.append(note);
+    }
+  }
+
   function setExplorationStage(id) {
     setHelp(false);
     state.scene = id;
     opening.dataset.stage = id;
-    helpContent.textContent = scenes[id].help;
+    renderHelp(id);
     setProgress(id);
   }
 
@@ -321,7 +368,7 @@
     state.scene = 'O-02';
     opening.dataset.stage = 'O-02';
     root.dataset.theme = 'night';
-    helpContent.textContent = scenes['O-02'].help;
+    renderHelp('O-02');
     setProgress('O-02');
     startActivity();
     afterFade(() => {
@@ -427,8 +474,12 @@
       const slot = document.createElement('div');
       slot.className = 'o07__slot';
       slot.style.setProperty('--card-angle', `${card.angle}deg`);
-      const surface = document.createElement('div');
+      const surface = document.createElement('button');
+      surface.type = 'button';
       surface.className = 'o07__card';
+      surface.setAttribute('aria-label', `${card.name} 카드 자세히 보기`);
+      surface.setAttribute('aria-haspopup', 'dialog');
+      surface.addEventListener('click', () => openFinalCard(card, surface));
       Object.assign(surface.dataset, { cardId: card.id, constellation: card.name, guardian: card.guardian, svg: card.svg });
       const art = new Image();
       art.className = 'o07__card-image';
@@ -442,10 +493,54 @@
   }
 
   function syncFinalRotation() {
-    finalScene.classList.toggle('is-playing', state.scene === 'O-07' && !finalScene.classList.contains('is-closing') && !document.hidden && !reduced.matches);
+    finalScene.classList.toggle('is-playing', state.scene === 'O-07' && !finalDetail.open && help.hidden && !finalScene.classList.contains('is-closing') && !document.hidden && !reduced.matches);
   }
 
+  function openFinalCard(card, button) {
+    if (state.scene !== 'O-07' || state.transitioning || finalDetail.open || !help.hidden) return;
+    selectedCardButton = button;
+    const origin = button.getBoundingClientRect();
+    finalScene.classList.remove('is-playing');
+    chart?.classList.remove('is-playing');
+    const art = finalDetail.querySelector('.o07-detail__image');
+    art.getAnimations().forEach(animation => animation.cancel());
+    art.src = card.image || card.svg;
+    art.alt = `${card.name} 별자리 카드`;
+    finalDetail.querySelector('.o07-detail__guardian').textContent = `${card.sashin} · 28수`;
+    finalDetail.querySelector('.o07-detail__name').textContent = card.name;
+    finalDetail.querySelector('.o07-detail__hanja').textContent = card.hanja;
+    finalDetail.querySelector('.o07-detail__animal').textContent = card.animal;
+    finalDetail.querySelector('.o07-detail__date').textContent = card.dateRange;
+    finalDetail.showModal();
+    finalDetail.querySelector('.o07-detail__close').focus({ preventScroll: true });
+    if (!reduced.matches) {
+      const target = art.getBoundingClientRect();
+      const dx = origin.x + origin.width / 2 - target.x - target.width / 2;
+      const dy = origin.y + origin.height / 2 - target.y - target.height / 2;
+      art.animate([
+        { transform: `translate(${dx}px, ${dy}px) scale(${Math.min(origin.width / target.width, 1)})`, opacity: .6 },
+        { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+      ], { duration: 650, easing: 'cubic-bezier(.22,.61,.26,1)' });
+    }
+  }
+
+  function closeFinalCard(restoreFocus = true) {
+    if (!finalDetail.open) return;
+    finalDetail.close();
+    finalDetail.querySelector('.o07-detail__image').getAnimations().forEach(animation => animation.cancel());
+    if (restoreFocus) selectedCardButton?.focus({ preventScroll: true });
+    selectedCardButton = null;
+    wheelAccum = 0;
+    lastWheel = performance.now();
+    syncFinalRotation();
+    syncChart();
+  }
+  finalDetail.querySelector('.o07-detail__close').addEventListener('click', () => closeFinalCard());
+  finalDetail.addEventListener('cancel', event => { event.preventDefault(); closeFinalCard(); });
+  finalDetail.addEventListener('click', event => { if (event.target === finalDetail) closeFinalCard(); });
+
   function resetFinalScene() {
+    closeFinalCard(false);
     finalScene.classList.remove('is-playing', 'is-closing', 'is-visible');
     finalDoors.hidden = true;
     finalDoors.classList.remove('is-visible');
@@ -459,6 +554,7 @@
   }
 
   function switchFinalScene(id) {
+    if (finalDetail.open) return false;
     if (state.transitioning || !((state.scene === 'O-06' && id === 'O-07') || (state.scene === 'O-07' && id === 'O-06'))) return false;
     if (id === 'O-07') prepareFinalScene();
     ++sceneGeneration;
@@ -530,6 +626,7 @@
   }
 
   function finishOpening() {
+    if (finalDetail.open) return false;
     if (state.scene !== 'O-07' || state.transitioning || !bridge?.finish) return false;
     const generation = ++sceneGeneration;
     state.transitioning = true;
@@ -567,7 +664,7 @@
   }
 
   function syncChart() {
-    chart?.classList.toggle('is-playing', (isNightScene() || state.scene === 'O-07') && !document.hidden && !reduced.matches);
+    chart?.classList.toggle('is-playing', (isNightScene() || state.scene === 'O-07') && !finalDetail.open && !document.hidden && !reduced.matches);
   }
 
   function ensureChart() {
@@ -810,7 +907,7 @@
     const interactive = 'button,a,input,textarea,select,label,.o02__tilt-surface,.o06__visual';
     root.addEventListener('touchstart', e => {
       gesture = null;
-      if (!mobile.matches || state.transitioning || !help.hidden || e.touches.length !== 1 || performance.now() - lastWheel < 300) return;
+      if (!mobile.matches || state.transitioning || finalDetail.open || !help.hidden || e.touches.length !== 1 || performance.now() - lastWheel < 300) return;
       if (e.target instanceof Element && e.target.closest(interactive)) return;
       const scroller = scenes[state.scene]?.element;
       if (!scroller) return;
@@ -879,7 +976,7 @@
     root.hidden = false;
     root.inert = false;
     root.setAttribute('aria-hidden', 'false');
-    helpContent.textContent = scenes[state.scene].help;
+    renderHelp(state.scene);
     resetLantern();
     progress.querySelectorAll('.is-complete').forEach(el => el.classList.remove('is-complete'));
     // Commit the transparent starting frame once, not in the pointer loop.
@@ -941,6 +1038,7 @@
 
   // Called by opening.js's existing capture listener. No competing wheel owner.
   function handleWheel(e) {
+    if (finalDetail.open) return true;
     const now = performance.now();
     const quiet = now - lastWheel > 350;
     lastWheel = now;
@@ -966,13 +1064,18 @@
 
   function handleKey(e) {
     if (!state.scene) return;
+    if (finalDetail.open) {
+      if (e.key === 'Escape') { e.preventDefault(); closeFinalCard(); }
+      else if (['PageUp', 'PageDown', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) e.preventDefault();
+      return;
+    }
     if (e.repeat && ['PageUp', 'PageDown', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) { e.preventDefault(); return; }
     if (state.transitioning) {
       if (['Tab', 'Enter', ' ', 'PageUp', 'PageDown', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) e.preventDefault();
       return;
     }
     if (e.key === 'Tab') {
-      const sceneControls = isNightScene() || state.scene === 'O-07' ? [] : state.scene === 'O-05' ? starButtons : [...guardianButtons.values()];
+      const sceneControls = state.scene === 'O-07' ? [...finalScene.querySelectorAll('.o07__card')].filter(card => { const rect = card.getBoundingClientRect(); return rect.right > 0 && rect.left < innerWidth && rect.bottom > innerHeight * .24 && rect.top < innerHeight; }) : state.scene === 'O-02' ? [...document.querySelectorAll('.o02__sources a')] : isNightScene() ? [] : state.scene === 'O-05' ? starButtons : [...guardianButtons.values()];
       const controls = help.hidden ? [lantern, ...sceneControls] : [close];
       const index = controls.indexOf(document.activeElement);
       e.preventDefault();
@@ -1000,10 +1103,20 @@
   window.openingPC = Object.freeze({
     enter, handleWheel, handleKey, setProgress,
     connect(callbacks) { bridge = callbacks; },
-    setHelpContent(id, text) {
-      if (!scenes[id] || typeof text !== 'string') return false;
-      scenes[id].help = text;
-      if (state.scene === id) helpContent.textContent = text;
+    // All scenes share title/body/note typography. Plain strings still update only the body.
+    // Example: openingPC.setHelpContent('O-03', { title: '제목', body: '설명', note: '보조 안내' });
+    setHelpContent(id, content) {
+      if (!scenes[id]) return false;
+      if (typeof content === 'string') scenes[id].help = content;
+      else {
+        if (!content || typeof content.body !== 'string' ||
+            (content.title !== undefined && typeof content.title !== 'string') ||
+            (content.note !== undefined && typeof content.note !== 'string')) return false;
+        scenes[id].helpTitle = content.title || '';
+        scenes[id].help = content.body;
+        scenes[id].helpNote = content.note || '';
+      }
+      if (state.scene === id) renderHelp(id);
       return true;
     },
     // O-04/O-05 require a real guardian interaction, never a blind page jump.

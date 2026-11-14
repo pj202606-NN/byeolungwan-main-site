@@ -44,7 +44,7 @@
 <link rel="stylesheet" href="css/mobile.css?v=20261110.4" media="(max-width: 767px), (max-width: 1023px) and (max-height: 500px) and (pointer: coarse)">
 <link rel="stylesheet" href="css/e02.css?v=20261110.2">
 <link rel="stylesheet" href="css/date-select.css?v=20261109.1">
-<link rel="stylesheet" href="css/fortune.css?v=20261110.1">
+<link rel="stylesheet" href="css/fortune.css?v=20261119.1">
 <link rel="stylesheet" href="css/constellation-dictionary.css?v=20261109.1">
 <link rel="stylesheet" href="css/direction-accordion.css?v=20261109.1">
 <link rel="stylesheet" href="css/compatibility-images.css?v=20261109.1">
@@ -3329,7 +3329,7 @@
          ON/OFF 토글 UI와 장식용 모션만 구현한다. bar 개수/구조는
          추후 실제 오디오 분석 데이터로 높이를 갱신할 때 그대로 재사용
          가능하도록 맞췄다(js/opening.js의 soundBars 참고). -->
-    <div class="o01__soundui" id="o01-soundui">
+    <div class="o01__soundui" id="o01-soundui" hidden>
       <button type="button" class="o01__soundui-btn" id="o01-soundui-btn" data-sound-on="true" aria-haspopup="true" aria-expanded="false" aria-label="배경음 설정 열기">
         <span class="o01__soundui-bar"></span>
         <span class="o01__soundui-bar"></span>
@@ -3543,7 +3543,15 @@
           </div>
           <figcaption class="o02__caption">천상열차분야지도<br>각석</figcaption>
         </figure>
-        <p class="o02__copy">3원 28수에 대한 설명, 정의, 사용처, 처음 발견한 사람, 어느 나라에 영향을 받았고 어느 시기에 우리나라에서 가장 활발히 연구되었는지, 어느 때에 '실제로' 쓰이기 시작했는지 등의 내용</p>
+        <div class="o02__copy">
+          <p>왼쪽의 돌에 새겨진 것은 1395년, 조선에서 만든 하늘을 읽기 위한 지도입니다. ‘천상열차분야지도 각석’이라는 이름의 이 돌에는 1,467개의 별과 별자리가 담겨 있습니다.</p>
+          <p>이 지도 속의 하늘을 읽는 틀이 바로 ‘3원 28수’입니다. 하늘을 세 개의 큰 영역과 28개의 구역으로 나누어, 해와 달, 별이 어디에 있는지 살폈습니다. 오늘날 지도에서 위치를 찾듯 하늘에도 기준을 둔 셈입니다.</p>
+          <p>고구려에서 전해진 옛 천문도를 바탕으로 새긴 이 돌은, 오랫동안 하늘을 관찰해 온 기록을 이어줍니다. 옛사람들은 하늘의 움직임으로 계절을 헤아리고 달력을 만들었으며, 나라의 앞날을 점치기도 했습니다.</p>
+          <!-- 한국민족문화대백과 「종대부」·「이십팔수」·「천문유초」,
+               우리역사넷 「천상열차분야지도」·「칠정산」,
+               한국천문연구원 양홍진 「한국의 별그림 역사와 별자리 그림」(2005)을 참고. -->
+          <p class="o02__sources" aria-label="본문 참고 자료">출처 · <a href="https://encykorea.aks.ac.kr/Article/E0045037" target="_blank" rel="noopener noreferrer">한국민족문화대백과사전</a></p>
+        </div>
       </div>
     </section>
     <section class="opening-pc__scene exploration" id="opening-exploration" data-mode="overview" aria-label="사신수와 28수 탐색" tabindex="-1" hidden inert>
@@ -3596,12 +3604,25 @@
     <section class="opening-pc__scene o07" id="o07-scene" data-opening-scene="O-07" aria-label="스물여덟 별자리와 만나는 마지막 오프닝" tabindex="-1" hidden inert>
       <div class="o01__bg" aria-hidden="true"></div>
       <div class="o07__sky" aria-hidden="true"></div>
-      <div class="o07__card-window" aria-hidden="true">
+      <div class="o07__card-window" aria-label="28수 별자리 카드">
         <div class="o07__orbit"><div class="o07__rotor"></div></div>
       </div>
       <p class="o07__caption">당신의 별자리는 어떤 길을 비추고 있을까요?</p>
       <!-- O-01's eave and railing are copied once, behind the separate door layer. -->
       <div class="o07__architecture" aria-hidden="true"></div>
+      <dialog class="o07-detail" aria-labelledby="o07-detail-name">
+        <div class="o07-detail__panel">
+          <button type="button" class="o07-detail__close" aria-label="카드 상세 닫기">×</button>
+          <img class="o07-detail__image" alt="" draggable="false">
+          <div class="o07-detail__copy">
+            <p class="o07-detail__guardian"></p>
+            <h2 class="o07-detail__name" id="o07-detail-name"></h2>
+            <p class="o07-detail__hanja"></p>
+            <p class="o07-detail__animal"></p>
+            <p class="o07-detail__date"></p>
+          </div>
+        </div>
+      </dialog>
     </section>
     <!-- Doors cover the lantern and railing, while the modal stays above them. -->
     <div class="o07__doors" aria-hidden="true" hidden></div>
@@ -3839,7 +3860,7 @@
     <img src="01_SITE_IMAGES/c-00-cover-background-wide-optimized.webp?v=2" alt="" decoding="async" loading="lazy">
   </div>
   <div class="cover-bg-layer" data-cover-background="S-00" aria-hidden="true">
-    <img src="01_SITE_IMAGES/s-00-cover-background-wide-optimized.webp?v=2" alt="" decoding="async" loading="eager">
+    <img src="01_SITE_IMAGES/s-00-cover-background-wide.webp?v=3" alt="" decoding="async" loading="eager">
   </div>
   <div class="cover-bg-layer" data-cover-background="IMG-02" aria-hidden="true">
     <img src="01_SITE_IMAGES/e-00-cover-background-wide-optimized.webp" alt="" decoding="async" loading="lazy">
@@ -7722,10 +7743,8 @@
          생년월일 선택은
          실제 <select> 3개(년/월/일)로 구현 — 월 변경 시 일 옵션
          개수를 윤년 포함해 다시 계산하는 최소한의 입력값 검증만
-         추가했다. "별자리 찾기" 클릭 시 28수 계산 로직이 아직 없어
-         결과는 만들어내지 않고, 입력값만 sessionStorage에 저장해
-         F-02로 넘어갈 구조만 마련했다(js/main.js 참고, 콘솔 출력/
-         서버 전송 없음). -->
+         추가했다. "별자리 찾기" 클릭 시 기준 JSON의 양력 월일
+         구간으로 별자리를 판정하고 F-02를 갱신한다. -->
     <section class="screen screen--f01" id="F-01" data-screen-id="F-01" data-rail-theme="navy">
       <div class="f01__mobile-label" hidden>
         <p>운세 보기</p>
@@ -7759,6 +7778,7 @@
            폼에 별도로 둬서 서로 간섭하지 않게 분리했다. -->
       <div class="f01__date-card-wrap reveal reveal--image" data-reveal-start="0.3" data-reveal-end="0.7">
         <form class="f01__date-card">
+          <p class="f01__hint" id="f01-hint" role="status" aria-live="polite">생년월일을 입력해 주세요.</p>
           <div class="f01__date-field">
             <select id="f01-year" aria-label="태어난 연도"></select>
             <span>년</span>
@@ -7780,17 +7800,15 @@
       </div>
 
       <div class="f01__actions">
-        <p class="f01__hint" id="f01-hint" role="status" aria-live="polite">생년월일을 입력해 주세요.</p>
         <button type="button" class="f01__find" id="f01-find" aria-describedby="f01-hint">내 별자리 찾기</button>
       </div>
       <div class="f01__mobile-actions" hidden>
-        <p class="f01__mobile-hint" id="f01-mobile-hint" role="status" aria-live="polite">생년월일을 입력해 주세요.</p>
-        <button type="button" class="f01__mobile-submit" id="f01-mobile-submit" aria-describedby="f01-mobile-hint">내 별자리 찾기</button>
+        <button type="button" class="f01__mobile-submit" id="f01-mobile-submit" aria-describedby="f01-hint">내 별자리 찾기</button>
       </div>
     </section>
 
-    <!-- F-02: fortune.js reuses the approved birthday demo and copy pool.
-         The selected constellation, card, description and fortune update together. -->
+    <!-- F-02: fortune.js resolves the authored birthday ranges and displays
+         the selected constellation and date-matched general fortune together. -->
     <section class="screen screen--f02" id="F-02" data-screen-id="F-02" data-rail-theme="navy">
       <div class="f02__breadcrumb reveal" data-reveal-start="0.1" data-reveal-end="0.4">
         <p class="f02__breadcrumb-label">운세 보기</p>
@@ -7804,16 +7822,14 @@
       <h2 class="f02__title reveal" data-reveal-start="0.15" data-reveal-end="0.5">저수</h2>
       <p class="f02__subtitle reveal" data-reveal-start="0.2" data-reveal-end="0.55">氐宿 · 너구리자리</p>
       <p class="f02__desc reveal" data-reveal-start="0.25" data-reveal-end="0.6">
-        너구리를 상징 동물로 하는 저수는 동방 청룡에 속한 별자리로<br>
-        동쪽의 7수 중 용의 몸통을 뜻하며, 단단한 중심과 현실적 판단<br>
-        을 기반으로 한 강한 생존력을 상징합니다.
+        별자리 소개를 불러오는 중입니다.
       </p>
 
       <div class="f02__fortune-ph reveal" data-reveal-start="0.35" data-reveal-end="0.7">
         <div class="f02__card-crop"><img class="f02__card" src="01_SITE_IMAGES/28su/CD-03-jeo-card.webp" alt="저수 별자리 카드" decoding="async" loading="lazy"></div>
       </div>
       <div class="f02__fortune reveal" data-reveal-start="0.4" data-reveal-end="0.75">
-        <h3 class="f02__fortune-title">오늘의 운세</h3>
+        <div class="f02__fortune-heading"><h3 class="f02__fortune-title">오늘의 운세</h3><time class="f02__fortune-date" datetime="2026-11-19">2026.11.19</time></div>
         <p class="f02__fortune-p1">
           작은 균열이 보일 수 있습니다.<br>
           미리 살피면 큰일이 되지 않습니다.
@@ -7824,10 +7840,9 @@
           리니, 잘 되던 일도 한 번 더 확인하고 지금 할 수<br>
           있는 것에만 집중하십시오.
         </p>
-      </div>
-
-      <div class="f02__links reveal" data-reveal-start="0.5" data-reveal-end="0.85">
-        <a href="#F-01" data-target="F-01">별자리 다시 확인하기</a>
+        <div class="f02__links reveal" data-reveal-start="0.5" data-reveal-end="0.85">
+          <a href="#F-01" data-target="F-01">별자리 다시 확인하기</a>
+        </div>
       </div>
 
     </section>
@@ -7886,7 +7901,7 @@
       <h3 class="c-ref__at c01__preview-name reveal" id="c01-preview-name" style="--x:1433;--y:552;--w:237" data-reveal-start="0.35" data-reveal-end="0.75">저수</h3>
       <p class="c-ref__at c01__preview-hanja reveal" id="c01-preview-hanja" style="--x:1433;--y:633;--w:237" data-reveal-start="0.35" data-reveal-end="0.75">氐宿 · 너구리자리</p>
       <div class="c-ref__at c01__preview-copy" style="--x:1433;--y:703;--w:237">
-        <p class="c-ref__body c01__preview-desc reveal" id="c01-preview-desc" data-reference-copy="true" data-reveal-start="0.35" data-reveal-end="0.75">옛 사람들은 하늘을 3개의 원과 28개<br>의 별자리로 나누어 그 뜻을 읽고 농경<br>과 정치, 삶에 적용해 살아갔습니다. 프<br>로젝트 별운관은 이러한 전통 천문 체<br>계인 3원 28수를 오늘날 사람들이 흔<br>히 즐기는 별자리 운세로 다시 엮어 새<br>로운 28개의 별자리와 함께 매일의</p>
+        <p class="c-ref__body c01__preview-desc reveal" id="c01-preview-desc" data-reveal-start="0.35" data-reveal-end="0.75">별자리 소개를 불러오는 중입니다.</p>
       </div>
       <!-- 선택 데이터/필터 로직은 보관하되 이미지 자리에는 UI를 표시하지 않는다. -->
       <div hidden>
@@ -7942,6 +7957,7 @@
       </div>
       <p class="c-ref__at c-ref__name reveal" id="c03-confirm-label" style="--x:791;--y:757;--w:130" aria-live="polite" data-reveal-start="0.4" data-reveal-end="0.8">저수 &amp; 루수</p>
       <button type="button" class="c-ref__at c03__confirm-btn" id="c03-confirm-btn" style="--x:930;--y:749" disabled>궁합 보기</button>
+      <button type="button" class="c03__reset" id="c03-reset-btn">다시 선택하기</button>
     </section>
 
     <!-- C-04 : 00_DESIGN_REFERENCE의 원본 이미지 영역과 텍스트 배치를 재현. -->
@@ -7953,7 +7969,7 @@
         <g class="c04__base-lines" fill="none" stroke="#D9D9D9" stroke-width="1"><path d="M577 299 617 423 634 513 M617 423 667 331 738 260 M667 331 798 377 752 421 774 499 M798 377 912 465 900 334 M912 465 824 541 845 558"/></g>
         <g class="c04__points" fill="#D9D9D9"><circle cx="577" cy="299" r="3"/><circle cx="617" cy="423" r="3"/><circle cx="634" cy="513" r="3"/><circle cx="667" cy="331" r="3"/><circle cx="738" cy="260" r="3"/><circle cx="798" cy="377" r="3"/><circle cx="752" cy="421" r="3"/><circle cx="774" cy="499" r="3"/><circle cx="912" cy="465" r="3"/><circle cx="900" cy="334" r="3"/><circle cx="824" cy="541" r="3"/><circle cx="845" cy="558" r="3"/></g>
       </svg>
-      <div class="c-ref__at c04__progress" style="--x:574;--y:590" role="progressbar" aria-label="별자리 연결 진행" aria-description="표시되는 궁합도 100%는 연결 연출의 완료를 뜻하며, 계산된 실제 궁합 점수가 아닙니다." title="표시되는 궁합도 100%는 연결 연출의 완료를 뜻하며, 계산된 실제 궁합 점수가 아닙니다." aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div class="c-ref__at c04__progress" style="--x:574;--y:590" role="progressbar" aria-label="별자리 궁합도" aria-description="별운관 궁합 데이터의 궁합도입니다." title="별운관 궁합 데이터의 궁합도입니다." aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
         <span class="c04__progress-track" aria-hidden="true"><span class="c04__progress-fill"></span></span>
         <span class="c04__progress-label" aria-hidden="true"><span class="c04__progress-title">궁합도</span> <span id="c04-progress-value">0</span><span class="c04__progress-unit">%</span></span>
       </div>
@@ -8013,7 +8029,7 @@
         <p class="s01__label-category">이야기</p>
         <p>천상열차분야지도 이야기</p>
       </div>
-      <div class="s01__image-ph" aria-hidden="true"><img class="s01__image" src="01_SITE_IMAGES/s-01-cheonsang-story-optimized.webp" alt="" decoding="async" loading="lazy"></div>
+      <div class="s01__image-ph" aria-hidden="true"><img class="s01__image" src="01_SITE_IMAGES/s-01-cheonsang-story.webp?v=3" alt="" decoding="async" loading="lazy"></div>
 
       <h2 class="s01__title reveal" id="s01-title" data-reveal-start="0.1" data-reveal-end="0.5">돌에 새긴 하늘</h2>
 
@@ -8083,14 +8099,15 @@
       <div class="story__label reveal" style="--x:209;--y:902" data-reveal-start="0.4" data-reveal-end="0.7"><p>이야기</p><p>28수 운세 이야기</p></div>
       <div class="story__ph" style="--x:160;--y:1;--w:441;--h:835" aria-hidden="true"><img class="story__asset" src="01_SITE_IMAGES/s-05-story-03-optimized.webp" alt="" decoding="async" loading="lazy"></div>
       <h2 class="story__title reveal" id="s04-title" style="--x:636;--y:150" data-reveal-start="0.1" data-reveal-end="0.5">운세에 적합한 옛 체계<br>28수 운세 이야기</h2>
-      <div class="story__body reveal" style="--x:645;--y:363;--w:400" data-reveal-start="0.35" data-reveal-end="0.75">
-        <p>옛 사람들은 하늘을 3개의 원과 28개의 별자리로 나누어<br>그 뜻을 읽고 농경과 정치, 삶에 적용해 살아갔습니다.<br>프로젝트 별운관은 이러한 전통 천문 체계인 3원 28수를<br>오늘날 사람들이 흔히 즐기는 별자리 운세로 다시 엮어<br>새로운 28개의 별자리와 함께 매일의 운세를 만나는 한국형<br>별자리 운세 서비스로 재해석합니다.</p>
+      <div class="story__body reveal" style="--x:648;--y:363;--w:340" data-reveal-start="0.35" data-reveal-end="0.75">
+        <p>3원 28수는 오랫동안 하늘의 위치와 움직임을 읽어 온 전통 천문 체계입니다. 옛사람들은 이 질서로 계절과 시간을 살피고, 하늘의 변화를 세상의 일과 연결해 길흉을 해석하기도 했습니다. 하늘을 관찰하는 기준이자 삶의 방향을 헤아리는 틀이었던 셈입니다.</p>
       </div>
-      <div class="story__body reveal" style="--x:648;--y:558;--w:400" data-reveal-start="0.35" data-reveal-end="0.75">
-        <p>이 웹사이트는 프로젝트 별운관을 소개하고,<br>잊혀졌던 3원 28수와 그에 얽힌 옛이야기를 알아가며<br>여러분의 새로운 별자리를 미리 만나볼 수 있는 공간입니다.</p>
+      <div class="story__body reveal" style="--x:648;--y:514;--w:340" data-reveal-start="0.35" data-reveal-end="0.75">
+        <p>여기에 해와 달, 다섯 행성을 뜻하는 ‘칠요’가 더해집니다. 칠요의 목·화·토·금·수는 사주에서도 사용하는 오행과 맞닿아, 자연의 질서로 삶을 이해하려는 관점을 보여줍니다.</p>
       </div>
-      <div class="story__body reveal" style="--x:648;--y:687;--w:400" data-reveal-start="0.35" data-reveal-end="0.75">
-        <p>옛 사람들은 하늘을 3개의 원과 28개의 별자리로 나누어<br>그 뜻을 읽고 농경과 정치, 삶에 적용해 살아갔습니다.<br>프로젝트 별운관은 이러한 전통 천문 체계인 3원 28수를<br>오늘날 사람들이 흔히 즐기는 별자리 운세로 다시 엮어<br>새로운 28개의 별자리와 함께 매일의 운세를 만나는 한국형<br>별자리 운세 서비스로 재해석합니다.</p>
+      <div class="story__body reveal" style="--x:648;--y:644;--w:340" data-reveal-start="0.35" data-reveal-end="0.75">
+        <p>28수와 칠요를 함께 활용해 사람의 성향과 날의 길흉을 해석한 전통도 전해집니다. 별운관은 이처럼 여러 기준과 상징이 연결된 체계에서 오늘의 별자리 운세를 위한 가능성을 찾았습니다. 오래된 하늘의 이야기를 바탕으로, 나의 별자리와 하루를 가볍게 돌아보는 새로운 운세 경험을 제안합니다.</p>
+        <small class="story__source">출처: 한국민족문화대백과사전 <a href="https://encykorea.aks.ac.kr/Article/E0055876" target="_blank" rel="noopener noreferrer">「천문유초」</a> · <a href="https://encykorea.aks.ac.kr/Article/E0058533" target="_blank" rel="noopener noreferrer">「칠정」</a> · <a href="https://encykorea.aks.ac.kr/Article/E0025957" target="_blank" rel="noopener noreferrer">「사주」</a><br>참고: <a href="https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART003396574" target="_blank" rel="noopener noreferrer">「불교 경전 『수요경』의 구성과 천문 상징 연구」</a></small>
       </div>
       <div class="story__ph" style="--x:1087;--y:362;--w:729;--h:661" aria-hidden="true"><img class="story__asset" src="01_SITE_IMAGES/s-04-right-image.webp" alt="" decoding="async" loading="lazy"></div>
     </section>
@@ -8125,15 +8142,10 @@
   </div>
 </main>
 
-<script src="js/main.js?v=20261110.4"></script>
-<script src="js/date-select.js?v=20261109.1"></script>
-<script src="js/e02.js?v=20261109.1"></script>
-<script src="js/constellation-dictionary.js?v=20261109.1"></script>
-<script src="js/compatibility-images.js?v=20261109.1"></script>
-<script src="js/fortune.js?v=20261109.1"></script>
-<script src="js/map-viewer.js?v=20261109.1"></script>
-<script src="js/opening-pc.js?v=20261109.1"></script>
-<script src="js/opening.js?v=20261109.1"></script>
-<script src="js/chart-cache.js?v=20261109.1"></script>
+<button type="button" class="loop-return-cue" id="loop-return-cue" aria-label="첫 장으로 돌아가기" aria-hidden="true" inert>
+  <span class="loop-return-cue__content"><span>첫 장으로 돌아가기</span><svg class="loop-return-cue__arrow" viewBox="0 0 32 16" aria-hidden="true"><path d="M1 8H29M23 2L29 8L23 14" fill="none" stroke="currentColor" stroke-width="1"/></svg></span>
+</button>
+
+<script type="module" src="js/site-data.js?v=20261119.1"></script>
 </body>
 </html>

@@ -16,7 +16,7 @@
       button.type = 'button';
       button.className = 'c01__sky-star';
       button.dataset.star = star.file;
-      button.setAttribute('aria-label', `${star.groupName} ${star.name} ${star.animal}자리 선택`);
+      button.setAttribute('aria-label', `${star.groupName} ${star.name} ${star.constellationName} 선택`);
       button.style.left = `${positions[i][0]}%`;
       button.style.top = `${positions[i][1]}%`;
       const img = new Image();
@@ -30,7 +30,7 @@
       const captionName = document.createElement('span');
       captionName.textContent = star.name;
       const captionAnimal = document.createElement('span');
-      captionAnimal.textContent = `${star.animal}자리`;
+      captionAnimal.textContent = `${star.constellationName}`;
       caption.append(captionName, captionAnimal);
       button.append(caption);
       const hover = active => {
@@ -81,14 +81,19 @@
     selected = index;
     if (!automatic) pinned = true;
     section.dataset.constellation = star.file;
-    section.querySelector('#c01-preview-hanja').textContent = `${star.hanja}宿 · ${star.animal}자리`;
+    const identity = document.createElement('span');
+    identity.textContent = `${star.hanja}宿 · ${star.constellationName}`;
+    const range = document.createElement('span');
+    range.className = 'c01__birth-range';
+    range.textContent = star.dateRange;
+    section.querySelector('#c01-preview-hanja').replaceChildren(identity, range);
     renderGroup(star.guardian);
     portrait.src = `01_SITE_IMAGES/28su/${star.file}.svg`;
     schedule();
   }
   function schedule() {
     clearTimeout(timer);
-    if (!visible || pinned || hovered || reduced.matches || document.hidden || document.body.classList.contains('is-o01-active')) return;
+    if (!visible || pinned || hovered || window.ByeolData.getPersonalStar() || reduced.matches || document.hidden || document.body.classList.contains('is-o01-active')) return;
     timer = setTimeout(() => {
       const guardian = groups[(groupIndex + 1) % groups.length];
       const index = catalog.findIndex(star => star.guardian === guardian);
@@ -104,7 +109,7 @@
   });
   new IntersectionObserver(([entry]) => {
     visible = entry.isIntersecting;
-    if (!visible) pinned = false;
+    if (!visible && !window.ByeolData.getPersonalStar()) pinned = false;
     else render(selected, true);
     schedule();
   }, { root: document.getElementById('viewport'), threshold: 0.35 }).observe(map);

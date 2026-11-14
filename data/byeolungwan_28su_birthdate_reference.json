@@ -1,0 +1,550 @@
+{
+  "schema_version": 1,
+  "project": "별운관",
+  "source": "data.zip / data/28su_dates_v3.js",
+  "date_basis": "별운관 프로젝트에서 정한 양력 월일 고정 구간",
+  "calendar": "solar",
+  "range_inclusive": true,
+  "notes": [
+    "출생 연도와 무관하게 양력의 월·일을 기준으로 판정합니다.",
+    "원본 28su_dates_v3.js의 getMansionByDate(month, day)와 동일한 구간/경계 규칙입니다.",
+    "12월~1월에 걸친 두루미자리 구간은 연도 경계를 가로지릅니다.",
+    "2월 29일은 사슴자리(02.19~03.08)에 포함됩니다.",
+    "음력 생년월일은 양력으로 변환한 뒤 판정해야 합니다. 이 파일과 JS 모듈은 음양력 변환을 구현하지 않습니다.",
+    "천문 관측을 통한 출생 당시 달 위치 계산이 아니라 프로젝트 자체의 고정 별자리 판정 기준입니다."
+  ],
+  "mansions": [
+    {
+      "id": 1,
+      "name": "이무기자리",
+      "mansion": "각(角)",
+      "animal": "이무기",
+      "sashin": "동방청룡",
+      "chil_yo": "목",
+      "element": "목",
+      "start": {
+        "month": 4,
+        "day": 10
+      },
+      "end": {
+        "month": 4,
+        "day": 19
+      },
+      "date_range": "04.10~04.19",
+      "short_analysis": "낯선 시작에서 가능성을 보고 작은 도전을 성장으로 바꾸는 사람입니다."
+    },
+    {
+      "id": 2,
+      "name": "용자리",
+      "mansion": "항(亢)",
+      "animal": "용",
+      "sashin": "동방청룡",
+      "chil_yo": "금",
+      "element": "금",
+      "start": {
+        "month": 4,
+        "day": 20
+      },
+      "end": {
+        "month": 4,
+        "day": 29
+      },
+      "date_range": "04.20~04.29",
+      "short_analysis": "혼란 속에서도 중심을 잡고 책임 있는 판단으로 믿음을 얻는 사람입니다."
+    },
+    {
+      "id": 3,
+      "name": "너구리자리",
+      "mansion": "저(氐)",
+      "animal": "너구리",
+      "sashin": "동방청룡",
+      "chil_yo": "토",
+      "element": "토",
+      "start": {
+        "month": 4,
+        "day": 30
+      },
+      "end": {
+        "month": 5,
+        "day": 17
+      },
+      "date_range": "04.30~05.17",
+      "short_analysis": "익숙한 일상을 아끼고 변화에도 유연하게 적응해 기반을 다지는 사람입니다."
+    },
+    {
+      "id": 4,
+      "name": "토끼자리",
+      "mansion": "방(房)",
+      "animal": "토끼",
+      "sashin": "동방청룡",
+      "chil_yo": "일",
+      "element": "화",
+      "start": {
+        "month": 5,
+        "day": 18
+      },
+      "end": {
+        "month": 5,
+        "day": 27
+      },
+      "date_range": "05.18~05.27",
+      "short_analysis": "부드러운 태도와 재치로 마음을 잇고 어려운 상황을 푸는 사람입니다."
+    },
+    {
+      "id": 5,
+      "name": "여우자리",
+      "mansion": "심(心)",
+      "animal": "여우",
+      "sashin": "동방청룡",
+      "chil_yo": "월",
+      "element": "수",
+      "start": {
+        "month": 5,
+        "day": 28
+      },
+      "end": {
+        "month": 6,
+        "day": 6
+      },
+      "date_range": "05.28~06.06",
+      "short_analysis": "말속에 숨은 뜻을 읽고 예리한 통찰로 상황의 핵심을 찾는 사람입니다."
+    },
+    {
+      "id": 6,
+      "name": "호랑이자리",
+      "mansion": "미(尾)",
+      "animal": "호랑이",
+      "sashin": "동방청룡",
+      "chil_yo": "화",
+      "element": "화",
+      "start": {
+        "month": 6,
+        "day": 7
+      },
+      "end": {
+        "month": 6,
+        "day": 20
+      },
+      "date_range": "06.07~06.20",
+      "short_analysis": "소중한 사람을 위해 앞장서며 책임감으로 어려운 순간을 지키는 사람입니다."
+    },
+    {
+      "id": 7,
+      "name": "표범자리",
+      "mansion": "기(箕)",
+      "animal": "표범",
+      "sashin": "동방청룡",
+      "chil_yo": "수",
+      "element": "수",
+      "start": {
+        "month": 6,
+        "day": 21
+      },
+      "end": {
+        "month": 7,
+        "day": 3
+      },
+      "date_range": "06.21~07.03",
+      "short_analysis": "깊은 집중력으로 중요한 순간을 포착하고 목표를 향해 나아가는 사람입니다."
+    },
+    {
+      "id": 8,
+      "name": "해태자리",
+      "mansion": "두(斗)",
+      "animal": "해태",
+      "sashin": "북방현무",
+      "chil_yo": "목",
+      "element": "목",
+      "start": {
+        "month": 7,
+        "day": 4
+      },
+      "end": {
+        "month": 7,
+        "day": 22
+      },
+      "date_range": "07.04~07.22",
+      "short_analysis": "옳고 그름을 헤아리고 흔들림 없는 원칙으로 신뢰를 얻는 사람입니다."
+    },
+    {
+      "id": 9,
+      "name": "소자리",
+      "mansion": "우(牛)",
+      "animal": "소",
+      "sashin": "북방현무",
+      "chil_yo": "금",
+      "element": "금",
+      "start": {
+        "month": 7,
+        "day": 23
+      },
+      "end": {
+        "month": 8,
+        "day": 1
+      },
+      "date_range": "07.23~08.01",
+      "short_analysis": "빠른 성과보다 노력을 믿고 맡은 일을 끝까지 해내는 든든한 사람입니다."
+    },
+    {
+      "id": 10,
+      "name": "박쥐자리",
+      "mansion": "여(女)",
+      "animal": "박쥐",
+      "sashin": "북방현무",
+      "chil_yo": "토",
+      "element": "토",
+      "start": {
+        "month": 8,
+        "day": 2
+      },
+      "end": {
+        "month": 8,
+        "day": 12
+      },
+      "date_range": "08.02~08.12",
+      "short_analysis": "작은 변화를 놓치지 않고 섬세한 배려로 좋은 인연을 가꾸는 사람입니다."
+    },
+    {
+      "id": 11,
+      "name": "쥐자리",
+      "mansion": "허(虛)",
+      "animal": "쥐",
+      "sashin": "북방현무",
+      "chil_yo": "일",
+      "element": "화",
+      "start": {
+        "month": 8,
+        "day": 13
+      },
+      "end": {
+        "month": 8,
+        "day": 22
+      },
+      "date_range": "08.13~08.22",
+      "short_analysis": "제한된 상황에서도 길을 찾아 작은 기회를 성과로 만드는 사람입니다."
+    },
+    {
+      "id": 12,
+      "name": "제비자리",
+      "mansion": "위(危)",
+      "animal": "제비",
+      "sashin": "북방현무",
+      "chil_yo": "월",
+      "element": "수",
+      "start": {
+        "month": 8,
+        "day": 23
+      },
+      "end": {
+        "month": 9,
+        "day": 7
+      },
+      "date_range": "08.23~09.07",
+      "short_analysis": "소중한 인연을 지키며 멀어진 마음을 다시 이어 주는 따뜻한 사람입니다."
+    },
+    {
+      "id": 13,
+      "name": "돼지자리",
+      "mansion": "실(室)",
+      "animal": "돼지",
+      "sashin": "북방현무",
+      "chil_yo": "화",
+      "element": "화",
+      "start": {
+        "month": 9,
+        "day": 8
+      },
+      "end": {
+        "month": 9,
+        "day": 22
+      },
+      "date_range": "09.08~09.22",
+      "short_analysis": "일상의 행복을 아끼고 가진 것을 가꾸며 넉넉함을 나누는 사람입니다."
+    },
+    {
+      "id": 14,
+      "name": "수달자리",
+      "mansion": "벽(壁)",
+      "animal": "수달",
+      "sashin": "북방현무",
+      "chil_yo": "수",
+      "element": "수",
+      "start": {
+        "month": 9,
+        "day": 23
+      },
+      "end": {
+        "month": 10,
+        "day": 2
+      },
+      "date_range": "09.23~10.02",
+      "short_analysis": "새로운 것을 탐구하고 변화하는 환경에서도 자신만의 답을 찾는 사람입니다."
+    },
+    {
+      "id": 15,
+      "name": "늑대자리",
+      "mansion": "규(奎)",
+      "animal": "늑대",
+      "sashin": "서방백호",
+      "chil_yo": "목",
+      "element": "목",
+      "start": {
+        "month": 10,
+        "day": 3
+      },
+      "end": {
+        "month": 10,
+        "day": 18
+      },
+      "date_range": "10.03~10.18",
+      "short_analysis": "함께하는 성취를 아끼고 서로의 장점을 모아 위기를 넘는 사람입니다."
+    },
+    {
+      "id": 16,
+      "name": "개자리",
+      "mansion": "루(婁)",
+      "animal": "개(진돗개)",
+      "sashin": "서방백호",
+      "chil_yo": "금",
+      "element": "금",
+      "start": {
+        "month": 10,
+        "day": 19
+      },
+      "end": {
+        "month": 10,
+        "day": 31
+      },
+      "date_range": "10.19~10.31",
+      "short_analysis": "맺은 인연과 약속을 오래 지키며 행동으로 깊은 신뢰를 주는 사람입니다."
+    },
+    {
+      "id": 17,
+      "name": "꿩자리",
+      "mansion": "위(胃)",
+      "animal": "꿩",
+      "sashin": "서방백호",
+      "chil_yo": "토",
+      "element": "토",
+      "start": {
+        "month": 11,
+        "day": 1
+      },
+      "end": {
+        "month": 11,
+        "day": 14
+      },
+      "date_range": "11.01~11.14",
+      "short_analysis": "위험을 세심히 살피고 미래를 준비하며 소중한 것을 지키는 사람입니다."
+    },
+    {
+      "id": 18,
+      "name": "닭자리",
+      "mansion": "묘(昴)",
+      "animal": "닭",
+      "sashin": "서방백호",
+      "chil_yo": "일",
+      "element": "화",
+      "start": {
+        "month": 11,
+        "day": 15
+      },
+      "end": {
+        "month": 11,
+        "day": 25
+      },
+      "date_range": "11.15~11.25",
+      "short_analysis": "남들이 놓치는 변화를 알아채고 필요한 순간에 정확히 알리는 사람입니다."
+    },
+    {
+      "id": 19,
+      "name": "까마귀자리",
+      "mansion": "필(畢)",
+      "animal": "까마귀",
+      "sashin": "서방백호",
+      "chil_yo": "월",
+      "element": "수",
+      "start": {
+        "month": 11,
+        "day": 26
+      },
+      "end": {
+        "month": 12,
+        "day": 7
+      },
+      "date_range": "11.26~12.07",
+      "short_analysis": "흩어진 정보에서 중요한 징후를 읽고 한발 앞서 주변을 살피는 사람입니다."
+    },
+    {
+      "id": 20,
+      "name": "원숭이자리",
+      "mansion": "자(觜)",
+      "animal": "원숭이",
+      "sashin": "서방백호",
+      "chil_yo": "화",
+      "element": "화",
+      "start": {
+        "month": 12,
+        "day": 8
+      },
+      "end": {
+        "month": 12,
+        "day": 17
+      },
+      "date_range": "12.08~12.17",
+      "short_analysis": "기발한 발상과 재치로 막힌 문제를 풀고 자원을 영리하게 쓰는 사람입니다."
+    },
+    {
+      "id": 21,
+      "name": "삵자리",
+      "mansion": "삼(參)",
+      "animal": "삵(살쾡이)",
+      "sashin": "서방백호",
+      "chil_yo": "수",
+      "element": "수",
+      "start": {
+        "month": 12,
+        "day": 18
+      },
+      "end": {
+        "month": 12,
+        "day": 27
+      },
+      "date_range": "12.18~12.27",
+      "short_analysis": "자신만의 기준을 지키며 깊은 집중력으로 선택을 완성하는 사람입니다."
+    },
+    {
+      "id": 22,
+      "name": "두루미자리",
+      "mansion": "정(井)",
+      "animal": "두루미(학)",
+      "sashin": "남방주작",
+      "chil_yo": "목",
+      "element": "목",
+      "start": {
+        "month": 12,
+        "day": 28
+      },
+      "end": {
+        "month": 1,
+        "day": 17
+      },
+      "date_range": "12.28~01.17",
+      "short_analysis": "높은 기준과 차분한 태도로 신뢰를 쌓고 품위 있게 선택하는 사람입니다."
+    },
+    {
+      "id": 23,
+      "name": "염소자리",
+      "mansion": "귀(鬼)",
+      "animal": "염소",
+      "sashin": "남방주작",
+      "chil_yo": "금",
+      "element": "금",
+      "start": {
+        "month": 1,
+        "day": 18
+      },
+      "end": {
+        "month": 1,
+        "day": 27
+      },
+      "date_range": "01.18~01.27",
+      "short_analysis": "남들이 놓친 문제를 끝까지 살피며 책임감으로 제 몫을 하는 사람입니다."
+    },
+    {
+      "id": 24,
+      "name": "노루자리",
+      "mansion": "류(柳)",
+      "animal": "노루",
+      "sashin": "남방주작",
+      "chil_yo": "토",
+      "element": "토",
+      "start": {
+        "month": 1,
+        "day": 28
+      },
+      "end": {
+        "month": 2,
+        "day": 8
+      },
+      "date_range": "01.28~02.08",
+      "short_analysis": "상대의 마음을 헤아리고 작은 친절로 관계의 균형을 잡는 사람입니다."
+    },
+    {
+      "id": 25,
+      "name": "말자리",
+      "mansion": "성(星)",
+      "animal": "말",
+      "sashin": "남방주작",
+      "chil_yo": "일",
+      "element": "화",
+      "start": {
+        "month": 2,
+        "day": 9
+      },
+      "end": {
+        "month": 2,
+        "day": 18
+      },
+      "date_range": "02.09~02.18",
+      "short_analysis": "생각을 바로 행동으로 옮기고 활력으로 가능성을 현실로 만드는 사람입니다."
+    },
+    {
+      "id": 26,
+      "name": "사슴자리",
+      "mansion": "장(張)",
+      "animal": "사슴",
+      "sashin": "남방주작",
+      "chil_yo": "월",
+      "element": "수",
+      "start": {
+        "month": 2,
+        "day": 19
+      },
+      "end": {
+        "month": 3,
+        "day": 8
+      },
+      "date_range": "02.19~03.08",
+      "short_analysis": "예의와 배려를 지키며 공들인 노력을 뜻깊은 성취로 만드는 사람입니다."
+    },
+    {
+      "id": 27,
+      "name": "뱀자리",
+      "mansion": "익(翼)",
+      "animal": "뱀",
+      "sashin": "남방주작",
+      "chil_yo": "화",
+      "element": "화",
+      "start": {
+        "month": 3,
+        "day": 9
+      },
+      "end": {
+        "month": 3,
+        "day": 26
+      },
+      "date_range": "03.09~03.26",
+      "short_analysis": "익숙한 틀을 넘어 표현을 찾고 변화를 자기만의 색으로 바꾸는 사람입니다."
+    },
+    {
+      "id": 28,
+      "name": "잉어자리",
+      "mansion": "진(軫)",
+      "animal": "잉어",
+      "sashin": "남방주작",
+      "chil_yo": "수",
+      "element": "수",
+      "start": {
+        "month": 3,
+        "day": 27
+      },
+      "end": {
+        "month": 4,
+        "day": 9
+      },
+      "date_range": "03.27~04.09",
+      "short_analysis": "어려운 목표 앞에서도 물러서지 않고 꾸준한 도전으로 도약하는 사람입니다."
+    }
+  ]
+}

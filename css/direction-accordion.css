@@ -1,4 +1,9 @@
 /* Use physical horizontal marks below vertical text in all three selectors. */
+#viewport :is(#C-01, #C-02, #C-03) :is(.c01__star, .c03__acc-star) {
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 14px; writing-mode: horizontal-tb;
+}
+#viewport .accordion__star-name { display: block; writing-mode: vertical-rl; text-orientation: upright; white-space: nowrap; font: inherit; letter-spacing: inherit; color: inherit; }
+#viewport .accordion__star-date { display: block; writing-mode: vertical-rl; text-orientation: upright; white-space: nowrap; font-family: var(--font-sans); font-size: clamp(8px, .6vw, 10px); font-weight: 400; line-height: 1.3; letter-spacing: -.12em; color: inherit; opacity: .44; }
 #viewport :is(.c01__star, .c03__acc-star),
 #viewport :is(.c01__star, .c03__acc-star):hover,
 #viewport :is(.c01__star, .c03__acc-star)[aria-pressed="true"] { position: relative; text-decoration: none; }

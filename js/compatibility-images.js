@@ -15,12 +15,19 @@
     return img;
   }
   function setArt(img, index) {
+    img.hidden = false;
     img.src = `01_SITE_IMAGES/28su/${catalog[index].file}.svg`;
     img.dataset.star = catalog[index].file;
   }
   function label(id, index) {
     const star = catalog[index];
-    document.getElementById(id).textContent = `${star.hanja}宿 · ${star.animal}자리`;
+    const identity = document.createElement('span');
+    identity.className = 'compatibility__identity';
+    identity.textContent = `${star.hanja}宿 · ${star.constellationName}`;
+    const range = document.createElement('span');
+    range.className = 'compatibility__date';
+    range.textContent = star.dateRange;
+    document.getElementById(id).replaceChildren(identity, range);
   }
   const selectedArt = mountArt(c02.querySelector('.c02__selected-image'));
   const smallArt = [...c02.querySelectorAll('.c02__relation-image')].map(mountArt);
@@ -74,17 +81,30 @@
       lines.append(line);
     });
     points.forEach((point, i) => {
-      const active = i === index, related = linked.some(relation => relation.idx === i);
+      const active = i === index, relation = linked.find(relation => relation.idx === i), related = !!relation;
       point.group.setAttribute('opacity', active ? 1 : related ? .85 : .35);
       point.group.setAttribute('aria-pressed', String(active));
-      point.dot.setAttribute('r', active ? 7 : related ? 5 : 3.5);
-      point.dot.setAttribute('fill', related ? colors[linked.find(relation => relation.idx === i).type] : 'white');
+      let marker;
+      if (relation?.type === '보완') marker = svgNode('rect', { x: point.x - 5, y: point.y - 5, width: 10, height: 10 });
+      else if (relation?.type === '주의') marker = svgNode('polygon', { points: `${point.x},${point.y - 7} ${point.x - 6},${point.y + 5} ${point.x + 6},${point.y + 5}` });
+      else marker = svgNode('circle', { cx: point.x, cy: point.y, r: active ? 7 : related ? 5 : 3.5 });
+      marker.setAttribute('class', 'compatibility__dot');
+      marker.setAttribute('fill', related ? colors[relation.type] : 'white');
+      marker.dataset.relation = relation?.type || '';
+      point.dot.replaceWith(marker);
+      point.dot = marker;
     });
   }
   const pairArt = [...c03.querySelectorAll(':scope > .c-ref__ph')].map(mountArt);
   function renderC03(pair) {
     pair.forEach((index, slot) => {
-      index ??= slot === 0 ? 2 : 15;
+      if (index === null) {
+        pairArt[slot].hidden = true;
+        pairArt[slot].removeAttribute('src');
+        document.getElementById(`c03-picked-name-${slot}`).textContent = '별자리 선택';
+        document.getElementById(`c03-picked-hanja-${slot}`).replaceChildren();
+        return;
+      }
       setArt(pairArt[slot], index);
       document.getElementById(`c03-picked-name-${slot}`).textContent = catalog[index].name;
       label(`c03-picked-hanja-${slot}`, index);

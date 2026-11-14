@@ -21,6 +21,24 @@
  * screenStarts[] 배열(각 화면의 실제 시작 px, 누적합)로 관리한다.
  */
 (() => {
+  // A stationary, feathered wash spreads from the point where the pointer enters.
+  document.querySelectorAll('#S-03 .story__ph[data-guardian]').forEach((artwork) => {
+    const image = artwork.querySelector('.story__asset');
+    if (!image) return;
+    const wash = document.createElement('span');
+    wash.className = 'guardian-wash';
+    wash.setAttribute('aria-hidden', 'true');
+    const washImage = image.cloneNode();
+    washImage.removeAttribute('id');
+    wash.append(washImage);
+    artwork.append(wash);
+    artwork.addEventListener('pointerenter', (event) => {
+      if (event.pointerType === 'touch') return;
+      const bounds = artwork.getBoundingClientRect();
+      artwork.style.setProperty('--guardian-origin-x', `${(event.clientX - bounds.left) / bounds.width * 100}%`);
+      artwork.style.setProperty('--guardian-origin-y', `${(event.clientY - bounds.top) / bounds.height * 100}%`);
+    });
+  });
   const viewport = document.getElementById('viewport');
   const track = document.getElementById('track');
   // Keep desktop geometry and input paths intact; mobile shares this engine.
@@ -28,6 +46,8 @@
   const screens = Array.from(track.children);
   const rail = document.querySelector('.rail');
   const mobileNext = document.getElementById('mobile-next');
+  const loopReturnCue = document.getElementById('loop-return-cue');
+  let loopReturnCueVisible = false;
   let mobileM00Backdrop = null;
   const progressFill = document.getElementById('rail-progress-fill');
   const railNavEntrance = document.getElementById('rail-navitem-entrance');
@@ -99,7 +119,29 @@
     }
     track.style.transform = `translate3d(${-outerX}px, 0, 0)`;
     if (s05Content) s05Content.style.transform = `translate3d(${-innerX}px, 0, 0)`;
+    updateLoopReturnCue();
   }
+
+  function updateLoopReturnCue() {
+    if (!loopReturnCue) return;
+    const end = s05Pin.start + s05Pin.range;
+    const fade = loop.enabled && s05Pin.range > 0 && state.current >= end - 2
+      ? clamp(1 - Math.max(0, state.current - end) / Math.max(1, state.unitWidth * .65), 0, 1)
+      : 0;
+    const visible = fade > 0 && !document.body.classList.contains('is-o01-active');
+    loopReturnCue.style.setProperty('--return-cue-opacity', String(fade));
+    if (state.current >= end - 2) {
+      loopReturnCue.style.setProperty('--return-cue-shift', `${clamp(state.current - end, 0, state.unitWidth)}px`);
+    }
+    if (visible === loopReturnCueVisible) return;
+    loopReturnCueVisible = visible;
+    loopReturnCue.classList.toggle('is-visible', visible);
+    loopReturnCue.inert = !visible;
+    loopReturnCue.setAttribute('aria-hidden', String(!visible));
+  }
+  loopReturnCue?.addEventListener('click', () => {
+    if (loopReturnCueVisible && loop.enabled) state.target = loop.span;
+  });
 
   function loopPosition(position) {
     return loop.enabled && loop.span > 0 ? ((position % loop.span) + loop.span) % loop.span : position;
@@ -1029,84 +1071,35 @@
   });
 
   // ------------------------------------------------------------
-  // 28수 공용 데이터 — exhibition-site/pages/archive.html(기존 와이어
-  //프레임)에 이미 정의되어 있던 확정급 데이터를 그대로 재사용한다
-  // (PROJECT_CONTEXT.md 3번 "28수 전체 명단과 그룹 구조"·"관계 데이터"
-  // 항목과 동일 — 임의로 새로 만든 값이 아님). C-01~C-04가 공통으로
-  // 쓴다. desc는 "문체 참고용 초안"으로 명시된 자료지만 현재로선
-  // 유일한 실제 콘텐츠라 그대로 노출한다(임의 생성 금지 원칙 준수).
+  // C-01~C-04 share reference identities; C-01 uses its dedicated description.
+  // Compatibility calculations below remain separate from the identity data.
   // ------------------------------------------------------------
-  const STARS = [
-    { hanja:'角', name:'각수', group:'청룡', groupLabel:'청룡 · 동방7수', desc:'새로운 시작을 두려워하지 않는 이. 무언가를 앞장서 여는 힘이 있습니다.' },
-    { hanja:'亢', name:'항수', group:'청룡', groupLabel:'청룡 · 동방7수', desc:'곧게 뻗은 뜻을 가진 이. 흔들림 없이 자신의 길을 지켜냅니다.' },
-    { hanja:'氐', name:'저수', group:'청룡', groupLabel:'청룡 · 동방7수', desc:'낮은 곳에서부터 단단히 쌓는 이. 성급함보다 다짐을 믿습니다.', animal:'너구리자리' },
-    { hanja:'房', name:'방수', group:'청룡', groupLabel:'청룡 · 동방7수', desc:'마음에 방을 하나 내어주는 이. 곁을 내주는 데 인색하지 않습니다.' },
-    { hanja:'心', name:'심수', group:'청룡', groupLabel:'청룡 · 동방7수', desc:'가장 깊은 곳의 진심을 아는 이. 겉보다 속을 먼저 들여다봅니다.' },
-    { hanja:'尾', name:'미수', group:'청룡', groupLabel:'청룡 · 동방7수', desc:'끝까지 놓지 않는 이. 마무리에서 진가를 드러냅니다.' },
-    { hanja:'箕', name:'기수', group:'청룡', groupLabel:'청룡 · 동방7수', desc:'바람을 읽고 방향을 고르는 이. 흐름을 타는 감각이 남다릅니다.' },
-    { hanja:'斗', name:'두수', group:'현무', groupLabel:'현무 · 북방7수', desc:'많은 것을 담아내는 이. 넉넉한 그릇으로 주변을 품습니다.' },
-    { hanja:'牛', name:'우수', group:'현무', groupLabel:'현무 · 북방7수', desc:'묵묵히 제 몫을 다하는 이. 성실함이 결국 신뢰가 됩니다.' },
-    { hanja:'女', name:'여수', group:'현무', groupLabel:'현무 · 북방7수', desc:'섬세하게 결을 살피는 이. 작은 신호도 놓치지 않습니다.' },
-    { hanja:'虛', name:'허수', group:'현무', groupLabel:'현무 · 북방7수', desc:'비워야 채워짐을 아는 이. 여백을 두려워하지 않습니다.' },
-    { hanja:'危', name:'위수', group:'현무', groupLabel:'현무 · 북방7수', desc:'위태로움 속에서도 중심을 잡는 이. 흔들려도 무너지지 않습니다.' },
-    { hanja:'室', name:'실수', group:'현무', groupLabel:'현무 · 북방7수', desc:'자기만의 방을 짓는 이. 안에서부터 단단해집니다.' },
-    { hanja:'壁', name:'벽수', group:'현무', groupLabel:'현무 · 북방7수', desc:'경계를 세우고 지키는 이. 지킬 것을 분명히 압니다.' },
-    { hanja:'奎', name:'규수', group:'백호', groupLabel:'백호 · 서방7수', desc:'문장과 결을 다루는 이. 기록하고 정리하는 데 능합니다.' },
-    { hanja:'婁', name:'루수', group:'백호', groupLabel:'백호 · 서방7수', desc:'끌어모아 엮어내는 이. 흩어진 것을 하나로 모읍니다.', animal:'개자리' },
-    { hanja:'胃', name:'위수', group:'백호', groupLabel:'백호 · 서방7수', desc:'받아들이고 소화하는 이. 무엇이든 제 것으로 만듭니다.' },
-    { hanja:'昴', name:'묘수', group:'백호', groupLabel:'백호 · 서방7수', desc:'작은 별들을 한데 보는 이. 전체를 조망하는 눈이 있습니다.' },
-    { hanja:'畢', name:'필수', group:'백호', groupLabel:'백호 · 서방7수', desc:'끝맺음이 분명한 이. 시작한 일은 반드시 매듭짓습니다.' },
-    { hanja:'觜', name:'자수', group:'백호', groupLabel:'백호 · 서방7수', desc:'예리하게 핵심을 짚는 이. 군더더기 없이 본질을 봅니다.' },
-    { hanja:'參', name:'삼수', group:'백호', groupLabel:'백호 · 서방7수', desc:'여럿이 함께일 때 빛나는 이. 어울림 속에서 힘을 냅니다.' },
-    { hanja:'井', name:'정수', group:'주작', groupLabel:'주작 · 남방7수', desc:'마르지 않는 우물 같은 이. 나눌수록 채워지는 사람입니다.' },
-    { hanja:'鬼', name:'귀수', group:'주작', groupLabel:'주작 · 남방7수', desc:'보이지 않는 것을 감지하는 이. 직감이 남들보다 앞섭니다.' },
-    { hanja:'柳', name:'류수', group:'주작', groupLabel:'주작 · 남방7수', desc:'바람에 몸을 맡기되 뿌리는 깊은 이. 유연함이 강함이 됩니다.' },
-    { hanja:'星', name:'성수', group:'주작', groupLabel:'주작 · 남방7수', desc:'어둠 속에서 스스로 빛나는 이. 존재만으로 길잡이가 됩니다.' },
-    { hanja:'張', name:'장수', group:'주작', groupLabel:'주작 · 남방7수', desc:'품을 넓게 펼치는 이. 크게 벌이는 일을 두려워하지 않습니다.' },
-    { hanja:'翼', name:'익수', group:'주작', groupLabel:'주작 · 남방7수', desc:'날개를 펴 멀리 보는 이. 남들이 못 본 곳까지 나아갑니다.' },
-    { hanja:'軫', name:'진수', group:'주작', groupLabel:'주작 · 남방7수', desc:'마지막에서 처음을 준비하는 이. 끝을 새로운 시작으로 바꿉니다.' },
-  ];
+  const STARS = window.ByeolData.catalog.map(star => ({
+    id: star.id, hanja: star.hanja, name: star.name, group: star.groupName,
+    groupLabel: `${star.groupName} · ${star.direction}7수`,
+    desc: star.shortAnalysis, animal: star.constellationName, dateRange: star.dateRange,
+    dictionaryDescription: star.dictionaryDescription,
+  }));
   const STAR_GROUPS = ['청룡', '현무', '백호', '주작'];
   window.ByeolStars = Object.freeze(STARS.map(star => Object.freeze({ ...star })));
   const STAR_GROUP_LABEL = { 청룡:'청룡 · 동방', 현무:'현무 · 북방', 백호:'백호 · 서방', 주작:'주작 · 남방' };
   const STAR_GROUP_COLOR = { 청룡:'#0BA295', 현무:'#285C6B', 백호:'#DFCD9D', 주작:'#B15456' };
-  const STAR_GROUP_RANGE = { 청룡:[0,6], 현무:[7,13], 백호:[14,20], 주작:[21,27] };
-  // 관계 규칙(동일 출처): 천생연분(정반대 idx+14) 1개, 보완(같은 그룹
-  // 내 앞뒤 이웃) 2개, 주의(다음 그룹의 같은 순번) 1개.
+  const relationColors = { '천생연분': '#b8eaff', '보완': '#73caff', '주의': '#3195d6' };
   function relationsOfStar(idx) {
-    const rels = [];
-    const opp = (idx + 14) % 28;
-    rels.push({ idx: opp, type: '천생연분', color: '#DFCD9D', reason: '정반대의 기운이 서로를 완성시켜주는 관계입니다.' });
-    const g = STARS[idx].group;
-    const [gs] = STAR_GROUP_RANGE[g];
-    const offset = idx - gs;
-    const next = gs + ((offset + 1) % 7);
-    const prev = gs + ((offset + 6) % 7);
-    rels.push({ idx: next, type: '보완', color: '#0BA295', reason: '같은 기운을 나누며 서로를 자연스럽게 채워주는 관계입니다.' });
-    rels.push({ idx: prev, type: '보완', color: '#0BA295', reason: '같은 기운을 나누며 서로를 자연스럽게 채워주는 관계입니다.' });
-    const gi = STAR_GROUPS.indexOf(g);
-    const nextGroup = STAR_GROUPS[(gi + 1) % 4];
-    const [ngs] = STAR_GROUP_RANGE[nextGroup];
-    rels.push({ idx: ngs + offset, type: '주의', color: '#B15456', reason: '기질의 결이 달라 마찰이 생기기 쉬우니 배려가 필요한 관계입니다.' });
-    return rels;
+    const star = STARS[idx];
+    if (!star) return [];
+    return window.ByeolData.featuredOf(star.id).map(row => ({
+      idx: STARS.findIndex(partner => partner.id === row.partner_id),
+      type: row.type, rank: row.rank, color: relationColors[row.type],
+      reason: row.card_text, score: row.score,
+    }));
   }
   window.ByeolRelations = Object.freeze({ of: relationsOfStar });
-  // A·B가 서로의 relationsOfStar() 목록에 있는지(대칭적이지 않을 수
-  // 있어 양쪽 다 확인) — 있으면 그 관계를, 없으면 null을 돌려준다.
-  // C-04에서 "정의되지 않은 궁합은 지어내지 않는다" 원칙을 지키는 데 쓴다.
-  function relationBetween(idxA, idxB) {
-    const found = relationsOfStar(idxA).find((r) => r.idx === idxB);
-    if (found) return found;
-    return relationsOfStar(idxB).find((r) => r.idx === idxA) || null;
-  }
-  // Exhibition demo scores; replace with the project's final pair data later.
   function compatibilityOf(pair) {
     if (!Array.isArray(pair) || pair.length !== 2 || !pair.every(index => Number.isInteger(index) && index >= 0 && index < STARS.length)) return null;
-    const [a, b] = pair;
-    const relation = relationBetween(a, b);
-    const seed = Math.min(a, b) * 37 + Math.max(a, b) * 13;
-    const score = !relation ? null : relation.type === '천생연분' ? 100 : relation.type === '보완' ? 76 + seed % 10 : 20 + seed % 31;
-    return { pair: pair.slice(), relation, score };
+    const data = window.ByeolData.compatibilityOf(STARS[pair[0]].id, STARS[pair[1]].id);
+    if (!data) return null;
+    return { pair: pair.slice(), relation: { type: data.relation }, score: data.score, data };
   }
   function starLabel(s) {
     return s.animal ? (s.hanja + '宿 · ' + s.animal) : (s.hanja + '宿');
@@ -1115,9 +1108,8 @@
   // ------------------------------------------------------------
   // F-01 생년월일 입력 — <select> 3개(년/월/일) 채우기 + 최소한의
   // 입력값 검증(월이 바뀌면 그 달의 실제 일수만큼만 '일' 옵션을
-  // 다시 채움, 윤년 포함). 28수 계산 로직이 아직 없어 결과를 만들어
-  // 내지는 않고, "별자리 찾기" 클릭 시 입력값만 sessionStorage에
-  // 저장해 F-02로 넘어갈 구조만 마련한다 — 콘솔 출력/서버 전송 없음.
+  // 다시 채움, 윤년 포함). 입력 이벤트를 fortune.js에 전달해 기준
+  // JSON으로 별자리를 판정하고, 입력값을 저장한 뒤 F-02로 이동한다.
   // F-01이 없는 화면(E-xx 등)에서는 아무 일도 하지 않는다.
   // ------------------------------------------------------------
   const f01Year = document.getElementById('f01-year');
@@ -1162,7 +1154,6 @@
 
   const f01MobileLabel = document.querySelector('.f01__mobile-label');
   const f01MobileActions = document.querySelector('.f01__mobile-actions');
-  const f01MobileHint = document.getElementById('f01-mobile-hint');
   const f01MobileSubmit = document.getElementById('f01-mobile-submit');
   const f01Find = document.getElementById('f01-find');
   const f01Hint = document.getElementById('f01-hint');
@@ -1172,7 +1163,7 @@
   }
   function advanceF01() {
     if (!f01Year || !f01Month || !f01Day) return;
-    const hint = mobileLayout.matches ? f01MobileHint : f01Hint;
+    const hint = f01Hint;
     suppressMobileClick = false;
     const year = Number(f01Year.value), month = Number(f01Month.value), day = Number(f01Day.value);
     const valid = [
@@ -1251,6 +1242,17 @@
   mobileLayout.addEventListener('change', refreshOpenDirectionPanels);
   document.fonts.ready.then(refreshOpenDirectionPanels);
 
+  function appendAccordionStarLabel(button, star) {
+    const name = document.createElement('span');
+    name.className = 'accordion__star-name';
+    name.textContent = star.name;
+    const date = document.createElement('span');
+    date.className = 'accordion__star-date';
+    date.textContent = star.dateRange;
+    date.setAttribute('aria-hidden', 'true');
+    button.append(name, date);
+  }
+
   function initDirectionAccordion(directions, selectStar) {
     directions.addEventListener('pointerdown', (e) => e.stopPropagation());
     directions.querySelectorAll('.c01__direction-toggle').forEach((toggle) => {
@@ -1261,8 +1263,8 @@
         button.type = 'button';
         button.className = 'c01__star';
         button.dataset.idx = String(index);
-        button.textContent = star.name;
-        button.setAttribute('aria-label', star.group + ' ' + star.name + ' ' + star.hanja + '宿');
+        appendAccordionStarLabel(button, star);
+        button.setAttribute('aria-label', `${star.group} ${star.name} ${star.hanja}宿, ${star.dateRange}`);
         button.addEventListener('click', () => selectStar(index));
         panel.appendChild(button);
       });
@@ -1322,7 +1324,8 @@
       selectedIndex = index;
       nameEl.textContent = star.name;
       hanjaEl.textContent = starLabel(star);
-      descEl.textContent = star.desc || '';
+      descEl.textContent = star.dictionaryDescription ?? '별자리 소개 데이터를 불러오지 못했습니다.';
+      descEl.toggleAttribute('data-description-error', star.dictionaryDescription === null);
       syncSelection();
       searchStatus.textContent = '';
       window.dispatchEvent(new CustomEvent('byeol:c01-change', { detail: { index, automatic } }));
@@ -1364,6 +1367,7 @@
     // 기본 선택: 레퍼런스와 동일한 저수
     const defaultStar = STARS.findIndex((s) => s.name === '저수');
     selectStar(defaultStar, { automatic: true });
+    window.addEventListener('byeol:personal-star', event => selectStar(event.detail.index));
 
     c01Tabs.querySelectorAll('.c01__tab').forEach((tab) => {
       tab.addEventListener('click', () => {
@@ -1401,12 +1405,10 @@
         const block = relationBlocks[i];
         block.querySelector(':scope > p').textContent = relation.type;
         const paragraphs = block.querySelectorAll('.c02__relation-copy p');
-        if (mobileLayout.matches) {
-          const meta = document.createElement('span');
-          meta.className = 'c02__relation-meta';
-          meta.textContent = target.groupLabel;
-          paragraphs[0].replaceChildren(document.createTextNode(target.name + ' '), meta);
-        } else paragraphs[0].textContent = target.name + ' (' + target.groupLabel + ')';
+        const meta = document.createElement('span');
+        meta.className = 'c02__relation-meta';
+        meta.textContent = target.groupLabel;
+        paragraphs[0].replaceChildren(document.createTextNode(target.name + ' '), meta);
         paragraphs[1].textContent = relation.reason;
       });
       syncC02Selection(index);
@@ -1420,6 +1422,7 @@
     });
     // 초기 레퍼런스 문구는 유지하고 선택 표시만 저수에 맞춘다.
     selectC02(STARS.findIndex((star) => star.name === '저수'));
+    window.addEventListener('byeol:personal-star', event => selectC02(event.detail.index));
   }
 
   // 이전 그래프 구현 보관: 현재 화면에는 마운트가 없어 실행되지 않는다.
@@ -1584,6 +1587,8 @@
     c04LastPercent = -1;
     setC04Progress(0);
     c04Screen.classList.remove('is-constellation-playing', 'is-result-active');
+    // Commit the reset once per selection so a new pair restarts the CSS clock.
+    void c04Screen.offsetWidth;
   }
   function updateC04Sequence() {
     if (!c04Screen || state.unitWidth <= 0) return;
@@ -1615,8 +1620,8 @@
         btn.type = 'button';
         btn.className = 'c03__acc-star';
         btn.dataset.idx = String(i);
-        btn.textContent = s.name;
-        btn.setAttribute('aria-label', s.name + ' ' + s.hanja + '宿 선택');
+        appendAccordionStarLabel(btn, s);
+        btn.setAttribute('aria-label', `${s.name} ${s.hanja}宿, ${s.dateRange} 선택`);
         body.appendChild(btn);
       });
       setDirectionPanel(head, body, false);
@@ -1646,28 +1651,35 @@
     pickers.forEach((p, i) => p.addEventListener('click', () => setActiveSlot(i)));
     setActiveSlot(0);
 
-    c03Accordion.querySelectorAll('.c03__acc-star').forEach((btn) => {
+    function updatePickedSelection() {
+      c03Accordion.querySelectorAll('.c03__acc-star').forEach(button => {
+        button.setAttribute('aria-pressed', String(picked.includes(Number(button.dataset.idx))));
+      });
+      const complete = picked.every(index => index !== null);
+      confirmBtn.disabled = !complete;
+      confirmLabel.textContent = complete
+        ? STARS[picked[0]].name + ' & ' + STARS[picked[1]].name
+        : '별자리를 2개 골라주세요';
+      window.dispatchEvent(new CustomEvent('byeol:c03-change', { detail: { pair: picked.slice() } }));
+    }
+    window.addEventListener('byeol:personal-star', event => {
+      picked[0] = event.detail.index;
+      setActiveSlot(1);
+      updatePickedSelection();
+    });
+    document.getElementById('c03-reset-btn').addEventListener('click', () => {
+      picked.fill(null);
+      setActiveSlot(0);
+      updatePickedSelection();
+      try { sessionStorage.removeItem('byeolungwan-c03-pair'); } catch {}
+      pickers[0].focus({ preventScroll: true });
+    });
+    c03Accordion.querySelectorAll('.c03__acc-star').forEach(btn => {
       btn.addEventListener('click', () => {
-        const idx = parseInt(btn.dataset.idx, 10);
-        picked[activeSlot] = idx;
-        c03Accordion.querySelectorAll('.c03__acc-star').forEach((button) => {
-          button.setAttribute('aria-pressed', String(picked.includes(Number(button.dataset.idx))));
-        });
-        const s = STARS[idx];
-        document.getElementById('c03-picked-name-' + activeSlot).textContent = s.name;
-        document.getElementById('c03-picked-hanja-' + activeSlot).textContent = starLabel(s);
-        pickers[activeSlot].querySelector('.c03__picker-label').textContent = s.name;
-        window.dispatchEvent(new CustomEvent('byeol:c03-change', { detail: { pair: picked.slice() } }));
-        // 다음 빈 슬롯으로 자동 이동(둘 다 찼으면 유지)
+        picked[activeSlot] = Number(btn.dataset.idx);
+        updatePickedSelection();
         if (picked[0] === null) setActiveSlot(0);
         else if (picked[1] === null) setActiveSlot(1);
-
-        if (picked[0] !== null && picked[1] !== null) {
-          confirmBtn.disabled = false;
-          confirmLabel.textContent = STARS[picked[0]].name + ' & ' + STARS[picked[1]].name;
-        } else {
-          confirmLabel.textContent = '별자리를 2개 골라주세요';
-        }
       });
     });
 
@@ -1688,9 +1700,8 @@
   }
 
   // ------------------------------------------------------------
-  // C-04 별자리 궁합 상세 — 실제 선택은 기존 relationBetween()으로
-  // 계산한다. 선택 전에는 PNG의 정적 저수·루수 화면을 유지한다.
-  // 이름별 상세 해설 데이터가 없는 경우 원본 예시 해설을 재사용하지 않는다.
+  // C-04 uses the authored pair/same-constellation result, including its
+  // relation, score, description and advice. The CSS clock drives both graphics.
   // renderC04()는
   // C-03의 confirm 클릭에서도 직접 호출된다(위 참고 — 단일 페이지라
   // sessionStorage를 "나중에 다시 읽는" 방식만으로는 갱신되지 않음).
@@ -1705,9 +1716,9 @@
     c04Screen.dataset.relationship = result.relation?.type || '';
     c04Screen.dataset.score = result.score === null ? '' : result.score;
     c04Screen.style.setProperty('--c04-unfilled', `${100 - (result.score || 0)}%`);
-    c04Progress.setAttribute('aria-description', '현재 전시 체험용 관계 규칙과 점수입니다.');
+    c04Progress.setAttribute('aria-description', '별운관 궁합 데이터의 궁합도입니다.');
     c04Progress.setAttribute('aria-label', '별자리 궁합도');
-    c04Progress.setAttribute('title', '현재 전시 체험용 관계 규칙과 점수입니다.');
+    c04Progress.setAttribute('title', '별운관 궁합 데이터의 궁합도입니다.');
     c04Progress.querySelector('.c04__progress-unit').hidden = result.score === null;
     c04Screen.querySelectorAll('.c04__points circle').forEach(point => {
       const graphic = c04Screen.querySelector('.c04__constellation');
@@ -1724,28 +1735,19 @@
     document.getElementById('c04-hanja-1').textContent = starLabel(sb);
     document.getElementById('c04-result-title').textContent = sa.name + ' & ' + sb.name;
 
-    const rel = result.relation;
-    const copy = {
-      '천생연분': { headline: '서로의 빈틈을 채우는', summary: '서로 다른 강점이 만나 균형을 이루는 관계입니다.', body: '서로에게 없는 시각과 힘을 보태며 함께할 때 가능성이 더 넓어집니다. 같은 목표를 세우고 각자가 잘하는 역할을 나누면 든든한 동반자가 될 수 있습니다.', lead: '익숙함 속에서도 고마움을 표현해 주세요.', advice: '잘 맞는 사이라고 마음을 모두 짐작할 수는 없습니다. 작은 배려를 당연하게 여기지 말고, 각자의 시간과 선택도 존중해 주세요. 서로의 변화에 관심을 기울이는 태도가 좋은 관계를 오래 이어줍니다.' },
-      '보완': { headline: '다른 결이 만나 힘이 되는', summary: '서로의 장점을 보태며 함께 성장하는 관계입니다.', body: '닮은 방향을 바라보면서도 서로 다른 방식으로 힘을 보탭니다. 함께하는 속도와 역할을 조율할수록 혼자서는 놓치던 기회를 발견할 수 있습니다.', lead: '차이를 고치기보다 함께 쓰는 방법을 찾아보세요.', advice: '상대의 방식이 낯설 때에는 결론보다 이유를 먼저 물어보세요. 기대하는 도움과 혼자 해결하고 싶은 일을 미리 나누면 부담이 줄어듭니다. 작은 약속을 지키며 쌓은 신뢰가 두 별의 강점을 이어줍니다.' },
-      '주의': { headline: '가까워질수록 배려가 필요한', summary: '서로의 속도와 표현 방식에 주의가 필요한 관계입니다.', body: '같은 상황에서도 중요하게 여기는 것과 반응하는 속도가 다를 수 있습니다. 차이를 잘못으로 판단하기보다 각자의 기준을 설명하고, 함께 지킬 경계를 정하는 과정이 필요합니다.', lead: '감정이 앞설 때에는 잠시 쉬어가도 괜찮습니다.', advice: '서운한 마음을 쌓아두거나 상대의 의도를 단정하지 말고, 구체적인 상황과 바라는 변화를 차분히 전해 주세요. 당장 합의하기 어려운 문제는 시간을 두고 다시 이야기하세요. 서로의 거리를 존중하는 것도 관계를 지키는 방법입니다.' },
-    };
+    const data = result.data;
+    const relationshipLine = { '천생연분': '천생연분의 관계입니다.', '보완': '서로를 보완하는 관계입니다.',
+      '주의': '서로의 차이에 주의가 필요한 관계입니다.', '무난': '무난하게 이어지는 관계입니다.' }[data.relation];
+    c04Headline.replaceChildren(document.createTextNode(`${sa.name}와 ${sb.name}는`), document.createElement('br'),
+      document.createTextNode(relationshipLine));
+    document.getElementById('c04-result-desc').textContent = data.title;
+    document.getElementById('c04-result-body').textContent = data.description;
     document.getElementById('c04-note-title').textContent = '조언';
-    if (rel) {
-      const text = copy[rel.type];
-      c04Headline.replaceChildren(document.createTextNode(text.headline), document.createElement('br'), document.createTextNode(`${rel.type}의 관계입니다.`));
-      document.getElementById('c04-result-desc').textContent = text.summary;
-      document.getElementById('c04-result-body').textContent = `${sa.name}와 ${sb.name}는 ${text.body}`;
-      document.getElementById('c04-result-note').textContent = text.lead;
-      document.getElementById('c04-note-body').textContent = text.advice;
-    } else {
-      c04Headline.textContent = '아직 두 별자리 사이에 정의된 궁합 관계가 없습니다.';
-      document.getElementById('c04-result-desc').textContent = '이 조합의 관계 데이터는 아직 준비되지 않았습니다.';
-      document.getElementById('c04-result-note').textContent = '두 별자리 사이에 정의된 관계가 없습니다.';
-      document.getElementById('c04-result-body').textContent = '이 조합의 궁합 점수와 요약은 추후 별자리 관계 데이터가 마련되면 표시됩니다.';
-      document.getElementById('c04-note-body').textContent = '정해진 해석보다 서로가 실제로 느끼는 편안함과 대화에 귀를 기울여 보세요. 각자의 기대와 경계를 솔직하게 나누는 것부터 시작할 수 있습니다.';
-    }
+    document.getElementById('c04-result-note').textContent = data.advice;
+    document.getElementById('c04-note-body').textContent = '';
+    document.getElementById('c04-note-body').hidden = true;
     window.dispatchEvent(new CustomEvent('byeol:c04-change', { detail: result }));
+    updateC04Sequence();
   }
   window.ByeolCompatibility = Object.freeze({ calculate: compatibilityOf, show: renderC04 });
   (function initC04FromSession() {
@@ -1754,7 +1756,7 @@
       const raw = sessionStorage.getItem('byeolungwan-c03-pair');
       if (raw) {
         const arr = JSON.parse(raw);
-        if (Array.isArray(arr) && arr.length === 2 && arr.every((idx) => Number.isInteger(idx) && idx >= 0 && idx < STARS.length) && arr[0] !== arr[1]) {
+        if (Array.isArray(arr) && arr.length === 2 && arr.every((idx) => Number.isInteger(idx) && idx >= 0 && idx < STARS.length)) {
           renderC04(arr);
           return;
         }
