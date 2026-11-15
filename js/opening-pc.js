@@ -322,7 +322,7 @@
       exploration.querySelector('.exploration__name').textContent = data.name;
       // Reuse the existing S-03 descriptions; do not invent new explanatory copy.
       const description = document.querySelector(`.story__guardian[data-guardian="${data.name}"] .story__guardian-body`).cloneNode(true);
-      // Keep the three authored lines from S-03 instead of wrapping a flattened paragraph.
+      // Keep the shared wording intact; each layout wraps the paragraph to its own width.
       exploration.querySelector('.exploration__description').replaceChildren(...description.childNodes);
       exploration.style.setProperty('--guardian-color', data.color);
       exploration.classList.remove('is-selecting');

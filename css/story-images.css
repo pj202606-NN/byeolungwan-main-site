@@ -11,6 +11,8 @@
 #IMG-05 { background: transparent; }
 .cover-bg-layer[data-cover-background="IMG-05"] { width: max(100vh, 70vw); }
 #S-03 .story__asset, [data-cover-background="IMG-05"] img, #IMG-05 .cover-mobile-image img { filter: saturate(.85) brightness(1.04); }
+#S-03 :is(.story__ph[data-guardian], .story__guardian) { top: calc((var(--y) - 28) * 100vh / 1024); }
+#S-03 .story__guardian-body { width: calc(280 * 100vw / 1440); white-space: normal; word-break: keep-all; overflow-wrap: break-word; }
 @property --guardian-spread { syntax: '<percentage>'; inherits: false; initial-value: .1%; }
 #S-03 .guardian-wash { display: none; }
 @media (hover: hover) and (pointer: fine) {
@@ -44,6 +46,8 @@ body.is-o01-active .loop-return-cue { opacity: 0; visibility: hidden; pointer-ev
 @keyframes loop-return-pulse { 0%, 100% { opacity: 0; } 50% { opacity: .9; } }
 @media (prefers-reduced-motion: reduce) { .loop-return-cue { transition-duration: 1ms; } .loop-return-cue__content { animation: none; } }
 @media (max-width: 767px), (max-width: 1023px) and (max-height: 500px) and (pointer: coarse) {
+  #viewport #S-03 :is(.story__ph[data-guardian], .story__guardian) { top: -20px; }
+  #viewport #S-03 .story__guardian-body { width: calc(100% - 12px); }
   .loop-return-cue { right: 10px; flex-direction: column; gap: 10px; width: 24px; }
   .loop-return-cue__content { flex-direction: column; gap: 10px; }
   .loop-return-cue__content > span { writing-mode: vertical-rl; text-orientation: upright; }
