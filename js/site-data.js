@@ -2,11 +2,11 @@ import {
   loadMansionReference,
   validateSolarBirthdate,
   resolveMansionBySolarBirthdate,
-} from './byeolungwan_28su_birthdate_resolver.js?v=20261115.7';
+} from './byeolungwan_28su_birthdate_resolver.js?v=20261115.8';
 
 // Share the entry module's release version across scripts and authored JSON.
 // Revisited pages must not mix a new HTML file with previously cached assets.
-const assetVersion = new URL(import.meta.url).searchParams.get('v') || '20261115.7';
+const assetVersion = new URL(import.meta.url).searchParams.get('v') || '20261115.8';
 function assetURL(relative) {
   const url = new URL(relative, import.meta.url);
   url.searchParams.set('v', assetVersion);
