@@ -19,6 +19,13 @@
 .f02__fortune-p1, .f02__fortune-p2 { font-size: .9vw; }
 .f02__fortune-p1 { position: relative; top: -18px; }
 .f02__desc, .f02__fortune-p1, .f02__fortune-p2 { word-break: keep-all; overflow-wrap: normal; }
+@media (min-width: 768px) {
+  @media not all and (max-width: 1023px) and (max-height: 500px) and (pointer: coarse) {
+    .f02__fortune-ph { --card-frame-color: #b0a080; border-radius: 8px; box-shadow: 0 12px 24px -14px rgb(0 0 0 / 38%); }
+    .f02__fortune-ph::after { border-radius: 8px; }
+    .f02__card-crop { border-radius: 7px; }
+  }
+}
 @media (max-width: 767px), (max-width: 1023px) and (max-height: 500px) and (pointer: coarse) {
   #viewport #F-02 .f02__image-ph { min-height: 0; aspect-ratio: 3 / 2; }
   #viewport #F-02 .f02__sky { position: absolute; inset: 0; }
