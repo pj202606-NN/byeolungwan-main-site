@@ -1248,11 +1248,11 @@
     const name = document.createElement('span');
     name.className = 'accordion__star-name';
     name.textContent = star.name;
-    const date = document.createElement('span');
-    date.className = 'accordion__star-date';
-    date.textContent = star.dateRange;
-    date.setAttribute('aria-hidden', 'true');
-    button.append(name, date);
+    const animal = document.createElement('span');
+    animal.className = 'accordion__star-animal';
+    animal.textContent = star.animal;
+    animal.setAttribute('aria-hidden', 'true');
+    button.append(name, animal);
   }
 
   function initDirectionAccordion(directions, selectStar) {
@@ -1266,7 +1266,7 @@
         button.className = 'c01__star';
         button.dataset.idx = String(index);
         appendAccordionStarLabel(button, star);
-        button.setAttribute('aria-label', `${star.group} ${star.name} ${star.hanja}宿, ${star.dateRange}`);
+        button.setAttribute('aria-label', `${star.group} ${star.name} ${star.hanja}宿, ${star.animal}`);
         button.addEventListener('click', () => selectStar(index));
         panel.appendChild(button);
       });
@@ -1623,7 +1623,7 @@
         btn.className = 'c03__acc-star';
         btn.dataset.idx = String(i);
         appendAccordionStarLabel(btn, s);
-        btn.setAttribute('aria-label', `${s.name} ${s.hanja}宿, ${s.dateRange} 선택`);
+        btn.setAttribute('aria-label', `${s.name} ${s.hanja}宿, ${s.animal} 선택`);
         body.appendChild(btn);
       });
       setDirectionPanel(head, body, false);
